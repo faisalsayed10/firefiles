@@ -1,0 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,500;0,600;0,700;0,800;0,900;1,300&display=swap");
+
+body {
+  margin: 0;
+  border-top: 5px solid #0af5f4;
+}
+
+html {
+  height: 100%;
+}
+
+* {
+  font-family: "Poppins", sans-serif;
+}
+
+a:hover {
+  text-decoration: none !important;
+}
+
+.hoverAnim:hover {
+  transform: scale(1.05);
+}
