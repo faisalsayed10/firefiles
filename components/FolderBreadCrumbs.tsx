@@ -26,7 +26,7 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 			fontSize="xl">
 			{path.map((folder, i) => {
 				return (
-					<BreadcrumbItem key={folder.id} maxW="175px" p="3px">
+					<BreadcrumbItem key={folder.id || i} maxW="175px" p="3px">
 						<BreadcrumbLink
 							display="inline-block"
 							isTruncated={true}
@@ -36,7 +36,7 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 								const route = folder.id ? `/folder/${folder.id}` : "/";
 								router.push(route + query, route);
 							}}>
-							{folder.name === "Root" ? "Home" : folder.name}
+							{folder.name === "Root" ? "~" : folder.name}
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 				);

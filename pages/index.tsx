@@ -34,9 +34,10 @@ import { useFolder } from "util/useFolder";
 
 export default function Index() {
 	const router = useRouter();
+	const path = router.asPath.split("/");
 	const { folder, childFolders, childFiles, loading, foldersLoading } = useFolder(
-		router.asPath.substring(1),
-		undefined // TODO:
+		router.asPath.split("/")[path.length - 1],
+		router.query?.folder ? JSON.parse(router.query?.folder as string) : undefined
 	);
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [progress, setProgress] = useState(0);

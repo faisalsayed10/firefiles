@@ -1,7 +1,9 @@
-import { useEffect, useReducer } from "react";
-import useUser from "@util/useUser";
 import { database, firestore } from "@util/firebase";
-import { doc, getDoc, getDocs, query, collection, where, orderBy } from "firebase/firestore";
+import {
+	collection, doc,
+	getDoc, onSnapshot, orderBy, query, where
+} from "firebase/firestore";
+import { useEffect, useReducer } from "react";
 import { FileCollection, FolderCollection } from "./types";
 
 export const ROOT_FOLDER: FolderCollection = { name: "Root", id: null, path: [] };
@@ -123,43 +125,39 @@ export const useFolder = (folderId: string = "", folder: FolderCollection = null
 	}, [folderId]);
 
 	useEffect(() => {
-		console.log(folderId);
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
-		(async () => {
-			const snapshot = await getDocs(
-				query(
-					collection(firestore, "folders"),
-					where("parentId", "==", folderId || null),
-					orderBy("createdAt")
-				)
-			);
-
-			dispatch({
-				type: ACTIONS.SET_CHILD_FOLDERS,
-				payload: { childFolders: snapshot.docs.map(database.formatDoc) }
-			});
-			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
-		})();
+		onSnapshot(
+			query(
+				collection(firestore, "folders"),
+				where("parentId", "==", folderId || null),
+				orderBy("createdAt")
+			),
+			(snapshot) => {
+				dispatch({
+					type: ACTIONS.SET_CHILD_FOLDERS,
+					payload: { childFolders: snapshot.docs.map(database.formatDoc) }
+				});
+				dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
+			}
+		);
 	}, [folderId]);
 
 	useEffect(() => {
 		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
-
-		(async () => {
-			const snapshot = await getDocs(
-				query(
-					collection(firestore, "files"),
-					where("folderId", "==", folderId || null),
-					orderBy("createdAt")
-				)
-			);
-
-			dispatch({
-				type: ACTIONS.SET_CHILD_FILES,
-				payload: { childFiles: snapshot.docs.map(database.formatDoc) }
-			});
-			dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
-		})();
+		onSnapshot(
+			query(
+				collection(firestore, "files"),
+				where("folderId", "==", folderId || null),
+				orderBy("createdAt")
+			),
+			(snapshot) => {
+				dispatch({
+					type: ACTIONS.SET_CHILD_FILES,
+					payload: { childFiles: snapshot.docs.map(database.formatDoc) }
+				});
+				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
+			}
+		);
 	}, [folderId]);
 
 	return state;
