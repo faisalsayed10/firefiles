@@ -2,7 +2,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@chakra-ui/react";
 import { FolderCollection } from "@util/types";
 import { ROOT_FOLDER } from "@util/useFolder";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface Props {
 	currentFolder: FolderCollection;
@@ -10,10 +10,17 @@ interface Props {
 
 const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 	const router = useRouter();
-	let path = currentFolder === ROOT_FOLDER ? [] : [ROOT_FOLDER];
-	if (currentFolder) {
-		path = [...path, ...currentFolder.path];
-	}
+	const [path, setPath] = useState<FolderCollection[]>([]);
+
+	useEffect(() => {
+		if (currentFolder) {
+			if (currentFolder === ROOT_FOLDER) {
+				setPath([]);
+			} else {
+				setPath([ROOT_FOLDER, ...currentFolder.path]);
+			}
+		}
+	}, [currentFolder]);
 
 	return (
 		<Breadcrumb

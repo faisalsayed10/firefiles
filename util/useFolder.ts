@@ -97,7 +97,7 @@ export const useFolder = (folderId: string = "", folder: FolderCollection = null
 	}, [folder, folderId]);
 
 	useEffect(() => {
-		if (folderId === "") {
+		if (folderId === "" || !folderId) {
 			return dispatch({
 				type: ACTIONS.UPDATE_FOLDER,
 				payload: { folder: ROOT_FOLDER }

@@ -28,20 +28,37 @@ import { sessionOptions } from "@util/session";
 import { CurrentlyUploading } from "@util/types";
 import { withIronSessionSsr } from "iron-session/next";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import React, { useState } from "react";
+import { NextRouter, useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 import { useFolder } from "util/useFolder";
+
+const getFolderId = (router: NextRouter) => {
+	const pathArray = router.asPath.split("/");
+	return pathArray[pathArray.length - 1];
+};
 
 export default function Index() {
 	const router = useRouter();
-	const path = router.asPath.split("/");
+	const [currentFolder, setCurrentFolder] = useState(undefined);
+	const [folderId, setFolderId] = useState(getFolderId(router));
 	const { folder, childFolders, childFiles, loading, foldersLoading } = useFolder(
-		router.asPath.split("/")[path.length - 1],
-		router.query?.folder ? JSON.parse(router.query?.folder as string) : undefined
+		folderId,
+		currentFolder
 	);
+
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [progress, setProgress] = useState(0);
 	const [isSmallerThan700] = useMediaQuery("(max-width: 700px)");
+
+	useEffect(() => {
+		if (router.query?.folder) {
+			setCurrentFolder(JSON.parse(router.query?.folder as string));
+		}
+	}, [router.query]);
+
+	useEffect(() => {
+		setFolderId(getFolderId(router));
+	}, [router.asPath]);
 
 	return (
 		<>
