@@ -1,7 +1,9 @@
-import { Box, Image, Text } from "@chakra-ui/react";
-import React from "react";
-import { useRouter } from "next/router";
+import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FolderCollection } from "@util/types";
+import { useRouter } from "next/router";
+import React from "react";
 
 interface Props {
 	folder: FolderCollection;
@@ -10,20 +12,31 @@ interface Props {
 const Folder: React.FC<Props> = ({ folder }) => {
 	const router = useRouter();
 	return (
-		<Box
+		<Flex
 			onClick={() =>
 				router.push(`/folder/${folder.id}?folder=${JSON.stringify(folder)}`, `/folder/${folder.id}`)
 			}
-			display="block"
-			borderRadius="md"
-			borderWidth="2px"
+			direction="column"
+			align="center"
+			justify="space-between"
+			boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+			transition="ease-in-out 0.1s"
+			cursor="pointer"
 			className="hoverAnim"
-			transition="ease-in-out 0.1s">
-			<Image width="70px" margin="0 auto" src="/icons8-folder-512.png" alt={folder.name} />
-			<Text isTruncated={true} as="h2" fontSize="xl" align="center" px="2">
+			w="110px"
+			h="110px"
+			pt="4"
+			pb="2"
+		>
+			<FontAwesomeIcon
+				icon={faFolderOpen}
+				size="3x"
+				color={useColorModeValue("#2D3748", "white")}
+			/>
+			<Text isTruncated={true} as="p" fontSize="xs" align="center" px="2" maxW="105px">
 				{folder.name}
 			</Text>
-		</Box>
+		</Flex>
 	);
 };
 

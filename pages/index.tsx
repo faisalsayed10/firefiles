@@ -1,17 +1,4 @@
-import {
-	Box,
-	Button,
-	Center,
-	Menu,
-	MenuButton,
-	MenuDivider,
-	MenuList,
-	Progress,
-	Skeleton,
-	Text,
-	useMediaQuery
-} from "@chakra-ui/react";
-import AddFileButton from "@components/AddFileButton";
+import { Box, Center, Progress, Skeleton, Text } from "@chakra-ui/react";
 import AddFolderButton from "@components/AddFolderButton";
 import FilesEmptyState from "@components/FilesEmptyState";
 import FilesTable from "@components/FilesTable";
@@ -19,11 +6,7 @@ import FilesTableSkeleton from "@components/FilesTableSkeleton";
 import FolderBreadCrumbs from "@components/FolderBreadCrumbs";
 import FolderGrid from "@components/FolderGrid";
 import Footer from "@components/Footer";
-import HomeButton from "@components/HomeButton";
 import Navbar from "@components/Navbar";
-import ProfileButton from "@components/ProfileButton";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { sessionOptions } from "@util/session";
 import { CurrentlyUploading } from "@util/types";
 import { withIronSessionSsr } from "iron-session/next";
@@ -48,7 +31,6 @@ export default function Index() {
 
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [progress, setProgress] = useState(0);
-	const [isSmallerThan700] = useMediaQuery("(max-width: 700px)");
 
 	useEffect(() => {
 		if (router.query?.folder) {
@@ -65,63 +47,13 @@ export default function Index() {
 			<Head>
 				<title>Your Files</title>
 				<meta charSet="utf-8" />
-				<meta name="viewport" content="initial-scale=1.0, width=device-width" />
 			</Head>
 			<Navbar />
 			<Box width="100%" px="8" py="4">
-				{/* TOP BUTTONS */}
-				{isSmallerThan700 ? (
-					<Menu isLazy placement="bottom">
-						<MenuButton
-							variant="outline"
-							colorScheme="cyan"
-							width="100%"
-							as={Button}
-							rightIcon={<FontAwesomeIcon icon={faChevronDown} />}>
-							Menu
-						</MenuButton>
-						<MenuList w="inherit">
-							<HomeButton variant="ghost" />
-							<MenuDivider />
-							<AddFileButton
-								currentFolder={folder}
-								setProgress={setProgress}
-								progress={progress}
-								variant="ghost"
-								setUploadingFiles={setUploadingFiles}
-								btnWidth="100%"
-							/>
-							<MenuDivider />
-							<AddFolderButton variant="ghost" btnWidth="100%" currentFolder={folder} />
-							<MenuDivider />
-							<ProfileButton variant="ghost" />
-						</MenuList>
-					</Menu>
-				) : (
-					<Box
-						display="flex"
-						alignItems="center"
-						justifyContent="space-around"
-						fontSize="xl"
-						flexWrap="wrap">
-						<HomeButton variant="outline" />
-						<AddFileButton
-							currentFolder={folder}
-							setProgress={setProgress}
-							progress={progress}
-							setUploadingFiles={setUploadingFiles}
-							variant="outline"
-						/>
-						<AddFolderButton currentFolder={folder} variant="outline" />
-						<ProfileButton variant="outline" />
-					</Box>
-				)}
-
 				{/* BREADCRUMBS */}
 
 				<FolderBreadCrumbs currentFolder={folder} />
 				<hr style={{ marginBottom: "2rem" }} />
-
 				<Box>
 					{/* FOLDERS */}
 
@@ -132,11 +64,18 @@ export default function Index() {
 						</>
 					)}
 
-					{childFolders?.length > 0 && (
+					{childFolders?.length > 0 ? (
 						<>
-							<FolderGrid childFolders={childFolders} />
+							<FolderGrid childFolders={childFolders} currentFolder={folder} />
 							<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
 						</>
+					) : (
+						!foldersLoading && (
+							<>
+								<AddFolderButton currentFolder={folder} />{" "}
+								<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
+							</>
+						)
 					)}
 
 					{/* FILES */}
@@ -178,7 +117,8 @@ export default function Index() {
 						pos="fixed"
 						bgColor="#3182ce"
 						bottom="5%"
-						width="80vw">
+						width="80vw"
+					>
 						{uploadingFiles
 							.filter((file) => !file.error)
 							.map((file) => (

@@ -1,4 +1,6 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@chakra-ui/react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, useColorModeValue } from "@chakra-ui/react";
+import { faChevronRight, faHome } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FolderCollection } from "@util/types";
 import { ROOT_FOLDER } from "@util/useFolder";
 import { useRouter } from "next/router";
@@ -29,29 +31,38 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 			isTruncated={true}
 			width="100%"
 			px={["2", "6", "8"]}
+			separator={<FontAwesomeIcon icon={faChevronRight} />}
 			pt="4"
-			fontSize="xl">
+			fontSize="xl"
+		>
 			{path.map((folder, i) => {
 				return (
 					<BreadcrumbItem key={folder.id || i} maxW="175px" p="3px">
 						<BreadcrumbLink
 							display="inline-block"
+							textColor={useColorModeValue("#2D3748", "white")}
 							isTruncated={true}
 							color="rgb(0, 119, 255)"
 							onClick={() => {
 								const query = `?folder=${JSON.stringify({ ...folder, path: path.slice(1, i) })}`;
 								const route = folder.id ? `/folder/${folder.id}` : "/";
 								router.push(route + query, route);
-							}}>
-							{folder.name === "Root" ? "~" : folder.name}
+							}}
+						>
+							{folder.name === "Root" ? <FontAwesomeIcon icon={faHome} /> : folder.name}
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 				);
 			})}
 			{currentFolder && (
 				<BreadcrumbItem p="3px" maxW="175px" isCurrentPage>
-					<BreadcrumbLink display="inline-block" isTruncated={true}>
-						{currentFolder.name === "Root" ? "~" : currentFolder.name}
+					<BreadcrumbLink
+						display="inline-block"
+						isTruncated={true}
+						_hover={{ textDecor: "none" }}
+						textColor={useColorModeValue("#2D3748", "white")}
+					>
+						{currentFolder.name === "Root" ? <FontAwesomeIcon icon={faHome} /> : currentFolder.name}
 					</BreadcrumbLink>
 				</BreadcrumbItem>
 			)}

@@ -1,6 +1,7 @@
 import {
 	Box,
 	Button,
+	Flex,
 	Input,
 	Modal,
 	ModalBody,
@@ -9,9 +10,10 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
+	useColorModeValue,
 	useDisclosure
 } from "@chakra-ui/react";
-import { faFolderPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { database, firestore } from "@util/firebase";
 import { FolderCollection } from "@util/types";
@@ -22,11 +24,9 @@ import { v4 } from "uuid";
 
 interface Props {
 	currentFolder: FolderCollection;
-	btnWidth?: string;
-	variant: string;
 }
 
-const AddFolderButton: React.FC<Props> = ({ currentFolder, btnWidth, variant }) => {
+const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
 	const inputRef = useRef<HTMLInputElement>();
@@ -52,14 +52,21 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder, btnWidth, variant }) 
 
 	return (
 		<>
-			<Button
-				leftIcon={<FontAwesomeIcon icon={faFolderPlus} />}
-				variant={variant}
-				colorScheme="cyan"
-				width={btnWidth}
-				onClick={onOpen}>
-				Create A Folder
-			</Button>
+			<Flex
+				onClick={onOpen}
+				direction="column"
+				align="center"
+				justify="center"
+				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+				transition="ease-in-out 0.1s"
+				cursor="pointer"
+				className="hoverAnim"
+				color={useColorModeValue("#2D3748", "white")}
+				w="100px"
+				h="110px"
+			>
+				<FontAwesomeIcon icon={faPlus} size="2x" />
+			</Flex>
 			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent>
