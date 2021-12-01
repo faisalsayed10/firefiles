@@ -26,14 +26,15 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 
 	return (
 		<Breadcrumb
+			// @ts-ignore
+			overflowX="scroll !important"
 			fontWeight="medium"
 			whiteSpace="nowrap"
 			isTruncated={true}
 			width="100%"
 			px={["2", "6", "8"]}
 			separator={<FontAwesomeIcon icon={faChevronRight} />}
-			pt="4"
-			fontSize="xl"
+			fontSize="lg"
 		>
 			{path.map((folder, i) => {
 				return (

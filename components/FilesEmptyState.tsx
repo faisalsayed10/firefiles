@@ -5,8 +5,8 @@ const FilesEmptyState = () => (
   <Flex
     width="100%"
     p={["8", "16", "16"]}
-    borderWidth="3px"
-    borderRadius="xl"
+    borderWidth="1px"
+    borderRadius="lg"
     justify="center"
     direction="column"
     align="center"
@@ -16,7 +16,7 @@ const FilesEmptyState = () => (
       There aren't any files
     </Text>
     <Text fontSize={["sm", "sm", "md"]} fontWeight="400">
-      Start Uploading Files!
+      Drag and drop a file here or click the button on the bottom right to upload a file.
     </Text>
   </Flex>
 );

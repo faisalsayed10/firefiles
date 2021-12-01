@@ -11,7 +11,7 @@ interface Props {
 
 const FolderGrid: React.FC<Props> = ({ childFolders, currentFolder }) => {
 	return (
-		<SimpleGrid columns={[2, 4, 6]} spacing="40px">
+		<SimpleGrid columns={[2, 4, 6, 6, 7]} spacing="10px">
 			{childFolders?.map((childFolder) => (
 				<Folder key={childFolder.id} folder={childFolder} />
 			))}

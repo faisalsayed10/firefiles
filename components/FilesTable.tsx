@@ -9,7 +9,7 @@ interface Props {
 
 const FilesTable: React.FC<Props> = ({ childFiles }) => {
 	return (
-		<Box borderWidth="3px" borderRadius="xl" overflowX="auto">
+		<Box borderWidth="1px" borderRadius="lg" overflowX="auto">
 			<Table w="full">
 				<thead>
 					<Tr>

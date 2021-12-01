@@ -1,4 +1,14 @@
-import { Box, Center, Progress, Skeleton, Text } from "@chakra-ui/react";
+import {
+	Box,
+	Center,
+	Progress,
+	Skeleton,
+	Text,
+	SimpleGrid,
+	Button,
+	chakra
+} from "@chakra-ui/react";
+import UploadFileButton from "@components/UploadFileButton";
 import AddFolderButton from "@components/AddFolderButton";
 import FilesEmptyState from "@components/FilesEmptyState";
 import FilesTable from "@components/FilesTable";
@@ -7,6 +17,8 @@ import FolderBreadCrumbs from "@components/FolderBreadCrumbs";
 import FolderGrid from "@components/FolderGrid";
 import Footer from "@components/Footer";
 import Navbar from "@components/Navbar";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { sessionOptions } from "@util/session";
 import { CurrentlyUploading } from "@util/types";
 import { withIronSessionSsr } from "iron-session/next";
@@ -59,7 +71,13 @@ export default function Index() {
 
 					{foldersLoading && (
 						<>
-							<Skeleton h="140px" w="100%" />
+							<SimpleGrid columns={[2, 4, 6]} spacing="10px">
+								<Skeleton h="110px" w="110px" borderRadius="3px" />
+								<Skeleton h="110px" w="110px" borderRadius="3px" />
+								<Skeleton h="110px" w="110px" borderRadius="3px" />
+								<Skeleton h="110px" w="110px" borderRadius="3px" />
+							</SimpleGrid>
+
 							<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
 						</>
 					)}
@@ -105,6 +123,13 @@ export default function Index() {
 						</>
 					)}
 				</Box>
+				<UploadFileButton
+					currentFolder={folder}
+					progress={progress}
+					setProgress={setProgress}
+					uploadingFiles={uploadingFiles}
+					setUploadingFiles={setUploadingFiles}
+				/>
 			</Box>
 			<Footer />
 			{/* PROGRESS BAR */}
