@@ -24,7 +24,7 @@ a:hover {
 .upload-hover:hover {
 	width: 8rem;
 	transform: scale(1.1);
-	border-radius: 4px;
+	border-radius: 12px;
 }
 
 .upload-hover:hover .upload-text {

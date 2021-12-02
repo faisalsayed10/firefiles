@@ -62,7 +62,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 				cursor="pointer"
 				className="hoverAnim"
 				color={useColorModeValue("#2D3748", "white")}
-				w="100px"
+				w="110px"
 				h="110px"
 			>
 				<FontAwesomeIcon icon={faPlus} size="2x" />

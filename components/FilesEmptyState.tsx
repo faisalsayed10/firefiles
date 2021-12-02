@@ -16,7 +16,7 @@ const FilesEmptyState = () => (
       There aren't any files
     </Text>
     <Text fontSize={["sm", "sm", "md"]} fontWeight="400">
-      Drag and drop a file here or click the button on the bottom right to upload a file.
+      Drop a file anywhere on the screen or click the button on the bottom right to upload a file.
     </Text>
   </Flex>
 );

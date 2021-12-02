@@ -1,4 +1,4 @@
-import { SimpleGrid } from "@chakra-ui/react";
+import { SimpleGrid, Box } from "@chakra-ui/react";
 import { FolderCollection } from "@util/types";
 import React from "react";
 import AddFolderButton from "./AddFolderButton";
@@ -13,9 +13,13 @@ const FolderGrid: React.FC<Props> = ({ childFolders, currentFolder }) => {
 	return (
 		<SimpleGrid columns={[2, 4, 6, 6, 7]} spacing="10px">
 			{childFolders?.map((childFolder) => (
-				<Folder key={childFolder.id} folder={childFolder} />
+				<Box m="0 auto" key={childFolder.id}>
+					<Folder folder={childFolder} />
+				</Box>
 			))}
-			<AddFolderButton currentFolder={currentFolder} />
+			<Box m="0 auto">
+				<AddFolderButton currentFolder={currentFolder} />
+			</Box>
 		</SimpleGrid>
 	);
 };
