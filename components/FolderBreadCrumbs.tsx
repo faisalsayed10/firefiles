@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, useColorModeValue } from "@chakra-ui/react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, useColorMode } from "@chakra-ui/react";
 import { faChevronRight, faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FolderCollection } from "@util/types";
@@ -13,6 +13,7 @@ interface Props {
 const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 	const router = useRouter();
 	const [path, setPath] = useState<FolderCollection[]>([]);
+	const { colorMode } = useColorMode();
 
 	useEffect(() => {
 		if (currentFolder) {
@@ -41,7 +42,7 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 					<BreadcrumbItem key={folder.id || i} maxW="175px" p="3px">
 						<BreadcrumbLink
 							display="inline-block"
-							textColor={useColorModeValue("#2D3748", "white")}
+							textColor={colorMode === "light" ? "#2D3748" : "white"}
 							isTruncated={true}
 							color="rgb(0, 119, 255)"
 							onClick={() => {
@@ -61,7 +62,7 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 						display="inline-block"
 						isTruncated={true}
 						_hover={{ textDecor: "none" }}
-						textColor={useColorModeValue("#2D3748", "white")}
+						textColor={colorMode === "light" ? "#2D3748" : "white"}
 					>
 						{currentFolder.name === "Root" ? <FontAwesomeIcon icon={faHome} /> : currentFolder.name}
 					</BreadcrumbLink>

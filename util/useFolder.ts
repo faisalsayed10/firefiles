@@ -1,8 +1,5 @@
 import { database, firestore } from "@util/firebase";
-import {
-	collection, doc,
-	getDoc, onSnapshot, orderBy, query, where
-} from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useReducer } from "react";
 import { FileCollection, FolderCollection } from "./types";
 
