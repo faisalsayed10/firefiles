@@ -1,4 +1,4 @@
-import { Button, chakra, Input, useToast, useColorModeValue } from "@chakra-ui/react";
+import { Button, chakra, Input, useColorModeValue, useToast } from "@chakra-ui/react";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { database, firestore, storage } from "@util/firebase";
@@ -6,11 +6,12 @@ import { CurrentlyUploading, FolderCollection } from "@util/types";
 import { ROOT_FOLDER } from "@util/useFolder";
 import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { v4 } from "uuid";
 
 interface Props {
 	currentFolder: FolderCollection;
+	filesToUpload: File[];
 	uploadingFiles: CurrentlyUploading[];
 	setUploadingFiles: React.Dispatch<React.SetStateAction<CurrentlyUploading[]>>;
 	setProgress: React.Dispatch<React.SetStateAction<number>>;
@@ -19,6 +20,7 @@ interface Props {
 
 const UploadFileButton: React.FC<Props> = ({
 	currentFolder,
+	filesToUpload,
 	setProgress,
 	uploadingFiles,
 	setUploadingFiles,
@@ -28,8 +30,13 @@ const UploadFileButton: React.FC<Props> = ({
 	const toast = useToast();
 	const id = v4();
 
-	const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files[0];
+	useEffect(() => {
+		if (!filesToUpload) return;
+		handleUpload(null, filesToUpload);
+	}, [filesToUpload]);
+
+	const handleUpload = (e: React.ChangeEvent<HTMLInputElement>, filesToUpload: File[]) => {
+		const file = filesToUpload[0] || e?.target.files[0];
 
 		if (currentFolder == null || file == null) return;
 		const nameArr = currentFolder.path.map((elem) => elem.name);
@@ -114,7 +121,13 @@ const UploadFileButton: React.FC<Props> = ({
 
 	return (
 		<>
-			<Input type="file" ref={fileInput} hidden={true} onChange={handleUpload} key={id} />
+			<Input
+				type="file"
+				ref={fileInput}
+				hidden={true}
+				onChange={(e) => handleUpload(e, null)}
+				key={id}
+			/>
 			<Button
 				disabled={uploadingFiles.filter((uploadingFile) => !uploadingFile.error).length > 0}
 				pos="fixed"

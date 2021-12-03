@@ -82,9 +82,10 @@ export default function Index() {
 				noClick
 				onDragOver={() => setIsDragging(true)}
 				onDragLeave={() => setIsDragging(false)}
+				maxFiles={1}
 			>
 				{({ getRootProps, getInputProps }) => (
-					<Box {...getRootProps({ style })} minH="100vh">
+					<Box {...getRootProps({ style })} minH="93vh">
 						<input {...getInputProps()} />
 						<Text
 							hidden={!isDragging}
@@ -159,48 +160,39 @@ export default function Index() {
 									</>
 								)}
 							</Box>
-							<UploadFileButton
-								currentFolder={folder}
-								progress={progress}
-								setProgress={setProgress}
-								uploadingFiles={uploadingFiles}
-								setUploadingFiles={setUploadingFiles}
-							/>
 						</Box>
-						<Footer />
-						{/* PROGRESS BAR */} // TODO: enhance the progress bar
-						{uploadingFiles.length > 0 && (
-							<Center>
-								<Box
-									borderWidth="2px"
-									borderRadius="md"
-									px="4"
-									pos="fixed"
-									bgColor="#3182ce"
-									bottom="5%"
-									width="80vw"
-								>
-									{uploadingFiles
-										.filter((file) => !file.error)
-										.map((file) => (
-											<Box key={file.id} my="4">
-												<Text fontSize="md">
-													{file.error ? "Upload Failed!" : `Uploading ${file.name} (${progress}%)`}
-												</Text>
-												<Progress
-													isIndeterminate={!file.error}
-													colorScheme={file.error ? "red" : "blue"}
-													value={100}
-													height="5px"
-												/>
-											</Box>
-										))}
-								</Box>
-							</Center>
-						)}
 					</Box>
 				)}
 			</Dropzone>
+			<UploadFileButton
+				filesToUpload={draggedFilesToUpload}
+				currentFolder={folder}
+				progress={progress}
+				setProgress={setProgress}
+				uploadingFiles={uploadingFiles}
+				setUploadingFiles={setUploadingFiles}
+			/>
+			<Footer />
+			{uploadingFiles.length > 0 && (
+				<Center>
+					<Box
+						borderRadius="md"
+						px="4"
+						pos="fixed"
+						bgColor={useColorModeValue("gray.100", "gray.700")}
+						bottom="5%"
+						width={["90vw", "60vw", "60vw"]}
+						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
+					>
+						{uploadingFiles.map((file) => (
+							<Box key={"file.id"} my="4">
+								<Text fontSize="md">{`Uploading ${file.name} (${progress}%)`}</Text>
+								<Progress hasStripe colorScheme="blue" value={file.progress} height="5px" />
+							</Box>
+						))}
+					</Box>
+				</Center>
+			)}
 		</>
 	);
 }
