@@ -1,5 +1,6 @@
 {
   "private": true,
+  "license": "GPL-3.0",
   "scripts": {
     "dev": "next",
     "build": "next build",
@@ -17,6 +18,7 @@
     "argon2": "^0.28.3",
     "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
+    "chakra-ui-contextmenu": "^1.0.3",
     "cookie": "^0.4.1",
     "firebase": "^9.5.0",
     "framer-motion": "^4",
