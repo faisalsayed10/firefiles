@@ -11,7 +11,8 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useColorModeValue,
-	useDisclosure
+	useDisclosure,
+	useToast
 } from "@chakra-ui/react";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,7 +21,7 @@ import { FolderCollection } from "@util/types";
 import { ROOT_FOLDER } from "@util/useFolder";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useRef, useState } from "react";
-import { v4 } from "uuid";
+import uniqid from "uniqid";
 
 interface Props {
 	currentFolder: FolderCollection;
@@ -29,10 +30,25 @@ interface Props {
 const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
+	const [loading, setLoading] = useState(false);
+	const toast = useToast();
 	const inputRef = useRef<HTMLInputElement>();
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		setLoading(true);
+
+		if (/[#\$\[\]\*/]/.test(name)) {
+			toast({
+				title: "Invalid Folder Name",
+				description: "Folder names cannot contain #$[]*/",
+				status: "error",
+				duration: 3000,
+				isClosable: true
+			});
+			setLoading(false);
+			return;
+		}
 
 		if (currentFolder === null) return;
 		const path = [...currentFolder.path];
@@ -40,13 +56,23 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 			path.push({ name: currentFolder.name, id: currentFolder.id });
 		}
 
-		await setDoc(doc(firestore, "folders", v4()), {
+		await setDoc(doc(firestore, "folders", uniqid()), {
 			name,
 			parentId: currentFolder.id,
 			path,
 			createdAt: database.getCurrentTimestamp()
 		});
+
+		toast({
+			title: "Folder Created Successfully",
+			description: "",
+			status: "success",
+			duration: 3000,
+			isClosable: true
+		});
+
 		setName("");
+		setLoading(false);
 		onClose();
 	};
 
@@ -88,7 +114,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 							<Button variant="ghost" colorScheme="blue" onClick={onClose}>
 								Close
 							</Button>
-							<Button variant="ghost" type="submit" colorScheme="green">
+							<Button variant="ghost" type="submit" colorScheme="green" isLoading={loading}>
 								Submit
 							</Button>
 						</ModalFooter>

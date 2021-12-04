@@ -46,9 +46,11 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 							isTruncated={true}
 							color="rgb(0, 119, 255)"
 							onClick={() => {
-								const query = `?folder=${JSON.stringify({ ...folder, path: path.slice(1, i) })}`;
-								const route = folder.id ? `/folder/${folder.id}` : "/";
-								router.push(route + query, route);
+								const parentPath = folder.path?.map((p) => p.id).join("/");
+								const route = folder.id
+									? `/folder${parentPath !== "" ? "/" + parentPath + "/" : "/"}${folder.id}`
+									: "/";
+								router.push(route);
 							}}
 						>
 							{folder.name === "Root" ? <FontAwesomeIcon icon={faHome} /> : folder.name}

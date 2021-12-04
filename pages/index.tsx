@@ -45,22 +45,12 @@ const activeStyle = {
 
 export default function Index() {
 	const router = useRouter();
-	const [currentFolder, setCurrentFolder] = useState(undefined);
 	const [folderId, setFolderId] = useState(getFolderId(router));
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [progress, setProgress] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
-	const { folder, childFolders, childFiles, loading, foldersLoading } = useFolder(
-		folderId,
-		currentFolder
-	);
-
-	useEffect(() => {
-		if (router.query?.folder) {
-			setCurrentFolder(JSON.parse(router.query?.folder as string));
-		}
-	}, [router.query]);
+	const { folder, childFolders, childFiles, loading, foldersLoading } = useFolder(folderId);
 
 	useEffect(() => {
 		setFolderId(getFolderId(router));

@@ -24,10 +24,8 @@ const Folder: React.FC<Props> = ({ folder }) => {
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faPlus} />}
 						onClick={() => {
-							router.push(
-								`/folder/${folder.id}?folder=${JSON.stringify(folder)}`,
-								`/folder/${folder.id}`
-							);
+							const parentPath = folder.path?.map((p) => p.id).join("/");
+							router.push(`/folder${parentPath !== "" ? `/${parentPath}/` : "/"}${folder.id}`);
 						}}
 					>
 						Open
@@ -35,7 +33,12 @@ const Folder: React.FC<Props> = ({ folder }) => {
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
 						onClick={() => {
-							window.open(`http://localhost:3000/folder/${folder.id}`, "_blank");
+							const domain = process.env.DEPLOY_URL || "http://localhost:3000";
+							const parentPath = folder.path?.map((p) => p.id).join("/");
+							window.open(
+								`${domain}/folder${parentPath !== "" ? `/${parentPath}/` : "/"}${folder.id}`,
+								"_blank"
+							);
 						}}
 					>
 						Open in new tab
@@ -43,7 +46,7 @@ const Folder: React.FC<Props> = ({ folder }) => {
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faTrash} />}
 						onClick={() => {
-							// we have to do all of this 👇 bs because we're using firestore, 
+							// we have to do all of this 👇 bs because we're using firestore,
 							// let's move to cloud and come to this later.
 							// first get all those folders whose parentId === folder.id
 							// then loop through each of these folders and get all folders whose parentId === folder.id
@@ -61,12 +64,10 @@ const Folder: React.FC<Props> = ({ folder }) => {
 		>
 			{(ref) => (
 				<Flex
-					onClick={() =>
-						router.push(
-							`/folder/${folder.id}?folder=${JSON.stringify(folder)}`,
-							`/folder/${folder.id}`
-						)
-					}
+					onClick={() => {
+						const parentPath = folder.path?.map((p) => p.id).join("/");
+						router.push(`/folder${parentPath !== "" ? `/${parentPath}/` : "/"}${folder.id}`);
+					}}
 					direction="column"
 					align="center"
 					justify="space-between"

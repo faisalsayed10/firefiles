@@ -7,7 +7,7 @@ import { ROOT_FOLDER } from "@util/useFolder";
 import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useEffect, useRef } from "react";
-import { v4 } from "uuid";
+import uniqid from "uniqid";
 
 interface Props {
 	currentFolder: FolderCollection;
@@ -28,7 +28,7 @@ const UploadFileButton: React.FC<Props> = ({
 }) => {
 	const fileInput = useRef<HTMLInputElement>();
 	const toast = useToast();
-	const id = v4();
+	const id = uniqid();
 
 	useEffect(() => {
 		if (!filesToUpload) return;
@@ -38,8 +38,19 @@ const UploadFileButton: React.FC<Props> = ({
 	const handleUpload = (e: React.ChangeEvent<HTMLInputElement>, filesToUpload: File[]) => {
 		const file = filesToUpload[0] || e?.target.files[0];
 
+		if (/[#\$\[\]\*/]/.test(file.name)) {
+			toast({
+				title: "Invalid File Name",
+				description: "File names cannot contain #$[]*/",
+				status: "error",
+				duration: 3000,
+				isClosable: true
+			});
+			return;
+		}
+
 		if (currentFolder == null || file == null) return;
-		const nameArr = currentFolder.path.map((elem) => elem.name);
+		const nameArr = currentFolder.path.map((path) => path.name);
 
 		setUploadingFiles((prevUploadingFiles) => [
 			...prevUploadingFiles,
@@ -97,7 +108,7 @@ const UploadFileButton: React.FC<Props> = ({
 						if (existingFile) {
 							await updateDoc(existingFile.ref, { url });
 						} else {
-							await setDoc(doc(firestore, "files", v4()), {
+							await setDoc(doc(firestore, "files", uniqid()), {
 								url: url,
 								name: file.name,
 								createdAt: database.getCurrentTimestamp(),

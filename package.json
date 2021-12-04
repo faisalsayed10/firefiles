@@ -17,29 +17,23 @@
     "@react-hook/media-query": "^1.1.1",
     "argon2": "^0.28.3",
     "axios": "^0.24.0",
-    "bcryptjs": "^2.4.3",
     "chakra-ui-contextmenu": "^1.0.3",
-    "cookie": "^0.4.1",
     "firebase": "^9.5.0",
     "framer-motion": "^4",
     "iron-session": "^6.0.2",
-    "js-cookie": "^3.0.1",
     "next": "latest",
     "pretty-bytes": "^5.6.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
     "swr": "^1.0.1",
-    "uuid": "^8.3.2"
+    "uniqid": "^5.4.0"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.2",
-    "@types/cookie": "^0.4.1",
-    "@types/js-cookie": "^3.0.1",
     "@types/node": "^12.12.21",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
-    "@types/uuid": "^8.3.3",
+    "@types/uniqid": "^5.3.1",
     "typescript": "4.3.2"
   }
 }
