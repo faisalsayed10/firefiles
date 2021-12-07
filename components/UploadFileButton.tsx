@@ -1,42 +1,41 @@
 import { Button, chakra, Input, useColorModeValue, useToast } from "@chakra-ui/react";
+import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "@firebase/firestore";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { database, firestore, storage } from "@util/firebase";
-import { CurrentlyUploading, FolderCollection } from "@util/types";
+import { CurrentlyUploading } from "@util/types";
 import { ROOT_FOLDER } from "@util/useFolder";
-import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
 import React, { useEffect, useRef } from "react";
 import uniqid from "uniqid";
 
 interface Props {
-	currentFolder: FolderCollection;
+	currentFolder: StorageReference;
 	filesToUpload: File[];
 	uploadingFiles: CurrentlyUploading[];
+	setFilesToUpload: React.Dispatch<React.SetStateAction<File[]>>;
 	setUploadingFiles: React.Dispatch<React.SetStateAction<CurrentlyUploading[]>>;
-	setProgress: React.Dispatch<React.SetStateAction<number>>;
-	progress: number;
 }
 
 const UploadFileButton: React.FC<Props> = ({
 	currentFolder,
 	filesToUpload,
-	setProgress,
+	setFilesToUpload,
 	uploadingFiles,
-	setUploadingFiles,
-	progress
+	setUploadingFiles
 }) => {
 	const fileInput = useRef<HTMLInputElement>();
 	const toast = useToast();
 	const id = uniqid();
 
 	useEffect(() => {
-		if (!filesToUpload) return;
+		if (!filesToUpload || filesToUpload.length < 1) return;
 		handleUpload(null, filesToUpload);
 	}, [filesToUpload]);
 
 	const handleUpload = (e: React.ChangeEvent<HTMLInputElement>, filesToUpload: File[]) => {
-		const file = filesToUpload[0] || e?.target.files[0];
+		const file = filesToUpload?.[0] || e?.target.files[0];
+		if (currentFolder == null || !file || file == null) return;
 
 		if (/[#\$\[\]\*/]/.test(file.name)) {
 			toast({
@@ -49,18 +48,14 @@ const UploadFileButton: React.FC<Props> = ({
 			return;
 		}
 
-		if (currentFolder == null || file == null) return;
-		const nameArr = currentFolder.path.map((path) => path.name);
-
-		setUploadingFiles((prevUploadingFiles) => [
-			...prevUploadingFiles,
-			{ id: id, name: file.name, progress, error: false }
-		]);
+		setUploadingFiles((prev) =>
+			prev.concat([{ id: id, name: file.name, progress: 0, error: false }])
+		);
 
 		const filePath =
 			currentFolder === ROOT_FOLDER
-				? `${nameArr.join("/")}/${file.name}`
-				: `${nameArr.join("/")}/${currentFolder.name}/${file.name}`;
+				? file.name
+				: `${decodeURIComponent(currentFolder.fullPath)}/${file.name}`;
 
 		const fileRef = ref(storage, filePath);
 		const uploadTask = uploadBytesResumable(fileRef, file);
@@ -68,11 +63,13 @@ const UploadFileButton: React.FC<Props> = ({
 		uploadTask.on(
 			"state_changed",
 			(snapshot) => {
-				setProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
 				setUploadingFiles((prevUploadingFiles) => {
 					return prevUploadingFiles.map((uploadFile) => {
 						if (uploadFile.id === id) {
-							return { ...uploadFile, progress };
+							return {
+								...uploadFile,
+								progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+							};
 						}
 
 						return uploadFile;
@@ -89,36 +86,13 @@ const UploadFileButton: React.FC<Props> = ({
 					});
 				});
 			},
-			() => {
+			async () => {
 				setUploadingFiles((prevUploadingFiles) => {
 					return prevUploadingFiles.filter((uploadFile) => {
 						return uploadFile.id !== id;
 					});
 				});
 
-				getDownloadURL(fileRef).then(async (url) => {
-					await getDocs(
-						query(
-							collection(firestore, "files"),
-							where("name", "==", file.name),
-							where("folderId", "==", currentFolder.id)
-						)
-					).then(async (existingFiles) => {
-						const existingFile = existingFiles.docs[0];
-						if (existingFile) {
-							await updateDoc(existingFile.ref, { url });
-						} else {
-							await setDoc(doc(firestore, "files", uniqid()), {
-								url: url,
-								name: file.name,
-								createdAt: database.getCurrentTimestamp(),
-								folderId: currentFolder.id,
-								size: file.size,
-								filePath
-							});
-						}
-					});
-				});
 				toast({
 					title: "Success",
 					description: "File uploaded successfully!",
@@ -126,6 +100,30 @@ const UploadFileButton: React.FC<Props> = ({
 					duration: 1000,
 					isClosable: true
 				});
+
+				const url = await getDownloadURL(fileRef);
+				const findDoc = await getDocs(
+					query(
+						collection(firestore, "files"),
+						where("name", "==", file.name),
+						where("parentPath", "==", currentFolder.fullPath)
+					)
+				);
+				const found = findDoc.docs[0];
+
+				if (found) {
+					await updateDoc(found.ref, { url });
+				} else {
+					await setDoc(doc(firestore, "files", uniqid()), {
+						name: file.name,
+						size: file.size,
+						url,
+						parentPath: currentFolder.fullPath,
+						createdAt: database.getCurrentTimestamp()
+					});
+				}
+
+				setFilesToUpload([]);
 			}
 		);
 	};

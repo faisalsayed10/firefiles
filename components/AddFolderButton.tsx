@@ -14,20 +14,18 @@ import {
 	useDisclosure,
 	useToast
 } from "@chakra-ui/react";
+import { StorageReference } from "@firebase/storage";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { database, firestore } from "@util/firebase";
-import { FolderCollection } from "@util/types";
-import { ROOT_FOLDER } from "@util/useFolder";
-import { doc, setDoc } from "firebase/firestore";
+import { ACTIONS, ReducerAction } from "@util/useFolder";
 import React, { useRef, useState } from "react";
-import uniqid from "uniqid";
 
 interface Props {
-	currentFolder: FolderCollection;
+	dispatch: React.Dispatch<ReducerAction>;
+	currentFolder: StorageReference;
 }
 
-const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
+const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -51,17 +49,26 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 		}
 
 		if (currentFolder === null) return;
-		const path = [...currentFolder.path];
-		if (currentFolder !== ROOT_FOLDER) {
-			path.push({ name: currentFolder.name, id: currentFolder.id });
-		}
 
-		await setDoc(doc(firestore, "folders", uniqid()), {
+		const path =
+			currentFolder.fullPath !== ""
+				? currentFolder.fullPath + "/" + encodeURIComponent(name)
+				: encodeURIComponent(name);
+
+		const newFolder = {
 			name,
-			parentId: currentFolder.id,
-			path,
-			createdAt: database.getCurrentTimestamp()
-		});
+			fullPath: path,
+			root: null,
+			bucket: null,
+			storage: null,
+			parent: null
+		};
+
+		dispatch({ type: ACTIONS.ADD_FOLDER, payload: { childFolders: [newFolder] } });
+
+		const localFolders = localStorage.getItem("local-folders");
+		const folders: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
+		localStorage.setItem("local-folders", JSON.stringify([...folders, newFolder]));
 
 		toast({
 			title: "Folder Created Successfully",

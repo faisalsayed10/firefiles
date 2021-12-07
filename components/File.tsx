@@ -7,13 +7,15 @@ import {
 	AlertDialogOverlay,
 	Box,
 	Button,
-	Td, useClipboard, useToast
+	Td,
+	useClipboard,
+	useToast
 } from "@chakra-ui/react";
+import { deleteDoc, doc } from "@firebase/firestore";
 import { faCopy, faDownload, faMinus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { firestore, storage } from "@util/firebase";
 import { FileCollection } from "@util/types";
-import { deleteDoc, doc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
@@ -41,8 +43,9 @@ const File: React.FC<Props> = ({ file }) => {
 
 	const deleteFile = async () => {
 		try {
-			await deleteObject(ref(storage, file.filePath));
-			await deleteDoc(doc(firestore, "files", file.id));
+			await deleteObject(ref(storage, `${file.parentPath}/${file.name}`)).catch((e) => {});
+			await deleteDoc(doc(firestore, "files", file.id)).catch((e) => {});
+			setIsOpen(false);
 			toast({
 				title: "Deleted",
 				description: "File deleted successfully!",
@@ -51,7 +54,15 @@ const File: React.FC<Props> = ({ file }) => {
 				isClosable: true
 			});
 		} catch (err) {
+			setIsOpen(false);
 			console.error(err);
+			toast({
+				title: "An Error Occurred",
+				description: err.message,
+				status: "error",
+				duration: 3000,
+				isClosable: true
+			});
 		}
 	};
 
@@ -80,7 +91,8 @@ const File: React.FC<Props> = ({ file }) => {
 				<AlertDialog
 					isOpen={isOpen}
 					leastDestructiveRef={cancelRef}
-					onClose={() => setIsOpen(false)}>
+					onClose={() => setIsOpen(false)}
+				>
 					<AlertDialogOverlay>
 						<AlertDialogContent>
 							<AlertDialogHeader fontSize="lg" fontWeight="bold">
@@ -105,6 +117,6 @@ const File: React.FC<Props> = ({ file }) => {
 			</Td>
 		</Box>
 	);
-}
+};
 
 export default File;

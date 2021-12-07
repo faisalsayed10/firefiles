@@ -15,7 +15,6 @@ export const firestore = getFirestore(app);
 export const storage = getStorage(app);
 
 export const database = {
-	folders: collection(firestore, "folders"),
 	files: collection(firestore, "files"),
 	getCurrentTimestamp: serverTimestamp,
 	formatDoc: (doc: DocumentData) => ({ id: doc.id, ...doc.data() })

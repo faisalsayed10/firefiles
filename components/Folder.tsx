@@ -1,4 +1,5 @@
 import { Flex, MenuItem, MenuList, Text, useColorModeValue } from "@chakra-ui/react";
+import { StorageReference } from "@firebase/storage";
 import {
 	faExternalLinkAlt,
 	faFolderOpen,
@@ -6,13 +7,12 @@ import {
 	faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FolderCollection } from "@util/types";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import { useRouter } from "next/router";
 import React from "react";
 
 interface Props {
-	folder: FolderCollection;
+	folder: StorageReference;
 }
 
 const Folder: React.FC<Props> = ({ folder }) => {
@@ -23,10 +23,7 @@ const Folder: React.FC<Props> = ({ folder }) => {
 				<MenuList>
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faPlus} />}
-						onClick={() => {
-							const parentPath = folder.path?.map((p) => p.id).join("/");
-							router.push(`/folder${parentPath !== "" ? `/${parentPath}/` : "/"}${folder.id}`);
-						}}
+						onClick={() => router.push(`/folder/${folder.fullPath}`)}
 					>
 						Open
 					</MenuItem>
@@ -34,11 +31,7 @@ const Folder: React.FC<Props> = ({ folder }) => {
 						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
 						onClick={() => {
 							const domain = process.env.DEPLOY_URL || "http://localhost:3000";
-							const parentPath = folder.path?.map((p) => p.id).join("/");
-							window.open(
-								`${domain}/folder${parentPath !== "" ? `/${parentPath}/` : "/"}${folder.id}`,
-								"_blank"
-							);
+							window.open(`${domain}/folder/${folder.fullPath}`, "_blank");
 						}}
 					>
 						Open in new tab
@@ -64,10 +57,7 @@ const Folder: React.FC<Props> = ({ folder }) => {
 		>
 			{(ref) => (
 				<Flex
-					onClick={() => {
-						const parentPath = folder.path?.map((p) => p.id).join("/");
-						router.push(`/folder${parentPath !== "" ? `/${parentPath}/` : "/"}${folder.id}`);
-					}}
+					onClick={() => router.push(`/folder/${folder.fullPath}`)}
 					direction="column"
 					align="center"
 					justify="space-between"

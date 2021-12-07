@@ -1,29 +1,17 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, useColorMode } from "@chakra-ui/react";
+import { StorageReference } from "@firebase/storage";
 import { faChevronRight, faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FolderCollection } from "@util/types";
-import { ROOT_FOLDER } from "@util/useFolder";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 interface Props {
-	currentFolder: FolderCollection;
+	currentFolder: StorageReference;
 }
 
 const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 	const router = useRouter();
-	const [path, setPath] = useState<FolderCollection[]>([]);
 	const { colorMode } = useColorMode();
-
-	useEffect(() => {
-		if (currentFolder) {
-			if (currentFolder === ROOT_FOLDER) {
-				setPath([]);
-			} else {
-				setPath([ROOT_FOLDER, ...currentFolder.path]);
-			}
-		}
-	}, [currentFolder]);
 
 	return (
 		<Breadcrumb
@@ -37,39 +25,38 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 			separator={<FontAwesomeIcon icon={faChevronRight} />}
 			fontSize="lg"
 		>
-			{path.map((folder, i) => {
-				return (
-					<BreadcrumbItem key={folder.id || i} maxW="175px" p="3px">
-						<BreadcrumbLink
-							display="inline-block"
-							textColor={colorMode === "light" ? "#2D3748" : "white"}
-							isTruncated={true}
-							color="rgb(0, 119, 255)"
-							onClick={() => {
-								const parentPath = folder.path?.map((p) => p.id).join("/");
-								const route = folder.id
-									? `/folder${parentPath !== "" ? "/" + parentPath + "/" : "/"}${folder.id}`
-									: "/";
-								router.push(route);
-							}}
-						>
-							{folder.name === "Root" ? <FontAwesomeIcon icon={faHome} /> : folder.name}
-						</BreadcrumbLink>
-					</BreadcrumbItem>
-				);
-			})}
-			{currentFolder && (
-				<BreadcrumbItem p="3px" maxW="175px" isCurrentPage>
-					<BreadcrumbLink
-						display="inline-block"
-						isTruncated={true}
-						_hover={{ textDecor: "none" }}
-						textColor={colorMode === "light" ? "#2D3748" : "white"}
-					>
-						{currentFolder.name === "Root" ? <FontAwesomeIcon icon={faHome} /> : currentFolder.name}
-					</BreadcrumbLink>
-				</BreadcrumbItem>
-			)}
+			<BreadcrumbItem p="3px" maxW="175px" isCurrentPage>
+				<BreadcrumbLink
+					display="inline-block"
+					isTruncated={true}
+					_hover={{ textDecor: "none" }}
+					textColor={colorMode === "light" ? "#2D3748" : "white"}
+					onClick={() => router.push("/")}
+				>
+					<FontAwesomeIcon icon={faHome} />
+				</BreadcrumbLink>
+			</BreadcrumbItem>
+			{currentFolder?.name !== "" &&
+				currentFolder?.fullPath.split("/").map((path, i) => {
+					return (
+						<BreadcrumbItem key={path || i} maxW="175px" p="3px">
+							<BreadcrumbLink
+								display="inline-block"
+								textColor={colorMode === "light" ? "#2D3748" : "white"}
+								isTruncated={true}
+								color="rgb(0, 119, 255)"
+								onClick={() => {
+									const route =
+										currentFolder.fullPath.substring(0, currentFolder.fullPath.indexOf(path)) +
+										path;
+									router.push(`/folder/${route}`);
+								}}
+							>
+								{decodeURIComponent(path)}
+							</BreadcrumbLink>
+						</BreadcrumbItem>
+					);
+				})}
 		</Breadcrumb>
 	);
 };

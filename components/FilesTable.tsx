@@ -22,7 +22,7 @@ const FilesTable: React.FC<Props> = ({ childFiles }) => {
 				</thead>
 				<tbody>
 					{childFiles.length > 0 &&
-						childFiles.map((childFile) => <File key={childFile.id} file={childFile} />)}
+						childFiles.map((childFile) => <File key={childFile.name} file={childFile} />)}
 				</tbody>
 			</Table>
 		</Box>

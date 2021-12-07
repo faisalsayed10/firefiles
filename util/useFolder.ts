@@ -1,13 +1,22 @@
-import { database, firestore } from "@util/firebase";
-import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { database, firestore, storage } from "@util/firebase";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { list, ref, StorageReference } from "firebase/storage";
 import { useEffect, useReducer } from "react";
-import { FileCollection, FolderCollection } from "./types";
+import { FileCollection } from "./types";
 
-export const ROOT_FOLDER: FolderCollection = { name: "Root", id: null, path: [] };
+export const ROOT_FOLDER: StorageReference = {
+	name: "",
+	fullPath: "",
+	parent: null,
+	root: null,
+	bucket: null,
+	storage: null
+};
 
-enum ACTIONS {
+export enum ACTIONS {
 	SELECT_FOLDER = "select-folder",
 	UPDATE_FOLDER = "update-folder",
+	ADD_FOLDER = "add-folder",
 	SET_CHILD_FOLDERS = "set-child-folders",
 	SET_CHILD_FILES = "set-child-files",
 	SET_LOADING = "set-loading",
@@ -16,16 +25,17 @@ enum ACTIONS {
 	STOP_FOLDERS_LOADING = "stop-folders-loading"
 }
 
-type ReducerState = {
-	folderId?: string;
-	folder?: FolderCollection;
-	childFolders?: FolderCollection[];
+export type ReducerState = {
+	fullPath?: string;
+	folder?: StorageReference;
+	childFolders?: StorageReference[];
+	file?: FileCollection;
 	childFiles?: FileCollection[];
 	loading?: boolean;
 	foldersLoading?: boolean;
 };
 
-type ReducerAction = {
+export type ReducerAction = {
 	type: ACTIONS;
 	payload: ReducerState;
 };
@@ -34,7 +44,7 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 	switch (action.type) {
 		case ACTIONS.SELECT_FOLDER:
 			return {
-				folderId: action.payload.folderId,
+				fullPath: action.payload.fullPath,
 				folder: action.payload.folder,
 				childFiles: [],
 				childFolders: []
@@ -48,6 +58,11 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 			return {
 				...state,
 				childFolders: action.payload.childFolders
+			};
+		case ACTIONS.ADD_FOLDER:
+			return {
+				...state,
+				childFolders: [...state.childFolders, ...action.payload.childFolders]
 			};
 		case ACTIONS.SET_CHILD_FILES:
 			return {
@@ -79,72 +94,84 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 	}
 };
 
-export const useFolder = (folderId: string = "", folder: FolderCollection = null) => {
+export const useFolder = (fullPath: string = "") => {
 	const [state, dispatch] = useReducer(reducer, {
-		folderId,
-		folder,
+		fullPath,
+		folder: null,
 		childFolders: [],
 		childFiles: [],
 		loading: false,
 		foldersLoading: false
 	});
 
+	// set current folder
 	useEffect(() => {
-		dispatch({ type: ACTIONS.SELECT_FOLDER, payload: { folderId, folder } });
-	}, [folder, folderId]);
-
-	useEffect(() => {
-		if (folderId === "" || !folderId) {
-			return dispatch({
+		dispatch({ type: ACTIONS.SELECT_FOLDER, payload: { fullPath } });
+		if (fullPath === "" || !fullPath) {
+			dispatch({
 				type: ACTIONS.UPDATE_FOLDER,
 				payload: { folder: ROOT_FOLDER }
 			});
+			return;
 		}
+
+		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
+		dispatch({
+			type: ACTIONS.UPDATE_FOLDER,
+			payload: { folder: ref(storage, fullPath) }
+		});
+		dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
+	}, [fullPath]);
+
+	// get child folders
+	useEffect(() => {
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
 
 		(async () => {
-			await getDoc(doc(firestore, "folders", folderId))
-				.then((doc) => {
-					dispatch({
-						type: ACTIONS.UPDATE_FOLDER,
-						payload: { folder: database.formatDoc(doc) }
-					});
-					dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
-				})
-				.catch(() => {
-					dispatch({
-						type: ACTIONS.UPDATE_FOLDER,
-						payload: { folder: ROOT_FOLDER }
-					});
-					dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
-				});
-		})();
-	}, [folderId]);
+			const reference = ref(storage, fullPath);
+			let results = await list(reference, { maxResults: 100 });
 
-	useEffect(() => {
-		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
-		onSnapshot(
-			query(
-				collection(firestore, "folders"),
-				where("parentId", "==", folderId || null),
-				orderBy("createdAt")
-			),
-			(snapshot) => {
-				dispatch({
-					type: ACTIONS.SET_CHILD_FOLDERS,
-					payload: { childFolders: snapshot.docs.map(database.formatDoc) }
+			while (results.nextPageToken) {
+				const more = await list(reference, {
+					maxResults: 100,
+					pageToken: results.nextPageToken
 				});
-				dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
+
+				results = {
+					nextPageToken: more.nextPageToken,
+					items: [...results.items, ...more.items],
+					prefixes: [...results.prefixes, ...more.prefixes]
+				};
 			}
-		);
-	}, [folderId]);
 
+			const localFolders = localStorage.getItem("local-folders");
+			const localFoldersArray: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
+			results.prefixes.push(
+				...localFoldersArray.filter((folder) => {
+					const parentPath = folder.fullPath.split("/").slice(0, -1).join("/");
+					return (
+						parentPath === fullPath &&
+						!results.prefixes.find((prefix) => prefix.name === folder.name)
+					);
+				})
+			);
+
+			dispatch({
+				type: ACTIONS.SET_CHILD_FOLDERS,
+				payload: { childFolders: results.prefixes }
+			});
+
+			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
+		})();
+	}, [fullPath]);
+
+	// get child files
 	useEffect(() => {
 		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
 		onSnapshot(
 			query(
 				collection(firestore, "files"),
-				where("folderId", "==", folderId || null),
+				where("parentPath", "==", fullPath),
 				orderBy("createdAt")
 			),
 			(snapshot) => {
@@ -153,9 +180,13 @@ export const useFolder = (folderId: string = "", folder: FolderCollection = null
 					payload: { childFiles: snapshot.docs.map(database.formatDoc) }
 				});
 				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
+			},
+			(err) => {
+				console.error(err);
+				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
 			}
 		);
-	}, [folderId]);
+	}, [fullPath]);
 
-	return state;
+	return { ...state, dispatch };
 };

@@ -25,9 +25,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import { useFolder } from "util/useFolder";
 
-const getFolderId = (router: NextRouter) => {
+const getFolderPath = (router: NextRouter) => {
 	const pathArray = router.asPath.split("/");
-	return pathArray[pathArray.length - 1];
+	return pathArray.slice(2).join("/");
 };
 
 const baseStyle = {
@@ -45,15 +45,15 @@ const activeStyle = {
 
 export default function Index() {
 	const router = useRouter();
-	const [folderId, setFolderId] = useState(getFolderId(router));
+	const [folderPath, setFolderPath] = useState(getFolderPath(router));
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
-	const [progress, setProgress] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
-	const { folder, childFolders, childFiles, loading, foldersLoading } = useFolder(folderId);
+	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } =
+		useFolder(folderPath);
 
 	useEffect(() => {
-		setFolderId(getFolderId(router));
+		setFolderPath(getFolderPath(router));
 	}, [router.asPath]);
 
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
@@ -114,13 +114,17 @@ export default function Index() {
 								)}
 								{childFolders?.length > 0 ? (
 									<>
-										<FolderGrid childFolders={childFolders} currentFolder={folder} />
+										<FolderGrid
+											dispatch={dispatch}
+											childFolders={childFolders}
+											currentFolder={folder}
+										/>
 										<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
 									</>
 								) : (
 									!foldersLoading && (
 										<>
-											<AddFolderButton currentFolder={folder} />{" "}
+											<AddFolderButton dispatch={dispatch} currentFolder={folder} />
 											<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
 										</>
 									)
@@ -156,9 +160,8 @@ export default function Index() {
 			</Dropzone>
 			<UploadFileButton
 				filesToUpload={draggedFilesToUpload}
+				setFilesToUpload={setDraggedFilesToUpload}
 				currentFolder={folder}
-				progress={progress}
-				setProgress={setProgress}
 				uploadingFiles={uploadingFiles}
 				setUploadingFiles={setUploadingFiles}
 			/>
@@ -166,18 +169,17 @@ export default function Index() {
 			{uploadingFiles.length > 0 && (
 				<Center>
 					<Box
-						borderRadius="md"
+						borderRadius="sm"
 						px="4"
 						pos="fixed"
-						bgColor={useColorModeValue("gray.100", "gray.700")}
 						bottom="5%"
 						width={["90vw", "60vw", "60vw"]}
 						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
 					>
 						{uploadingFiles.map((file) => (
 							<Box key={"file.id"} my="4">
-								<Text fontSize="md">{`Uploading ${file.name} (${progress}%)`}</Text>
-								<Progress hasStripe colorScheme="blue" value={file.progress} height="5px" />
+								<Text fontSize="md">{`Uploading ${file.name} (${file.progress}%)`}</Text>
+								<Progress hasStripe value={file.progress} height="5px" />
 							</Box>
 						))}
 					</Box>
