@@ -1,12 +1,4 @@
-import {
-	Box,
-	Center,
-	Progress,
-	SimpleGrid,
-	Skeleton,
-	Text,
-	useColorModeValue
-} from "@chakra-ui/react";
+import { Box, Center, Progress, SimpleGrid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
 import AddFolderButton from "@components/AddFolderButton";
 import FilesEmptyState from "@components/FilesEmptyState";
 import FilesTable from "@components/FilesTable";
@@ -51,6 +43,7 @@ export default function Index() {
 	const [isDragging, setIsDragging] = useState(false);
 	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } =
 		useFolder(folderPath);
+	const { colorMode } = useColorMode();
 
 	useEffect(() => {
 		setFolderPath(getFolderPath(router));
@@ -72,7 +65,7 @@ export default function Index() {
 				noClick
 				onDragOver={() => setIsDragging(true)}
 				onDragLeave={() => setIsDragging(false)}
-				maxFiles={1}
+				// maxFiles={1}
 			>
 				{({ getRootProps, getInputProps }) => (
 					<Box {...getRootProps({ style })} minH="93vh">
@@ -81,7 +74,7 @@ export default function Index() {
 							hidden={!isDragging}
 							fontSize={["2xl", "3xl", "3xl"]}
 							opacity="0.9"
-							color={useColorModeValue("gray.700", "gray.300")}
+							color={colorMode === "light" ? "gray.700" : "gray.300"}
 							fontWeight="700"
 							textTransform="uppercase"
 							align="center"
@@ -94,7 +87,7 @@ export default function Index() {
 							px="2"
 							m="0"
 						>
-							Drop a file anywhere on the screen
+							Drop files anywhere on the screen
 						</Text>
 						<Navbar />
 						<Box width="100%" px="8" py="4">
@@ -175,9 +168,10 @@ export default function Index() {
 						bottom="5%"
 						width={["90vw", "60vw", "60vw"]}
 						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
+						backgroundColor={colorMode === "dark" ? "gray.700" : "white"}
 					>
 						{uploadingFiles.map((file) => (
-							<Box key={"file.id"} my="4">
+							<Box key={file.id} my="4">
 								<Text fontSize="md">{`Uploading ${file.name} (${file.progress}%)`}</Text>
 								<Progress hasStripe value={file.progress} height="5px" />
 							</Box>
