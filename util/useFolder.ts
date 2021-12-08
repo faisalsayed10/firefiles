@@ -1,3 +1,4 @@
+import { useToast } from "@chakra-ui/toast";
 import { database, firestore, storage } from "@util/firebase";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { list, ref, StorageReference } from "firebase/storage";
@@ -95,6 +96,7 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 };
 
 export const useFolder = (fullPath: string = "") => {
+	const toast = useToast();
 	const [state, dispatch] = useReducer(reducer, {
 		fullPath,
 		folder: null,
@@ -128,38 +130,49 @@ export const useFolder = (fullPath: string = "") => {
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
 
 		(async () => {
-			const reference = ref(storage, fullPath);
-			let results = await list(reference, { maxResults: 100 });
+			try {
+				const reference = ref(storage, fullPath);
+				let results = await list(reference, { maxResults: 100 });
 
-			while (results.nextPageToken) {
-				const more = await list(reference, {
-					maxResults: 100,
-					pageToken: results.nextPageToken
+				while (results.nextPageToken) {
+					const more = await list(reference, {
+						maxResults: 100,
+						pageToken: results.nextPageToken
+					});
+
+					results = {
+						nextPageToken: more.nextPageToken,
+						items: [...results.items, ...more.items],
+						prefixes: [...results.prefixes, ...more.prefixes]
+					};
+				}
+
+				const localFolders = localStorage.getItem("local-folders");
+				const localFoldersArray: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
+				results.prefixes.push(
+					...localFoldersArray.filter((folder) => {
+						const parentPath = folder.fullPath.split("/").slice(0, -1).join("/");
+						return (
+							parentPath === fullPath &&
+							!results.prefixes.find((prefix) => prefix.name === folder.name)
+						);
+					})
+				);
+
+				dispatch({
+					type: ACTIONS.SET_CHILD_FOLDERS,
+					payload: { childFolders: results.prefixes }
 				});
-
-				results = {
-					nextPageToken: more.nextPageToken,
-					items: [...results.items, ...more.items],
-					prefixes: [...results.prefixes, ...more.prefixes]
-				};
+			} catch (err) {
+				console.error(err);
+				toast({
+					title: "An Error Occurred",
+					description: err.message,
+					status: "error",
+					duration: 5000,
+					isClosable: true
+				});
 			}
-
-			const localFolders = localStorage.getItem("local-folders");
-			const localFoldersArray: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
-			results.prefixes.push(
-				...localFoldersArray.filter((folder) => {
-					const parentPath = folder.fullPath.split("/").slice(0, -1).join("/");
-					return (
-						parentPath === fullPath &&
-						!results.prefixes.find((prefix) => prefix.name === folder.name)
-					);
-				})
-			);
-
-			dispatch({
-				type: ACTIONS.SET_CHILD_FOLDERS,
-				payload: { childFolders: results.prefixes }
-			});
 
 			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
 		})();
@@ -183,6 +196,13 @@ export const useFolder = (fullPath: string = "") => {
 			},
 			(err) => {
 				console.error(err);
+				toast({
+					title: "An Error Occurred",
+					description: err.message,
+					status: "error",
+					duration: 5000,
+					isClosable: true
+				});
 				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
 			}
 		);

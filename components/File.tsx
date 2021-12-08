@@ -43,8 +43,8 @@ const File: React.FC<Props> = ({ file }) => {
 
 	const deleteFile = async () => {
 		try {
-			await deleteObject(ref(storage, `${file.parentPath}/${file.name}`)).catch((e) => {});
-			await deleteDoc(doc(firestore, "files", file.id)).catch((e) => {});
+			deleteObject(ref(storage, `${file.parentPath}/${file.name}`)).catch();
+			deleteDoc(doc(firestore, "files", file.id)).catch();
 			setIsOpen(false);
 			toast({
 				title: "Deleted",

@@ -1,6 +1,6 @@
 import { getStorage } from "@firebase/storage";
 import { initializeApp } from "firebase/app";
-import { collection, getFirestore, serverTimestamp, DocumentData } from "firebase/firestore";
+import { collection, DocumentData, getFirestore, serverTimestamp } from "firebase/firestore";
 
 const app = initializeApp({
 	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
