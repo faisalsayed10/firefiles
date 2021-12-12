@@ -108,7 +108,7 @@ const UploadFileButton: React.FC<Props> = ({
 						query(
 							collection(firestore, "files"),
 							where("name", "==", files[i].name),
-							where("parentPath", "==", currentFolder.fullPath)
+							where("parentPath", "==", decodeURIComponent(currentFolder.fullPath))
 						)
 					);
 					const found = findDoc.docs[0];
@@ -120,7 +120,7 @@ const UploadFileButton: React.FC<Props> = ({
 							name: files[i].name,
 							size: files[i].size,
 							url,
-							parentPath: currentFolder.fullPath,
+							parentPath: decodeURIComponent(currentFolder.fullPath),
 							createdAt: database.getCurrentTimestamp()
 						});
 					}

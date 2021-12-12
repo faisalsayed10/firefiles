@@ -52,8 +52,8 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
 
 		const path =
 			currentFolder.fullPath !== ""
-				? currentFolder.fullPath + "/" + encodeURIComponent(name)
-				: encodeURIComponent(name);
+				? decodeURIComponent(currentFolder.fullPath) + "/" + name
+				: name;
 
 		const newFolder = {
 			name,

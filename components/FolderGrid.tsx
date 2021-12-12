@@ -9,14 +9,25 @@ interface Props {
 	dispatch: React.Dispatch<ReducerAction>;
 	childFolders?: StorageReference[];
 	currentFolder: StorageReference;
+	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const FolderGrid: React.FC<Props> = ({ childFolders, currentFolder, dispatch }) => {
+const FolderGrid: React.FC<Props> = ({
+	childFolders,
+	currentFolder,
+	dispatch,
+	setIsFolderDeleting
+}) => {
 	return (
 		<SimpleGrid columns={[2, 4, 6, 6, 7]} spacing="10px">
 			{childFolders?.map((childFolder) => (
 				<Box m="0 auto" key={childFolder.name}>
-					<Folder folder={childFolder} />
+					<Folder
+						setIsFolderDeleting={setIsFolderDeleting}
+						folder={childFolder}
+						childFolders={childFolders}
+						dispatch={dispatch}
+					/>
 				</Box>
 			))}
 			<Box m="0 auto">

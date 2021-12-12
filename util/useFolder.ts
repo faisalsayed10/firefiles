@@ -161,7 +161,7 @@ export const useFolder = (fullPath: string = "") => {
 
 				dispatch({
 					type: ACTIONS.SET_CHILD_FOLDERS,
-					payload: { childFolders: results.prefixes }
+					payload: { childFolders: results.prefixes.sort() }
 				});
 			} catch (err) {
 				console.error(err);
@@ -181,7 +181,7 @@ export const useFolder = (fullPath: string = "") => {
 	// get child files
 	useEffect(() => {
 		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
-		onSnapshot(
+		const unsubscribe = onSnapshot(
 			query(
 				collection(firestore, "files"),
 				where("parentPath", "==", fullPath),
@@ -206,6 +206,10 @@ export const useFolder = (fullPath: string = "") => {
 				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
 			}
 		);
+
+		return () => {
+			unsubscribe();
+		}
 	}, [fullPath]);
 
 	return { ...state, dispatch };

@@ -1,16 +1,4 @@
-import {
-	AlertDialog,
-	AlertDialogBody,
-	AlertDialogContent,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogOverlay,
-	Box,
-	Button,
-	Td,
-	useClipboard,
-	useToast
-} from "@chakra-ui/react";
+import { Box, Button, Td, useClipboard, useToast } from "@chakra-ui/react";
 import { deleteDoc, doc } from "@firebase/firestore";
 import { faCopy, faDownload, faMinus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,6 +7,7 @@ import { FileCollection } from "@util/types";
 import { deleteObject, ref } from "firebase/storage";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
+import DeleteAlert from "./DeleteAlert";
 
 interface Props {
 	file: FileCollection;
@@ -43,8 +32,8 @@ const File: React.FC<Props> = ({ file }) => {
 
 	const deleteFile = async () => {
 		try {
-			deleteObject(ref(storage, `${file.parentPath}/${file.name}`)).catch();
-			deleteDoc(doc(firestore, "files", file.id)).catch();
+			deleteObject(ref(storage, `${file.parentPath}/${file.name}`)).catch((e) => {});
+			deleteDoc(doc(firestore, "files", file.id)).catch((e) => {});
 			setIsOpen(false);
 			toast({
 				title: "Deleted",
@@ -78,7 +67,7 @@ const File: React.FC<Props> = ({ file }) => {
 				</Button>
 			</Td>
 			<Td>
-				<a href={file.url} target="_blank" rel="noreferrer">
+				<a href={file.url} target="_blank" rel="noreferrer" download={file.url}>
 					<Button variant="outline" colorScheme="cyan">
 						<FontAwesomeIcon icon={faDownload} />
 					</Button>
@@ -88,32 +77,12 @@ const File: React.FC<Props> = ({ file }) => {
 				<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="cyan">
 					<FontAwesomeIcon icon={faMinus} />
 				</Button>
-				<AlertDialog
+				<DeleteAlert
 					isOpen={isOpen}
-					leastDestructiveRef={cancelRef}
 					onClose={() => setIsOpen(false)}
-				>
-					<AlertDialogOverlay>
-						<AlertDialogContent>
-							<AlertDialogHeader fontSize="lg" fontWeight="bold">
-								Delete File
-							</AlertDialogHeader>
-
-							<AlertDialogBody>
-								Are you sure? You can't undo this action afterwards.
-							</AlertDialogBody>
-
-							<AlertDialogFooter>
-								<Button ref={cancelRef} onClick={() => setIsOpen(false)}>
-									Cancel
-								</Button>
-								<Button colorScheme="red" onClick={deleteFile} ml={3}>
-									Delete
-								</Button>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialogOverlay>
-				</AlertDialog>
+					cancelRef={cancelRef}
+					onClick={deleteFile}
+				/>
 			</Td>
 		</Box>
 	);
