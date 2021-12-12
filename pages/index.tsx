@@ -1,11 +1,4 @@
-import {
-	Box,
-	Center,
-	Progress,
-	SimpleGrid,
-	Skeleton, Text,
-	useColorMode
-} from "@chakra-ui/react";
+import { Box, Center, Progress, SimpleGrid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
 import AddFolderButton from "@components/AddFolderButton";
 import FilesEmptyState from "@components/FilesEmptyState";
 import FilesTable from "@components/FilesTable";
@@ -15,9 +8,8 @@ import FolderGrid from "@components/FolderGrid";
 import Footer from "@components/Footer";
 import Navbar from "@components/Navbar";
 import UploadFileButton from "@components/UploadFileButton";
-import { sessionOptions } from "@util/session";
 import { CurrentlyUploading } from "@util/types";
-import { withIronSessionSsr } from "iron-session/next";
+import useUser from "@util/useUser";
 import Head from "next/head";
 import { NextRouter, useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -50,15 +42,22 @@ export default function Index() {
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } =
-		useFolder(decodeURIComponent(folderPath));
+	const { currentUser } = useUser();
 	const { colorMode } = useColorMode();
+	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
+	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } = useFolder(
+		decodeURIComponent(folderPath)
+	);
 
 	useEffect(() => {
 		setFolderPath(getFolderPath(router));
 	}, [router.asPath]);
 
-	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
+	useEffect(() => {
+		if (!currentUser) {
+			router.push("/login");
+		}
+	}, [currentUser]);
 
 	return (
 		<>
@@ -197,19 +196,3 @@ export default function Index() {
 		</>
 	);
 }
-
-export const getServerSideProps = withIronSessionSsr(async function ({ req, res }) {
-	const user = req.session.user;
-
-	if (user === undefined || !user?.email) {
-		return {
-			redirect: {
-				permanent: false,
-				destination: "/login"
-			},
-			props: { user }
-		};
-	}
-
-	return { props: { user: req.session.user } };
-}, sessionOptions);

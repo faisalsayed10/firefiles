@@ -4,6 +4,7 @@ import { collection, onSnapshot, orderBy, query, where } from "firebase/firestor
 import { list, ref, StorageReference } from "firebase/storage";
 import { useEffect, useReducer } from "react";
 import { FileCollection } from "./types";
+import useUser from "./useUser";
 
 export const ROOT_FOLDER: StorageReference = {
 	name: "",
@@ -97,6 +98,7 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 
 export const useFolder = (fullPath: string = "") => {
 	const toast = useToast();
+	const { currentUser } = useUser();
 	const [state, dispatch] = useReducer(reducer, {
 		fullPath,
 		folder: null,
@@ -108,6 +110,7 @@ export const useFolder = (fullPath: string = "") => {
 
 	// set current folder
 	useEffect(() => {
+		if (!currentUser) return;
 		dispatch({ type: ACTIONS.SELECT_FOLDER, payload: { fullPath } });
 		if (fullPath === "" || !fullPath) {
 			dispatch({
@@ -123,10 +126,11 @@ export const useFolder = (fullPath: string = "") => {
 			payload: { folder: ref(storage, fullPath) }
 		});
 		dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
-	}, [fullPath]);
+	}, [fullPath, currentUser]);
 
 	// get child folders
 	useEffect(() => {
+		if (!currentUser) return;
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
 
 		(async () => {
@@ -176,10 +180,11 @@ export const useFolder = (fullPath: string = "") => {
 
 			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
 		})();
-	}, [fullPath]);
+	}, [fullPath, currentUser]);
 
 	// get child files
 	useEffect(() => {
+		if (!currentUser) return;
 		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
 		const unsubscribe = onSnapshot(
 			query(
@@ -209,8 +214,8 @@ export const useFolder = (fullPath: string = "") => {
 
 		return () => {
 			unsubscribe();
-		}
-	}, [fullPath]);
+		};
+	}, [fullPath, currentUser]);
 
 	return { ...state, dispatch };
 };

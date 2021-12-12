@@ -1,5 +1,6 @@
 import { getStorage } from "@firebase/storage";
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { collection, DocumentData, getFirestore, serverTimestamp } from "firebase/firestore";
 
 const app = initializeApp({
@@ -13,6 +14,7 @@ const app = initializeApp({
 
 export const firestore = getFirestore(app);
 export const storage = getStorage(app);
+export const auth = getAuth(app);
 
 export const database = {
 	files: collection(firestore, "files"),

@@ -1,40 +1,31 @@
-import {
-	Alert,
-	AlertIcon,
-	Box,
-	Button,
-	Center,
-	FormControl, Input, Text
-} from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Button, Center, FormControl, Input, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import Footer from "@components/Footer";
 import useUser from "@util/useUser";
-import axios from "axios";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function Login() {
-	const { mutateUser } = useUser({ redirectTo: "/", redirectIfFound: true });
+	const { login, currentUser } = useUser();
 	const emailRef = useRef<HTMLInputElement>();
 	const passwordRef = useRef<HTMLInputElement>();
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e) => {
+	useEffect(() => {
+		if (currentUser) {
+			window.location.href = "/";
+		}
+	}, [currentUser]);
+
+	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
 		try {
 			setError("");
 			setLoading(true);
-			mutateUser(
-				await axios.post("/api/login", {
-					email: emailRef.current.value,
-					password: passwordRef.current.value
-				}).then((res) => res.data)
-			);
-
+			await login(emailRef.current.value, passwordRef.current.value);
 		} catch (err) {
-			console.error(err);
-			setError(err.response.data.message);
+			setError(err.message);
 		}
 
 		setLoading(false);
@@ -82,7 +73,8 @@ export default function Login() {
 								isLoading={loading}
 								w="100"
 								mt="4"
-								type="submit">
+								type="submit"
+							>
 								Login
 							</Button>
 						</Center>
