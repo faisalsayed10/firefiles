@@ -156,7 +156,7 @@ export default function Index() {
 											<Text fontSize="3xl" fontWeight="600" mb={4}>
 												Your Files
 											</Text>
-											<FilesTable childFiles={childFiles} />
+											<FilesTable dispatch={dispatch} childFiles={childFiles} />
 										</>
 									)}
 								</Box>
@@ -165,6 +165,7 @@ export default function Index() {
 					)}
 				</Dropzone>
 				<UploadFileButton
+					dispatch={dispatch}
 					filesToUpload={draggedFilesToUpload}
 					setFilesToUpload={setDraggedFilesToUpload}
 					currentFolder={folder}

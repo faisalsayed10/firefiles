@@ -7,19 +7,18 @@ import {
 	faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { firestore, storage } from "@util/firebase";
+import { storage } from "@util/firebase";
 import { ACTIONS, ReducerAction } from "@util/useFolder";
 import { ContextMenu } from "chakra-ui-contextmenu";
-import { collection, getDocs, query, where, writeBatch } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React from "react";
 import DeleteAlert from "./DeleteAlert";
 
 interface Props {
+	dispatch: React.Dispatch<ReducerAction>;
 	folder: StorageReference;
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 	childFolders: StorageReference[];
-	dispatch: React.Dispatch<ReducerAction>;
 }
 
 const deleteLocalFolder = (folder: StorageReference) => {
@@ -31,18 +30,6 @@ const deleteLocalFolder = (folder: StorageReference) => {
 	}
 };
 
-const deleteFirestoreFiles = (folder: StorageReference) => {
-	console.log("deleting firestore files");
-	const deleteBatch = writeBatch(firestore);
-	getDocs(query(collection(firestore, "files"), where("parentPath", "==", folder.fullPath)))
-		.then((snapshot) => {
-			for (const doc of snapshot.docs) {
-				deleteBatch.delete(doc.ref);
-			}
-		})
-		.then(() => deleteBatch.commit());
-};
-
 const recursiveDelete = async (folders: StorageReference[], files: StorageReference[]) => {
 	for (const file of files) {
 		deleteObject(file);
@@ -51,7 +38,6 @@ const recursiveDelete = async (folders: StorageReference[], files: StorageRefere
 		return;
 	} else {
 		for (const folder of folders) {
-			deleteFirestoreFiles(folder);
 			const subFolders = await listAll(folder);
 			return recursiveDelete(subFolders.prefixes, subFolders.items);
 		}
@@ -109,7 +95,6 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 									}
 								});
 								deleteLocalFolder(folder);
-								deleteFirestoreFiles(folder);
 								recursiveDelete(res.prefixes, res.items);
 							} catch (err) {
 								console.error(err);

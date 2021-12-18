@@ -12,26 +12,21 @@ interface Props {
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const FolderGrid: React.FC<Props> = ({
-	childFolders,
-	currentFolder,
-	dispatch,
-	setIsFolderDeleting
-}) => {
+const FolderGrid: React.FC<Props> = ({ childFolders, currentFolder, setIsFolderDeleting, dispatch }) => {
 	return (
 		<SimpleGrid columns={[2, 4, 6, 6, 7]} spacing="10px">
 			{childFolders?.map((childFolder) => (
 				<Box m="0 auto" key={childFolder.name}>
 					<Folder
+						dispatch={dispatch}
 						setIsFolderDeleting={setIsFolderDeleting}
 						folder={childFolder}
 						childFolders={childFolders}
-						dispatch={dispatch}
 					/>
 				</Box>
 			))}
 			<Box m="0 auto">
-				<AddFolderButton currentFolder={currentFolder} dispatch={dispatch} />
+				<AddFolderButton dispatch={dispatch} currentFolder={currentFolder} />
 			</Box>
 		</SimpleGrid>
 	);

@@ -1,22 +1,39 @@
 import { Box, Button, Td, useClipboard, useToast } from "@chakra-ui/react";
-import { deleteDoc, doc } from "@firebase/firestore";
-import { faCopy, faDownload, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { firestore, storage } from "@util/firebase";
-import { FileCollection } from "@util/types";
-import { deleteObject, ref } from "firebase/storage";
+import { storage } from "@util/firebase";
+import { ACTIONS, ReducerAction } from "@util/useFolder";
+import useUser from "@util/useUser";
+import axios from "axios";
+import { User } from "firebase/auth";
+import { deleteObject, ref, StorageReference } from "firebase/storage";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
+import useSWRImmutable from "swr/immutable";
 import DeleteAlert from "./DeleteAlert";
 
 interface Props {
-	file: FileCollection;
+	dispatch: React.Dispatch<ReducerAction>;
+	file: StorageReference;
 }
 
-const File: React.FC<Props> = ({ file }) => {
-	const { onCopy } = useClipboard(file.url);
-	const toast = useToast();
+const firebase_url = `https://firebasestorage.googleapis.com/v0/b`;
+const metaFetcher = async (url: string, user: User) => {
+	const token = await user.getIdToken();
+	return axios.get(url, { headers: { Authorization: `Firebase ${token}` } });
+};
+
+const File: React.FC<Props> = ({ file, dispatch }) => {
 	const [isOpen, setIsOpen] = useState(false);
+	const { currentUser } = useUser();
+	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
+		metaFetcher(
+			`${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`,
+			currentUser
+		)
+	);
+	const { onCopy } = useClipboard(data?.data?.download);
+	const toast = useToast();
 	const cancelRef = useRef();
 
 	const handleClick = () => {
@@ -32,8 +49,9 @@ const File: React.FC<Props> = ({ file }) => {
 
 	const deleteFile = async () => {
 		try {
-			deleteObject(ref(storage, `${file.parentPath}/${file.name}`)).catch((e) => {});
-			deleteDoc(doc(firestore, "files", file.id)).catch((e) => {});
+			const reference = ref(storage, `${file?.parent.fullPath}/${file.name}`);
+			deleteObject(reference).catch((e) => {});
+			dispatch({ type: ACTIONS.REMOVE_FILE, payload: { childFiles: [reference] } });
 			setIsOpen(false);
 			toast({
 				title: "Deleted",
@@ -60,22 +78,22 @@ const File: React.FC<Props> = ({ file }) => {
 			<Td fontWeight="medium" isTruncated>
 				{file.name}
 			</Td>
-			<Td>{file && prettyBytes(file.size || 0)}</Td>
+			<Td>{data?.data && prettyBytes(parseInt(data?.data.size) || 0)}</Td>
 			<Td>
-				<Button onClick={handleClick} variant="outline" colorScheme="cyan">
+				<Button onClick={handleClick} isLoading={!data?.data} variant="outline" colorScheme="blue">
 					<FontAwesomeIcon icon={faCopy} />
 				</Button>
 			</Td>
 			<Td>
-				<a href={file.url} target="_blank" rel="noreferrer" download={file.url}>
-					<Button variant="outline" colorScheme="cyan">
+				<a href={data?.data?.download} target="_blank" rel="noreferrer" download={data?.data?.download}>
+					<Button isLoading={!data?.data} variant="outline" colorScheme="blue">
 						<FontAwesomeIcon icon={faDownload} />
 					</Button>
 				</a>
 			</Td>
 			<Td>
-				<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="cyan">
-					<FontAwesomeIcon icon={faMinus} />
+				<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="red">
+					<FontAwesomeIcon icon={faTrash} />
 				</Button>
 				<DeleteAlert
 					isOpen={isOpen}

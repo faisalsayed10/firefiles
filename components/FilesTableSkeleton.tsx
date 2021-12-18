@@ -1,5 +1,5 @@
+import { Box, Skeleton, Table, Td, Th, Tr } from "@chakra-ui/react";
 import React from "react";
-import { Box, Skeleton, Table, Tr, Th, Td } from "@chakra-ui/react";
 
 interface Props {
   width?: string;

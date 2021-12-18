@@ -1,9 +1,7 @@
 import { useToast } from "@chakra-ui/toast";
-import { database, firestore, storage } from "@util/firebase";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { storage } from "@util/firebase";
 import { list, ref, StorageReference } from "firebase/storage";
 import { useEffect, useReducer } from "react";
-import { FileCollection } from "./types";
 import useUser from "./useUser";
 
 export const ROOT_FOLDER: StorageReference = {
@@ -19,6 +17,8 @@ export enum ACTIONS {
 	SELECT_FOLDER = "select-folder",
 	UPDATE_FOLDER = "update-folder",
 	ADD_FOLDER = "add-folder",
+	ADD_FILE = "add-file",
+	REMOVE_FILE = "remove-file",
 	SET_CHILD_FOLDERS = "set-child-folders",
 	SET_CHILD_FILES = "set-child-files",
 	SET_LOADING = "set-loading",
@@ -31,8 +31,7 @@ export type ReducerState = {
 	fullPath?: string;
 	folder?: StorageReference;
 	childFolders?: StorageReference[];
-	file?: FileCollection;
-	childFiles?: FileCollection[];
+	childFiles?: StorageReference[];
 	loading?: boolean;
 	foldersLoading?: boolean;
 };
@@ -65,6 +64,18 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 			return {
 				...state,
 				childFolders: [...state.childFolders, ...action.payload.childFolders]
+			};
+		case ACTIONS.ADD_FILE:
+			return {
+				...state,
+				childFiles: [...state.childFiles, ...action.payload.childFiles]
+			};
+		case ACTIONS.REMOVE_FILE:
+			return {
+				...state,
+				childFiles: state.childFiles.filter(
+					(file) => file.fullPath !== action.payload.childFiles[0].fullPath
+				)
 			};
 		case ACTIONS.SET_CHILD_FILES:
 			return {
@@ -132,11 +143,17 @@ export const useFolder = (fullPath: string = "") => {
 	useEffect(() => {
 		if (!currentUser) return;
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
+		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
 
 		(async () => {
 			try {
 				const reference = ref(storage, fullPath);
 				let results = await list(reference, { maxResults: 100 });
+
+				dispatch({
+					type: ACTIONS.SET_CHILD_FILES,
+					payload: { childFiles: results.items }
+				});
 
 				while (results.nextPageToken) {
 					const more = await list(reference, {
@@ -149,7 +166,14 @@ export const useFolder = (fullPath: string = "") => {
 						items: [...results.items, ...more.items],
 						prefixes: [...results.prefixes, ...more.prefixes]
 					};
+
+					dispatch({
+						type: ACTIONS.SET_CHILD_FILES,
+						payload: { childFiles: results.items }
+					});
 				}
+
+				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
 
 				const localFolders = localStorage.getItem("local-folders");
 				const localFoldersArray: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
@@ -181,41 +205,5 @@ export const useFolder = (fullPath: string = "") => {
 			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
 		})();
 	}, [fullPath, currentUser]);
-
-	// get child files
-	useEffect(() => {
-		if (!currentUser) return;
-		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
-		const unsubscribe = onSnapshot(
-			query(
-				collection(firestore, "files"),
-				where("parentPath", "==", fullPath),
-				orderBy("createdAt")
-			),
-			(snapshot) => {
-				dispatch({
-					type: ACTIONS.SET_CHILD_FILES,
-					payload: { childFiles: snapshot.docs.map(database.formatDoc) }
-				});
-				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
-			},
-			(err) => {
-				console.error(err);
-				toast({
-					title: "An Error Occurred",
-					description: err.message,
-					status: "error",
-					duration: 5000,
-					isClosable: true
-				});
-				dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
-			}
-		);
-
-		return () => {
-			unsubscribe();
-		};
-	}, [fullPath, currentUser]);
-
 	return { ...state, dispatch };
 };

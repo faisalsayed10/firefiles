@@ -1,13 +1,15 @@
 import { Box, Table, Th, Tr } from "@chakra-ui/react";
-import { FileCollection } from "@util/types";
+import { ReducerAction } from "@util/useFolder";
+import { StorageReference } from "firebase/storage";
 import React from "react";
 import File from "./File";
 
 interface Props {
-	childFiles: FileCollection[];
+	dispatch: React.Dispatch<ReducerAction>;
+	childFiles: StorageReference[];
 }
 
-const FilesTable: React.FC<Props> = ({ childFiles }) => {
+const FilesTable: React.FC<Props> = ({ childFiles, dispatch }) => {
 	return (
 		<Box borderWidth="1px" borderRadius="lg" overflowX="auto">
 			<Table w="full">
@@ -22,7 +24,7 @@ const FilesTable: React.FC<Props> = ({ childFiles }) => {
 				</thead>
 				<tbody>
 					{childFiles.length > 0 &&
-						childFiles.map((childFile) => <File key={childFile.name} file={childFile} />)}
+						childFiles.map((childFile) => <File dispatch={dispatch} key={childFile.name} file={childFile} />)}
 				</tbody>
 			</Table>
 		</Box>

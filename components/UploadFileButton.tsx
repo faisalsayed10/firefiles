@@ -1,15 +1,15 @@
 import { Button, chakra, Input, useColorModeValue, useToast } from "@chakra-ui/react";
-import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "@firebase/firestore";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { database, firestore, storage } from "@util/firebase";
+import { storage } from "@util/firebase";
 import { CurrentlyUploading } from "@util/types";
-import { ROOT_FOLDER } from "@util/useFolder";
-import { getDownloadURL, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
+import { ACTIONS, ReducerAction, ROOT_FOLDER } from "@util/useFolder";
+import { ref, StorageReference, uploadBytesResumable } from "firebase/storage";
 import React, { useEffect, useRef } from "react";
 import uniqid from "uniqid";
 
 interface Props {
+	dispatch: React.Dispatch<ReducerAction>;
 	currentFolder: StorageReference;
 	filesToUpload: File[];
 	uploadingFiles: CurrentlyUploading[];
@@ -18,6 +18,7 @@ interface Props {
 }
 
 const UploadFileButton: React.FC<Props> = ({
+	dispatch,
 	currentFolder,
 	filesToUpload,
 	setFilesToUpload,
@@ -26,7 +27,6 @@ const UploadFileButton: React.FC<Props> = ({
 }) => {
 	const fileInput = useRef<HTMLInputElement>();
 	const toast = useToast();
-	const input_id = uniqid();
 
 	useEffect(() => {
 		if (!filesToUpload || filesToUpload.length < 1) return;
@@ -95,6 +95,7 @@ const UploadFileButton: React.FC<Props> = ({
 						});
 					});
 
+					dispatch({ type: ACTIONS.ADD_FILE, payload: { childFiles: [fileRef] } });
 					toast({
 						title: "Success",
 						description: "File uploaded successfully!",
@@ -102,28 +103,6 @@ const UploadFileButton: React.FC<Props> = ({
 						duration: 1000,
 						isClosable: true
 					});
-
-					const url = await getDownloadURL(fileRef);
-					const findDoc = await getDocs(
-						query(
-							collection(firestore, "files"),
-							where("name", "==", files[i].name),
-							where("parentPath", "==", decodeURIComponent(currentFolder.fullPath))
-						)
-					);
-					const found = findDoc.docs[0];
-
-					if (found) {
-						await updateDoc(found.ref, { url });
-					} else {
-						await setDoc(doc(firestore, "files", uniqid()), {
-							name: files[i].name,
-							size: files[i].size,
-							url,
-							parentPath: decodeURIComponent(currentFolder.fullPath),
-							createdAt: database.getCurrentTimestamp()
-						});
-					}
 
 					setFilesToUpload([]);
 				}
@@ -138,7 +117,7 @@ const UploadFileButton: React.FC<Props> = ({
 				ref={fileInput}
 				hidden={true}
 				onChange={(e) => handleUpload(e, null)}
-				key={input_id}
+				key={uniqid()}
 				multiple
 			/>
 			<Button

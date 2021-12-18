@@ -6,9 +6,10 @@ const Footer = () => {
 		<Text align="center" mt="4">
 			Made with ♥ by Faisal |{" "}
 			<Link
-				href="https://github.com/faisalsayed10/angel-files"
+				href="https://github.com/faisalsayed10/firefiles/tree/self-host"
 				textDecor="underline"
-				target="_blank">
+				target="_blank"
+			>
 				Open Source
 			</Link>
 		</Text>
