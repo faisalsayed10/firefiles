@@ -75,17 +75,22 @@ const File: React.FC<Props> = ({ file, dispatch }) => {
 
 	return (
 		<Box as="tr">
-			<Td fontWeight="medium" isTruncated>
+			<Td fontWeight="medium" isTruncated maxW={["250px", "300px", "300px"]}>
 				{file.name}
 			</Td>
-			<Td>{data?.data && prettyBytes(parseInt(data?.data.size) || 0)}</Td>
-			<Td>
+			<Td minW="110px">{data?.data && prettyBytes(parseInt(data?.data.size) || 0)}</Td>
+			<Td align="center">
 				<Button onClick={handleClick} isLoading={!data?.data} variant="outline" colorScheme="blue">
 					<FontAwesomeIcon icon={faCopy} />
 				</Button>
 			</Td>
-			<Td>
-				<a href={data?.data?.download} target="_blank" rel="noreferrer" download={data?.data?.download}>
+			<Td align="center">
+				<a
+					href={data?.data?.download}
+					target="_blank"
+					rel="noreferrer"
+					download={data?.data?.download}
+				>
 					<Button isLoading={!data?.data} variant="outline" colorScheme="blue">
 						<FontAwesomeIcon icon={faDownload} />
 					</Button>

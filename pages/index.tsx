@@ -5,7 +5,6 @@ import FilesTable from "@components/FilesTable";
 import FilesTableSkeleton from "@components/FilesTableSkeleton";
 import FolderBreadCrumbs from "@components/FolderBreadCrumbs";
 import FolderGrid from "@components/FolderGrid";
-import Footer from "@components/Footer";
 import Navbar from "@components/Navbar";
 import UploadFileButton from "@components/UploadFileButton";
 import { CurrentlyUploading } from "@util/types";
@@ -102,7 +101,7 @@ export default function Index() {
 								Drop files anywhere on the screen
 							</Text>
 							<Navbar />
-							<Box width="100%" px="8" py="4">
+							<Box width="100%" px={["4", "6", "8"]} py="4">
 								<FolderBreadCrumbs currentFolder={folder} />
 								<hr style={{ marginBottom: "2rem" }} />
 								<Box>
@@ -172,7 +171,6 @@ export default function Index() {
 					uploadingFiles={uploadingFiles}
 					setUploadingFiles={setUploadingFiles}
 				/>
-				<Footer />
 			</LoadingOverlay>
 			{uploadingFiles.length > 0 && (
 				<Center>

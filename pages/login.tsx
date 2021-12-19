@@ -1,6 +1,5 @@
-import { Alert, AlertIcon, Box, Button, Center, FormControl, Input, Text } from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Button, FormControl, Input, Link, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
-import Footer from "@components/Footer";
 import useUser from "@util/useUser";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -25,63 +24,72 @@ export default function Login() {
 			setLoading(true);
 			await login(emailRef.current.value, passwordRef.current.value);
 		} catch (err) {
-			setError(err.message);
+			setError(err.message.replace("Firebase: ", ""));
 		}
 
 		setLoading(false);
 	};
 
 	return (
-		<main>
-			<CenterContainer>
-				<Text fontSize="2xl" align="center" mb="2">
-					Firefiles
+		<CenterContainer>
+			<Box
+				w="sm"
+				px="6"
+				py="8"
+				borderRadius="md"
+				boxShadow="4.1px 4.1px 6.5px -1.7px rgba(0,0,0,0.2)"
+			>
+				<Text as="h2" fontSize="2xl" align="center" mb="8">
+					👋 Login
 				</Text>
-				<Box w="sm" px="6" py="8" borderWidth="2px" borderRadius="md">
-					<Text as="h2" fontSize="2xl" align="center" mb="8">
-						👋 Login
+				{error && (
+					<Alert status="error" fontSize="md">
+						<AlertIcon />
+						{error}
+					</Alert>
+				)}
+				<Box as="form" onSubmit={handleSubmit}>
+					<FormControl id="email" my="3">
+						<Input
+							variant="outline"
+							placeholder="Enter your email"
+							type="email"
+							ref={emailRef}
+							required
+						/>
+					</FormControl>
+					<FormControl id="password" mb="3">
+						<Input
+							variant="outline"
+							type="password"
+							placeholder="Password"
+							ref={passwordRef}
+							required
+						/>
+					</FormControl>
+					<Button
+						mb="3"
+						colorScheme="green"
+						variant="solid"
+						isLoading={loading}
+						w="full"
+						type="submit"
+					>
+						Login
+					</Button>
+					<Text as="p" fontSize="xs">
+						Checkout the{" "}
+						<Link
+							href="https://github.com/faisalsayed10/firefiles/tree/self-host#readme"
+							style={{ textDecoration: "underline" }}
+							target="_blank"
+						>
+							docs
+						</Link>{" "}
+						for account-related help.
 					</Text>
-					{error && (
-						<Alert status="error">
-							<AlertIcon />
-							{error}
-						</Alert>
-					)}
-					<Box as="form" onSubmit={handleSubmit}>
-						<FormControl id="email" my="3">
-							<Input
-								variant="flushed"
-								placeholder="Enter your email"
-								type="email"
-								ref={emailRef}
-								required
-							/>
-						</FormControl>
-						<FormControl id="password" mb="3">
-							<Input
-								variant="flushed"
-								type="password"
-								placeholder="Password"
-								ref={passwordRef}
-								required
-							/>
-						</FormControl>
-						<Center>
-							<Button
-								colorScheme="cyan"
-								variant="ghost"
-								isLoading={loading}
-								w="100"
-								mt="4"
-								type="submit"
-							>
-								Login
-							</Button>
-						</Center>
-					</Box>
 				</Box>
-			</CenterContainer>
-			<Footer />
-		</main>
+			</Box>
+		</CenterContainer>
 	);
 }

@@ -135,7 +135,7 @@ const UploadFileButton: React.FC<Props> = ({
 				className="upload-hover"
 				transition="all 0.2s"
 				boxShadow="4.2px 4px 6.5px -1.7px rgba(0, 0, 0, 0.4)"
-				colorScheme="cyan"
+				colorScheme="green"
 				aria-label="upload file"
 				onClick={() => fileInput.current.click()}
 			>
