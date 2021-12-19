@@ -1,5 +1,5 @@
-import { Box, Button, Flex, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
+import { Box, Button, Flex, Tooltip, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { faDonate, faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@util/useUser";
 import React from "react";
@@ -11,27 +11,40 @@ export default function Navbar() {
 	return (
 		<Flex align="center" justify="end" mx="2rem" mt="2">
 			<Box>
-				<Button
-					w="50px"
-					h="50px"
-					variant="solid"
-					_focus={{ outline: "none" }}
-					bgColor={useColorModeValue("white", "#1a202c")}
+				<TooltipButton
+					icon={<FontAwesomeIcon icon={colorMode === "light" ? faMoon : faSun} />}
+					label="Toggle dark mode"
 					onClick={toggleColorMode}
-				>
-					<FontAwesomeIcon icon={colorMode === "light" ? faMoon : faSun} />
-				</Button>
-				<Button
-					w="50px"
-					h="50px"
-					variant="solid"
-					_focus={{ outline: "none" }}
-					bgColor={useColorModeValue("white", "#1a202c")}
+				/>
+				<TooltipButton
+					icon={<FontAwesomeIcon icon={faDonate} />}
+					label="Sponsor this project"
+					onClick={() => {
+						const url = "https://github.com/faisalsayed10/firefiles#sponsor-this-project";
+						window.open(url, "_blank");
+					}}
+				/>
+				<TooltipButton
+					icon={<FontAwesomeIcon icon={faSignOutAlt} />}
+					label="Logout"
 					onClick={logout}
-				>
-					<FontAwesomeIcon icon={faSignOutAlt} />
-				</Button>
+				/>
 			</Box>
 		</Flex>
 	);
 }
+
+const TooltipButton = ({ label, onClick, icon }) => (
+	<Tooltip label={label} hasArrow>
+		<Button
+			w="50px"
+			h="50px"
+			variant="solid"
+			_focus={{ outline: "none" }}
+			bgColor={useColorModeValue("white", "#1a202c")}
+			onClick={onClick}
+		>
+			{icon}
+		</Button>
+	</Tooltip>
+);
