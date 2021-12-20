@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "license": "GPL-3.0",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^1.7.2",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/react-fontawesome": "^0.1.16",
+    "@react-hook/media-query": "^1.1.1",
+    "argon2": "^0.28.3",
+    "axios": "^0.24.0",
+    "chakra-ui-contextmenu": "^1.0.3",
+    "firebase": "^9.5.0",
+    "framer-motion": "^4",
+    "iron-session": "^6.0.2",
+    "next": "latest",
+    "pretty-bytes": "^5.6.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-dropzone": "^11.4.2",
+    "react-loading-overlay": "^1.0.1",
+    "swr": "^1.1.2-beta.0",
+    "uniqid": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.21",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.1",
+    "@types/uniqid": "^5.3.1",
+    "typescript": "4.3.2"
+  }
+}
