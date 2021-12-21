@@ -1,9 +1,10 @@
 import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  User,
-  UserCredential
+	createUserWithEmailAndPassword,
+	onAuthStateChanged,
+	signInWithEmailAndPassword,
+	signOut,
+	User,
+	UserCredential
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./firebase";
@@ -11,12 +12,14 @@ import { auth } from "./firebase";
 type ContextValue = {
 	currentUser?: User;
 	login: (email: string, password: string) => Promise<UserCredential>;
+	signup: (email: string, password: string) => Promise<UserCredential>;
 	logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<ContextValue>({
 	currentUser: null,
 	login: () => null,
+	signup: () => null,
 	logout: () => null
 });
 
@@ -32,6 +35,10 @@ export function AuthProvider({ children }) {
 		return signInWithEmailAndPassword(auth, email, password);
 	};
 
+	const signup = async (email: string, password: string) => {
+		return createUserWithEmailAndPassword(auth, email, password);
+	};
+
 	const logout = async () => {
 		return await signOut(auth);
 	};
@@ -45,7 +52,7 @@ export function AuthProvider({ children }) {
 		return unsubscribe;
 	}, []);
 
-	const value = { currentUser, login, logout };
+	const value = { currentUser, login, logout, signup };
 
 	return <AuthContext.Provider value={value}>{!loading ? children : <div />}</AuthContext.Provider>;
 }

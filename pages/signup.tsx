@@ -4,10 +4,11 @@ import useUser from "@util/useUser";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
-export default function Login() {
-	const { login, currentUser } = useUser();
+export default function Signup() {
 	const emailRef = useRef<HTMLInputElement>();
 	const passwordRef = useRef<HTMLInputElement>();
+	const passwordConfirmRef = useRef<HTMLInputElement>();
+	const { signup, currentUser } = useUser();
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
@@ -20,14 +21,18 @@ export default function Login() {
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
+		if (!passwordRef.current || !passwordConfirmRef.current || !emailRef) return;
+		if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+			return setError("Passwords do not match");
+		}
+
 		try {
 			setError("");
 			setLoading(true);
-			await login(emailRef.current.value, passwordRef.current.value);
+			await signup(emailRef.current.value, passwordRef.current.value);
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
-
 		setLoading(false);
 	};
 
@@ -41,7 +46,7 @@ export default function Login() {
 				boxShadow="4.1px 4.1px 6.5px -1.7px rgba(0,0,0,0.2)"
 			>
 				<Text as="h2" fontSize="2xl" align="center" mb="8">
-					👋 Login
+					👋 Sign Up
 				</Text>
 				{error && (
 					<Alert status="error" fontSize="md">
@@ -50,7 +55,7 @@ export default function Login() {
 					</Alert>
 				)}
 				<Box as="form" onSubmit={handleSubmit}>
-					<FormControl id="email" my="3">
+					<FormControl my="3" id="email">
 						<Input
 							variant="outline"
 							placeholder="Enter your email"
@@ -59,12 +64,21 @@ export default function Login() {
 							required
 						/>
 					</FormControl>
-					<FormControl id="password" mb="3">
+					<FormControl mb="3" id="password">
 						<Input
 							variant="outline"
-							type="password"
 							placeholder="Password"
+							type="password"
 							ref={passwordRef}
+							required
+						/>
+					</FormControl>
+					<FormControl mb="3" id="password-confirm">
+						<Input
+							variant="outline"
+							placeholder="Confirm your password"
+							type="password"
+							ref={passwordConfirmRef}
 							required
 						/>
 					</FormControl>
@@ -76,12 +90,14 @@ export default function Login() {
 						w="full"
 						type="submit"
 					>
-						Login
+						Sign Up
 					</Button>
 					<Text as="p" fontSize="xs">
-						Don't have an account?{" "}
-						<Link href="/signup">
-							<chakra.span textDecor="underline" cursor="pointer">Sign Up</chakra.span>
+						Already have an account?{" "}
+						<Link href="/login">
+							<chakra.span textDecor="underline" cursor="pointer">
+								Log In
+							</chakra.span>
 						</Link>
 					</Text>
 				</Box>
