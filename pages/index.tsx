@@ -61,7 +61,7 @@ export default function Index() {
 	return (
 		<>
 			<Head>
-				<title>Your Files</title>
+				<title>Firefiles — Your Files</title>
 				<meta charSet="utf-8" />
 			</Head>
 			<LoadingOverlay
