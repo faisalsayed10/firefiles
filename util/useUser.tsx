@@ -6,12 +6,14 @@ import {
 	User,
 	UserCredential
 } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "./firebase";
+import { auth, firestore } from "./firebase";
+import { UserData } from "./types";
 
 type ContextValue = {
 	currentUser?: User;
-	login: (email: string, password: string) => Promise<UserCredential>;
+	login: (email: string, password: string) => Promise<any>;
 	signup: (email: string, password: string) => Promise<UserCredential>;
 	logout: () => Promise<void>;
 };
@@ -32,7 +34,19 @@ export function AuthProvider({ children }) {
 	const [loading, setLoading] = useState(true);
 
 	const login = async (email: string, password: string) => {
-		return signInWithEmailAndPassword(auth, email, password);
+		try {
+			const { user } = await signInWithEmailAndPassword(auth, email, password);
+			if (user) {
+				const userDoc = await getDoc(doc(firestore, "users", user.uid));
+				if (userDoc.exists()) {
+					return userDoc.data() as UserData;
+				} else {
+					return null;
+				}
+			}
+		} catch (err) {
+			return err;
+		}
 	};
 
 	const signup = async (email: string, password: string) => {

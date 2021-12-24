@@ -1,21 +1,35 @@
-import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
+import {
+	Alert,
+	AlertIcon,
+	Box,
+	Button,
+	chakra,
+	FormControl,
+	Input,
+	Text,
+	useToast
+} from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
+import PasswordInput from "@components/PasswordInput";
 import useUser from "@util/useUser";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
 
 export default function Login() {
 	const { login, currentUser } = useUser();
-	const emailRef = useRef<HTMLInputElement>();
-	const passwordRef = useRef<HTMLInputElement>();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
+	const router = useRouter();
+	const toast = useToast();
 
-	useEffect(() => {
-		if (currentUser) {
-			window.location.href = "/";
-		}
-	}, [currentUser]);
+	// useEffect(() => {
+	// 	if (currentUser) {
+	// 		router.push('/');
+	// 	}
+	// }, [currentUser]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -23,7 +37,29 @@ export default function Login() {
 		try {
 			setError("");
 			setLoading(true);
-			await login(emailRef.current.value, passwordRef.current.value);
+			const res = await login(email, password);
+
+			if (!res) {
+				toast({
+					title: "Success",
+					description: "You have successfully logged in.",
+					status: "success",
+					duration: 2000,
+					isClosable: true
+				});
+				router.push("/creds");
+			} else if (res?.message) {
+				setError(res.message.replace("Firebase: ", ""));
+			} else {
+				toast({
+					title: "Success",
+					description: "You have successfully logged in.",
+					status: "success",
+					duration: 2000,
+					isClosable: true
+				});
+				router.push("/");
+			}
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
@@ -55,17 +91,16 @@ export default function Login() {
 							variant="outline"
 							placeholder="Enter your email"
 							type="email"
-							ref={emailRef}
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
 							required
 						/>
 					</FormControl>
 					<FormControl id="password" mb="3">
-						<Input
-							variant="outline"
-							type="password"
-							placeholder="Password"
-							ref={passwordRef}
-							required
+						<PasswordInput
+							placeholder="Enter your password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
 						/>
 					</FormControl>
 					<Button
@@ -81,7 +116,9 @@ export default function Login() {
 					<Text as="p" fontSize="xs">
 						Don't have an account?{" "}
 						<Link href="/signup">
-							<chakra.span textDecor="underline" cursor="pointer">Sign Up</chakra.span>
+							<chakra.span textDecor="underline" cursor="pointer">
+								Sign Up
+							</chakra.span>
 						</Link>
 					</Text>
 				</Box>

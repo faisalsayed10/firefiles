@@ -1,16 +1,27 @@
-import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
+import {
+	Alert,
+	AlertIcon,
+	Box,
+	Button,
+	chakra,
+	FormControl,
+	Input,
+	Text,
+	useToast
+} from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import useUser from "@util/useUser";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Signup() {
-	const emailRef = useRef<HTMLInputElement>();
-	const passwordRef = useRef<HTMLInputElement>();
-	const passwordConfirmRef = useRef<HTMLInputElement>();
-	const { signup, currentUser } = useUser();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
+	const { signup, currentUser } = useUser();
+	const toast = useToast();
 
 	useEffect(() => {
 		if (currentUser) {
@@ -21,15 +32,22 @@ export default function Signup() {
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
-		if (!passwordRef.current || !passwordConfirmRef.current || !emailRef) return;
-		if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+		if (!password || !confirmPassword || !email) return;
+		if (password !== confirmPassword) {
 			return setError("Passwords do not match");
 		}
 
 		try {
 			setError("");
 			setLoading(true);
-			await signup(emailRef.current.value, passwordRef.current.value);
+			await signup(email, password);
+			toast({
+				title: "Success",
+				description: "You have successfully signed up.",
+				status: "success",
+				duration: 2000,
+				isClosable: true
+			});
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
@@ -60,7 +78,8 @@ export default function Signup() {
 							variant="outline"
 							placeholder="Enter your email"
 							type="email"
-							ref={emailRef}
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
 							required
 						/>
 					</FormControl>
@@ -69,7 +88,8 @@ export default function Signup() {
 							variant="outline"
 							placeholder="Password"
 							type="password"
-							ref={passwordRef}
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
 							required
 						/>
 					</FormControl>
@@ -78,7 +98,8 @@ export default function Signup() {
 							variant="outline"
 							placeholder="Confirm your password"
 							type="password"
-							ref={passwordConfirmRef}
+							value={confirmPassword}
+							onChange={(e) => setConfirmPassword(e.target.value)}
 							required
 						/>
 					</FormControl>
