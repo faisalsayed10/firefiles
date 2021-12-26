@@ -13,6 +13,8 @@ import { UserData } from "./types";
 
 type ContextValue = {
 	currentUser?: User;
+	config?: UserData;
+	setConfig: React.Dispatch<React.SetStateAction<UserData>>;
 	login: (email: string, password: string) => Promise<any>;
 	signup: (email: string, password: string) => Promise<UserCredential>;
 	logout: () => Promise<void>;
@@ -20,6 +22,8 @@ type ContextValue = {
 
 const AuthContext = createContext<ContextValue>({
 	currentUser: null,
+	config: null,
+	setConfig: () => null,
 	login: () => null,
 	signup: () => null,
 	logout: () => null
@@ -31,6 +35,7 @@ export default function useUser() {
 
 export function AuthProvider({ children }) {
 	const [currentUser, setCurrentUser] = useState<User>();
+	const [config, setConfig] = useState<UserData>();
 	const [loading, setLoading] = useState(true);
 
 	const login = async (email: string, password: string) => {
@@ -39,7 +44,9 @@ export function AuthProvider({ children }) {
 			if (user) {
 				const userDoc = await getDoc(doc(firestore, "users", user.uid));
 				if (userDoc.exists()) {
-					return userDoc.data() as UserData;
+					const data = userDoc.data() as UserData;
+					setConfig(data);
+					return data;
 				} else {
 					return null;
 				}
@@ -54,6 +61,7 @@ export function AuthProvider({ children }) {
 	};
 
 	const logout = async () => {
+		setConfig(null);
 		return await signOut(auth);
 	};
 
@@ -66,7 +74,6 @@ export function AuthProvider({ children }) {
 		return unsubscribe;
 	}, []);
 
-	const value = { currentUser, login, logout, signup };
-
+	const value = { currentUser, login, logout, signup, config, setConfig };
 	return <AuthContext.Provider value={value}>{!loading ? children : <div />}</AuthContext.Provider>;
 }

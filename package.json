@@ -18,6 +18,7 @@
     "argon2": "^0.28.3",
     "axios": "^0.24.0",
     "chakra-ui-contextmenu": "^1.0.3",
+    "convert-to-object": "^0.0.4",
     "firebase": "^9.5.0",
     "framer-motion": "^4",
     "iron-session": "^6.0.2",

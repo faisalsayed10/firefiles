@@ -1,29 +1,37 @@
 import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button, FormControl,
-  Input,
-  Text,
-  useToast
+	Alert,
+	AlertIcon,
+	Box,
+	Button,
+	Flex,
+	FormControl,
+	Text,
+	Textarea,
+	useToast
 } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
-import PasswordInput from "@components/PasswordInput";
+import { faLongArrowAltLeft, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { firestore } from "@util/firebase";
 import useUser from "@util/useUser";
+import toObject from "convert-to-object";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Login() {
-	const { currentUser } = useUser();
-	const [apikey, setApikey] = useState("");
-	const [projectId, setProjectId] = useState("");
-	const [appId, setAppId] = useState("");
+	const { currentUser, config, setConfig, logout } = useUser();
+	const [input, setInput] = useState(config ? JSON.stringify(config) : "");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-  const toast = useToast();
+	const toast = useToast();
+
+	useEffect(() => {
+		if (!currentUser) {
+			router.push("/login");
+		}
+	}, [currentUser]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -31,15 +39,22 @@ export default function Login() {
 		try {
 			setError("");
 			setLoading(true);
+			const data = toObject(input);
+			if (
+				!data ||
+				!data.apiKey ||
+				!data.projectId ||
+				!data.appId ||
+				!data.authDomain ||
+				!data.storageBucket
+			) {
+				throw new Error("One or more fields are missing from the config.");
+			}
 
-			await setDoc(doc(firestore, "users", currentUser.uid), {
-				apikey: apikey,
-				authDomain: `${projectId}.firebaseapp.com`,
-				projectId: projectId,
-				storageBucket: `${projectId}.appspot.com`,
-				appId: appId
-			});
-      toast({
+			await setDoc(doc(firestore, "users", currentUser.uid), data);
+			setConfig(data);
+
+			toast({
 				title: "Success",
 				description: "Firebase credentials updated successfully.",
 				status: "success",
@@ -56,50 +71,57 @@ export default function Login() {
 	return (
 		<CenterContainer>
 			<Box
-				w="sm"
+				w="md"
 				px="6"
-				py="8"
+				pb="8"
 				borderRadius="md"
 				boxShadow="4.1px 4.1px 6.5px -1.7px rgba(0,0,0,0.2)"
 			>
-				<Text as="h2" fontSize="2xl" align="center" mb="8">
-					Enter your Firebase Credentials
+				<Flex align="center" justify="space-between">
+					<Button
+						variant="link"
+						onClick={() => router.push("/")}
+						leftIcon={<FontAwesomeIcon icon={faLongArrowAltLeft} />}
+						_focus={{ outline: "none" }}
+					>
+						Home
+					</Button>
+					<Button
+						variant="link"
+						onClick={logout}
+						leftIcon={<FontAwesomeIcon icon={faSignOutAlt} />}
+						_focus={{ outline: "none" }}
+					>
+						Logout
+					</Button>
+				</Flex>
+				<Text as="h2" fontSize="2xl" align="center" mt="8" mb="4">
+					Paste your Firebase Credentials
 				</Text>
 				{error && (
-					<Alert status="error" fontSize="md">
+					<Alert status="error" fontSize="md" mb="3">
 						<AlertIcon />
 						{error}
 					</Alert>
 				)}
 				<Box as="form" onSubmit={handleSubmit}>
-					<FormControl id="apikey" my="3">
-						<PasswordInput
-							value={apikey}
-							onChange={(e) => setApikey(e.target.value)}
-							placeholder="API Key"
-						/>
-					</FormControl>
-
-					<FormControl id="projectId" mb="3">
-						<Input
+					<FormControl mb="3">
+						<Textarea
 							autoComplete="off"
 							variant="outline"
 							type="text"
-							placeholder="Project ID"
-							value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
+							fontSize="sm"
+							value={input}
+							minH="175px"
+							onChange={(e) => setInput(e.target.value)}
 							required
-						/>
-					</FormControl>
-					<FormControl id="appId" mb="3">
-						<Input
-							autoComplete="off"
-							variant="outline"
-							type="text"
-							placeholder="App ID"
-							value={appId}
-              onChange={(e) => setAppId(e.target.value)}
-							required
+							placeholder={`{
+  apiKey: "AIzafeaubu13ub13j",
+  authDomain: "myapp-f3190.firebaseapp.com",
+  projectId: "myapp-f3190",
+  storageBucket: "myapp-f3190.appspot.com",
+  appId: "1:8931361818:web:132af17fejaj3695cf"
+}`}
 						/>
 					</FormControl>
 					<Button
@@ -112,6 +134,11 @@ export default function Login() {
 					>
 						Submit
 					</Button>
+					<Text fontSize="xs">
+						The fields <strong>apiKey</strong>, <strong>authDomain</strong>,{" "}
+						<strong>projectId</strong>, <strong>storageBucket</strong> and <strong>appId</strong>{" "}
+						must be present in the JSON.
+					</Text>
 				</Box>
 			</Box>
 		</CenterContainer>

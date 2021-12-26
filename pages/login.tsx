@@ -14,10 +14,10 @@ import PasswordInput from "@components/PasswordInput";
 import useUser from "@util/useUser";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Login() {
-	const { login, currentUser } = useUser();
+	const { login, currentUser, config } = useUser();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
@@ -25,11 +25,14 @@ export default function Login() {
 	const router = useRouter();
 	const toast = useToast();
 
-	// useEffect(() => {
-	// 	if (currentUser) {
-	// 		router.push('/');
-	// 	}
-	// }, [currentUser]);
+	useEffect(() => {
+		if (loading) return;
+		if (currentUser && config) {
+			router.push("/");
+		} else if (currentUser) {
+			router.push("/creds");
+		}
+	}, [currentUser, config, loading]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -47,7 +50,6 @@ export default function Login() {
 					duration: 2000,
 					isClosable: true
 				});
-				router.push("/creds");
 			} else if (res?.message) {
 				setError(res.message.replace("Firebase: ", ""));
 			} else {
@@ -58,7 +60,6 @@ export default function Login() {
 					duration: 2000,
 					isClosable: true
 				});
-				router.push("/");
 			}
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));

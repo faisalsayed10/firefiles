@@ -2022,6 +2022,11 @@ convert-source-map@^1.5.0:
   dependencies:
     safe-buffer "~5.1.1"
 
+convert-to-object@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/convert-to-object/-/convert-to-object-0.0.4.tgz#e42f59d87ebba7184f13bef537369c2bea3661bf"
+  integrity sha512-v9b0abfO/zft9YXqHthPjsqiP5GZFxG/GONStFd5EIzzW7o9BErnMuuvTSLOO1NYpDyJy7Dza20zOXdCsGIQUw==
+
 cookie@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.4.1.tgz#afd713fe26ebd21ba95ceb61f9a8116e50a537d1"

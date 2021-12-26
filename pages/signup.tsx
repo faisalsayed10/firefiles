@@ -12,6 +12,7 @@ import {
 import CenterContainer from "@components/CenterContainer";
 import useUser from "@util/useUser";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 export default function Signup() {
@@ -20,14 +21,17 @@ export default function Signup() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { signup, currentUser } = useUser();
+	const { signup, currentUser, config } = useUser();
 	const toast = useToast();
+	const router = useRouter();
 
 	useEffect(() => {
-		if (currentUser) {
-			window.location.href = "/";
+		if (currentUser && config) {
+			router.push("/");
+		} else if (currentUser) {
+			router.push("/creds");
 		}
-	}, [currentUser]);
+	}, [currentUser, config]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -48,6 +52,7 @@ export default function Signup() {
 				duration: 2000,
 				isClosable: true
 			});
+			router.push("/creds");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}

@@ -1,7 +1,7 @@
 export type CurrentlyUploading = { id: string; name: string; progress: number; error: boolean };
 
 export type UserData = {
-	apikey: string;
+	apiKey: string;
 	authDomain: string;
 	projectId: string;
 	storageBucket: string;

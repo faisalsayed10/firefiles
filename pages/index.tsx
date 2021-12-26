@@ -41,7 +41,7 @@ export default function Index() {
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { currentUser } = useUser();
+	const { currentUser, config } = useUser();
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } = useFolder(
@@ -55,6 +55,8 @@ export default function Index() {
 	useEffect(() => {
 		if (!currentUser) {
 			router.push("/login");
+		} else if (!config) {
+			router.push("/creds");
 		}
 	}, [currentUser]);
 
