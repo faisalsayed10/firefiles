@@ -1,25 +1,24 @@
 import {
-	Alert,
-	AlertIcon,
-	Box,
-	Button,
-	Flex,
-	FormControl,
-	Text,
-	Textarea,
-	useToast
+  Alert,
+  AlertIcon,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  Text,
+  Textarea,
+  useToast
 } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import { faLongArrowAltLeft, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { firestore } from "@util/firebase";
 import useUser from "@util/useUser";
+import axios from "axios";
 import toObject from "convert-to-object";
-import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-export default function Login() {
+export default function Config() {
 	const { currentUser, config, setConfig, logout } = useUser();
 	const [input, setInput] = useState(config ? JSON.stringify(config, null, 4) : "");
 	const [error, setError] = useState("");
@@ -51,7 +50,7 @@ export default function Login() {
 				throw new Error("One or more fields are missing from the config.");
 			}
 
-			await setDoc(doc(firestore, "users", currentUser.uid), data);
+			await axios.post("/api/config", data);
 			setConfig(data);
 			window.localStorage.setItem(`fb_config_${currentUser.uid}`, JSON.stringify(data));
 

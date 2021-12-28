@@ -30,7 +30,7 @@ export default function Login() {
 		if (currentUser && config) {
 			router.push("/");
 		} else if (currentUser) {
-			router.push("/creds");
+			router.push("/config");
 		}
 	}, [currentUser, config, loading]);
 

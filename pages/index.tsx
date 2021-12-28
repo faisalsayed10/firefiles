@@ -56,7 +56,7 @@ export default function Index() {
 		if (!currentUser) {
 			router.push("/login");
 		} else if (!config) {
-			router.push("/creds");
+			router.push("/config");
 		}
 	}, [currentUser]);
 

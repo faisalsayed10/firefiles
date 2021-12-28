@@ -1,6 +1,6 @@
 {
   "private": true,
-  "license": "GPL-3.0",
+  "license": "MIT",
   "scripts": {
     "dev": "next",
     "build": "next build",
@@ -15,13 +15,12 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "@react-hook/media-query": "^1.1.1",
-    "argon2": "^0.28.3",
     "axios": "^0.24.0",
     "chakra-ui-contextmenu": "^1.0.3",
     "convert-to-object": "^0.0.4",
+    "crypto-js": "^4.1.1",
     "firebase": "^9.5.0",
     "framer-motion": "^4",
-    "iron-session": "^6.0.2",
     "next": "latest",
     "pretty-bytes": "^5.6.0",
     "react": "^17.0.2",
@@ -32,6 +31,7 @@
     "uniqid": "^5.4.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.0.2",
     "@types/node": "^12.12.21",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
