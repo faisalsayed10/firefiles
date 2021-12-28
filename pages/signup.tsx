@@ -49,10 +49,9 @@ export default function Signup() {
 				title: "Success",
 				description: "You have successfully signed up.",
 				status: "success",
-				duration: 2000,
+				duration: 3000,
 				isClosable: true
 			});
-			router.push("/creds");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}

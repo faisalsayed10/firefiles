@@ -1,5 +1,5 @@
 import { Flex, MenuItem, MenuList, Text, useColorModeValue } from "@chakra-ui/react";
-import { deleteObject, listAll, ref, StorageReference } from "@firebase/storage";
+import { deleteObject, getStorage, listAll, ref, StorageReference } from "@firebase/storage";
 import {
 	faExternalLinkAlt,
 	faFolderOpen,
@@ -7,11 +7,11 @@ import {
 	faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { storage } from "@util/firebase";
 import { ACTIONS, ReducerAction } from "@util/useFolder";
+import useUser from "@util/useUser";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useRef, useState } from "react";
 import DeleteAlert from "./DeleteAlert";
 
 interface Props {
@@ -45,10 +45,11 @@ const recursiveDelete = async (folders: StorageReference[], files: StorageRefere
 };
 
 const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, dispatch }) => {
-	const router = useRouter();
-	const [isOpen, setIsOpen] = React.useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 	const onClose = () => setIsOpen(false);
-	const cancelRef = React.useRef();
+	const router = useRouter();
+	const cancelRef = useRef();
+	const { app } = useUser();
 
 	return (
 		<ContextMenu<HTMLDivElement>
@@ -83,6 +84,9 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 						isOpen={isOpen}
 						onClick={async () => {
 							try {
+								if (!app) return;
+								const storage = getStorage(app);
+
 								setIsFolderDeleting(true);
 								onClose();
 								const currentRef = ref(storage, decodeURIComponent(folder.fullPath) + "/");

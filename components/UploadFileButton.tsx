@@ -1,10 +1,10 @@
 import { Button, chakra, Input, useColorModeValue, useToast } from "@chakra-ui/react";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { storage } from "@util/firebase";
 import { CurrentlyUploading } from "@util/types";
 import { ACTIONS, ReducerAction, ROOT_FOLDER } from "@util/useFolder";
-import { ref, StorageReference, uploadBytesResumable } from "firebase/storage";
+import useUser from "@util/useUser";
+import { getStorage, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
 import React, { useEffect, useRef } from "react";
 import uniqid from "uniqid";
 
@@ -25,6 +25,7 @@ const UploadFileButton: React.FC<Props> = ({
 	uploadingFiles,
 	setUploadingFiles
 }) => {
+	const { app } = useUser();
 	const fileInput = useRef<HTMLInputElement>();
 	const toast = useToast();
 
@@ -34,6 +35,9 @@ const UploadFileButton: React.FC<Props> = ({
 	}, [filesToUpload]);
 
 	const handleUpload = (e: React.ChangeEvent<HTMLInputElement>, filesToUpload: File[]) => {
+		if (!app) return;
+		const storage = getStorage(app);
+		
 		const files = filesToUpload || e?.target.files;
 		if (currentFolder == null || files == null || files?.length < 1) return;
 
@@ -100,7 +104,7 @@ const UploadFileButton: React.FC<Props> = ({
 						title: "Success",
 						description: "File uploaded successfully!",
 						status: "success",
-						duration: 1000,
+						duration: 3000,
 						isClosable: true
 					});
 

@@ -21,7 +21,7 @@ import React, { useEffect, useState } from "react";
 
 export default function Login() {
 	const { currentUser, config, setConfig, logout } = useUser();
-	const [input, setInput] = useState(config ? JSON.stringify(config) : "");
+	const [input, setInput] = useState(config ? JSON.stringify(config, null, 4) : "");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
@@ -53,12 +53,13 @@ export default function Login() {
 
 			await setDoc(doc(firestore, "users", currentUser.uid), data);
 			setConfig(data);
+			window.localStorage.setItem(`fb_config_${currentUser.uid}`, JSON.stringify(data));
 
 			toast({
 				title: "Success",
 				description: "Firebase credentials updated successfully.",
 				status: "success",
-				duration: 2000,
+				duration: 3000,
 				isClosable: true
 			});
 		} catch (err) {
@@ -112,7 +113,7 @@ export default function Login() {
 							type="text"
 							fontSize="sm"
 							value={input}
-							minH="175px"
+							minH="200px"
 							onChange={(e) => setInput(e.target.value)}
 							required
 							placeholder={`{

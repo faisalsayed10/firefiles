@@ -40,32 +40,19 @@ export default function Login() {
 		try {
 			setError("");
 			setLoading(true);
-			const res = await login(email, password);
-
-			if (!res) {
-				toast({
-					title: "Success",
-					description: "You have successfully logged in.",
-					status: "success",
-					duration: 2000,
-					isClosable: true
-				});
-			} else if (res?.message) {
-				setError(res.message.replace("Firebase: ", ""));
-			} else {
-				toast({
-					title: "Success",
-					description: "You have successfully logged in.",
-					status: "success",
-					duration: 2000,
-					isClosable: true
-				});
-			}
+			await login(email, password);
+			toast({
+				title: "Success",
+				description: "You have successfully logged in.",
+				status: "success",
+				duration: 3000,
+				isClosable: true
+			});
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
+		} finally {
+			setLoading(false);
 		}
-
-		setLoading(false);
 	};
 
 	return (

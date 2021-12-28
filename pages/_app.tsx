@@ -5,12 +5,12 @@ import { AuthProvider } from "@util/useUser";
 
 function MyApp({ Component, pageProps }) {
 	return (
-		<AuthProvider>
-			<ChakraProvider resetCSS theme={theme}>
-				<ColorModeScript initialColorMode={theme.config.initialColorMode} />
+		<ChakraProvider resetCSS theme={theme}>
+			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
+			<AuthProvider>
 				<Component {...pageProps} />
-			</ChakraProvider>
-		</AuthProvider>
+			</AuthProvider>
+		</ChakraProvider>
 	);
 }
 

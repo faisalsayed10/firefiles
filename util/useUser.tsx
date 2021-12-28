@@ -1,3 +1,5 @@
+import { Flex, Spinner } from "@chakra-ui/react";
+import { deleteApp, FirebaseApp, getApp, initializeApp } from "firebase/app";
 import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
@@ -14,20 +16,14 @@ import { UserData } from "./types";
 type ContextValue = {
 	currentUser?: User;
 	config?: UserData;
-	setConfig: React.Dispatch<React.SetStateAction<UserData>>;
-	login: (email: string, password: string) => Promise<any>;
-	signup: (email: string, password: string) => Promise<UserCredential>;
-	logout: () => Promise<void>;
+	app?: FirebaseApp;
+	setConfig?: React.Dispatch<React.SetStateAction<UserData>>;
+	login?: (email: string, password: string) => Promise<any>;
+	signup?: (email: string, password: string) => Promise<UserCredential>;
+	logout?: () => Promise<void>;
 };
 
-const AuthContext = createContext<ContextValue>({
-	currentUser: null,
-	config: null,
-	setConfig: () => null,
-	login: () => null,
-	signup: () => null,
-	logout: () => null
-});
+const AuthContext = createContext<ContextValue>({});
 
 export default function useUser() {
 	return useContext(AuthContext);
@@ -36,24 +32,11 @@ export default function useUser() {
 export function AuthProvider({ children }) {
 	const [currentUser, setCurrentUser] = useState<User>();
 	const [config, setConfig] = useState<UserData>();
+	const [app, setApp] = useState<FirebaseApp>();
 	const [loading, setLoading] = useState(true);
 
 	const login = async (email: string, password: string) => {
-		try {
-			const { user } = await signInWithEmailAndPassword(auth, email, password);
-			if (user) {
-				const userDoc = await getDoc(doc(firestore, "users", user.uid));
-				if (userDoc.exists()) {
-					const data = userDoc.data() as UserData;
-					setConfig(data);
-					return data;
-				} else {
-					return null;
-				}
-			}
-		} catch (err) {
-			return err;
-		}
+		return signInWithEmailAndPassword(auth, email, password);
 	};
 
 	const signup = async (email: string, password: string) => {
@@ -62,11 +45,25 @@ export function AuthProvider({ children }) {
 
 	const logout = async () => {
 		setConfig(null);
+		window.localStorage.removeItem(`fb_config_${currentUser.uid}`);
 		return await signOut(auth);
 	};
 
 	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (user) => {
+		const unsubscribe = onAuthStateChanged(auth, async (user) => {
+			if (user) {
+				if (window.localStorage.getItem(`fb_config_${user.uid}`)) {
+					setConfig(JSON.parse(window.localStorage.getItem(`fb_config_${user.uid}`)));
+				} else {
+					await getDoc(doc(firestore, "users", user.uid)).then((doc) => {
+						if (doc.exists()) {
+							setConfig(doc.data() as UserData);
+							window.localStorage.setItem(`fb_config_${user.uid}`, JSON.stringify(doc.data()));
+						}
+					});
+				}
+			}
+
 			setCurrentUser(user);
 			setLoading(false);
 		});
@@ -74,6 +71,32 @@ export function AuthProvider({ children }) {
 		return unsubscribe;
 	}, []);
 
-	const value = { currentUser, login, logout, signup, config, setConfig };
-	return <AuthContext.Provider value={value}>{!loading ? children : <div />}</AuthContext.Provider>;
+	useEffect(() => {
+		if (!currentUser || !config) return;
+		try {
+			const gotApp = getApp(currentUser.uid);
+			setApp(gotApp);
+		} catch (err) {
+			const app = initializeApp(config, currentUser.uid);
+			setApp(app);
+		}
+
+		return () => {
+			if (app) {
+				deleteApp(app);
+			}
+		};
+	}, [config, currentUser]);
+
+	return (
+		<AuthContext.Provider value={{ currentUser, login, logout, signup, config, setConfig, app }}>
+			{!loading ? (
+				children
+			) : (
+				<Flex minH="100vh" align="center" justify="center">
+					<Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+				</Flex>
+			)}
+		</AuthContext.Provider>
+	);
 }

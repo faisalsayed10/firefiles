@@ -1,6 +1,5 @@
 import { useToast } from "@chakra-ui/toast";
-import { storage } from "@util/firebase";
-import { list, ref, StorageReference } from "firebase/storage";
+import { getStorage, list, ref, StorageReference } from "firebase/storage";
 import { useEffect, useReducer } from "react";
 import useUser from "./useUser";
 
@@ -109,7 +108,7 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 
 export const useFolder = (fullPath: string = "") => {
 	const toast = useToast();
-	const { currentUser } = useUser();
+	const { currentUser, app } = useUser();
 	const [state, dispatch] = useReducer(reducer, {
 		fullPath,
 		folder: null,
@@ -121,7 +120,9 @@ export const useFolder = (fullPath: string = "") => {
 
 	// set current folder
 	useEffect(() => {
-		if (!currentUser) return;
+		if (!currentUser || !app) return;
+		const storage = getStorage(app);
+
 		dispatch({ type: ACTIONS.SELECT_FOLDER, payload: { fullPath } });
 		if (fullPath === "" || !fullPath) {
 			dispatch({
@@ -141,7 +142,9 @@ export const useFolder = (fullPath: string = "") => {
 
 	// get child folders
 	useEffect(() => {
-		if (!currentUser) return;
+		if (!currentUser || !app) return;
+		const storage = getStorage(app);
+
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
 		dispatch({ type: ACTIONS.SET_LOADING, payload: null });
 
@@ -197,7 +200,7 @@ export const useFolder = (fullPath: string = "") => {
 					title: "An Error Occurred",
 					description: err.message,
 					status: "error",
-					duration: 5000,
+					duration: 3000,
 					isClosable: true
 				});
 			}

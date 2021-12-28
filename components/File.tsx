@@ -1,12 +1,11 @@
 import { Box, Button, Td, useClipboard, useToast } from "@chakra-ui/react";
 import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { storage } from "@util/firebase";
 import { ACTIONS, ReducerAction } from "@util/useFolder";
 import useUser from "@util/useUser";
 import axios from "axios";
 import { User } from "firebase/auth";
-import { deleteObject, ref, StorageReference } from "firebase/storage";
+import { deleteObject, getStorage, ref, StorageReference } from "firebase/storage";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
 import useSWRImmutable from "swr/immutable";
@@ -25,7 +24,7 @@ const metaFetcher = async (url: string, user: User) => {
 
 const File: React.FC<Props> = ({ file, dispatch }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { currentUser } = useUser();
+	const { currentUser, app } = useUser();
 	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
 		metaFetcher(
 			`${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`,
@@ -42,22 +41,25 @@ const File: React.FC<Props> = ({ file, dispatch }) => {
 			title: "Copied",
 			description: "File URL copied to clipboard!",
 			status: "success",
-			duration: 1000,
+			duration: 3000,
 			isClosable: true
 		});
 	};
 
 	const deleteFile = async () => {
 		try {
+			if (!app) return;
+			const storage = getStorage(app);
+
 			const reference = ref(storage, `${file?.parent.fullPath}/${file.name}`);
 			deleteObject(reference).catch((e) => {});
 			dispatch({ type: ACTIONS.REMOVE_FILE, payload: { childFiles: [reference] } });
 			setIsOpen(false);
 			toast({
-				title: "Deleted",
+				title: "Success",
 				description: "File deleted successfully!",
 				status: "info",
-				duration: 1000,
+				duration: 3000,
 				isClosable: true
 			});
 		} catch (err) {
