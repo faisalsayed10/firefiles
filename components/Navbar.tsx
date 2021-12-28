@@ -26,7 +26,7 @@ export default function Navbar() {
 				/>
 				<TooltipButton
 					icon={<FontAwesomeIcon icon={faSignOutAlt} />}
-					label="Logout"
+					label="Log out"
 					onClick={logout}
 				/>
 			</Box>

@@ -1,5 +1,5 @@
 import { Flex, Spinner } from "@chakra-ui/react";
-import { deleteApp, FirebaseApp, getApp, initializeApp } from "firebase/app";
+import { deleteApp, FirebaseApp, FirebaseOptions, initializeApp } from "firebase/app";
 import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
@@ -11,13 +11,12 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, firestore } from "./firebase";
-import { UserData } from "./types";
 
 type ContextValue = {
 	currentUser?: User;
-	config?: UserData;
+	config?: FirebaseOptions;
 	app?: FirebaseApp;
-	setConfig?: React.Dispatch<React.SetStateAction<UserData>>;
+	setConfig?: React.Dispatch<React.SetStateAction<FirebaseOptions>>;
 	login?: (email: string, password: string) => Promise<any>;
 	signup?: (email: string, password: string) => Promise<UserCredential>;
 	logout?: () => Promise<void>;
@@ -31,7 +30,7 @@ export default function useUser() {
 
 export function AuthProvider({ children }) {
 	const [currentUser, setCurrentUser] = useState<User>();
-	const [config, setConfig] = useState<UserData>();
+	const [config, setConfig] = useState<FirebaseOptions>();
 	const [app, setApp] = useState<FirebaseApp>();
 	const [loading, setLoading] = useState(true);
 
@@ -45,6 +44,8 @@ export function AuthProvider({ children }) {
 
 	const logout = async () => {
 		setConfig(null);
+		await deleteApp(app);
+		setApp(null);
 		window.localStorage.removeItem(`fb_config_${currentUser.uid}`);
 		return await signOut(auth);
 	};
@@ -57,7 +58,7 @@ export function AuthProvider({ children }) {
 				} else {
 					await getDoc(doc(firestore, "users", user.uid)).then((doc) => {
 						if (doc.exists()) {
-							setConfig(doc.data() as UserData);
+							setConfig(doc.data() as FirebaseOptions);
 							window.localStorage.setItem(`fb_config_${user.uid}`, JSON.stringify(doc.data()));
 						}
 					});
@@ -73,17 +74,15 @@ export function AuthProvider({ children }) {
 
 	useEffect(() => {
 		if (!currentUser || !config) return;
-		try {
-			const gotApp = getApp(currentUser.uid);
-			setApp(gotApp);
-		} catch (err) {
-			const app = initializeApp(config, currentUser.uid);
-			setApp(app);
+		if (app) {
+			(async () => await deleteApp(app).then(() => setApp(undefined)))();
 		}
+		const initApp = initializeApp(config, currentUser.uid);
+		setApp(initApp);
 
 		return () => {
 			if (app) {
-				deleteApp(app);
+				deleteApp(app).then(() => setApp(undefined));
 			}
 		};
 	}, [config, currentUser]);
