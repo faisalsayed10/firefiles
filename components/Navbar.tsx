@@ -1,16 +1,23 @@
 import { Box, Button, Flex, Tooltip, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { faDonate, faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
+import { faDonate, faEdit, faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@util/useUser";
+import { useRouter } from "next/router";
 import React from "react";
 
 export default function Navbar() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const { logout } = useUser();
+	const router = useRouter();
 
 	return (
-		<Flex align="center" justify="end" mx="2rem" mt="2">
-			<Box>
+		<Flex align="center" justify="end" px="2" mt="2" borderBottomWidth="1px" boxShadow="sm">
+			<Box mb="2">
+				<TooltipButton
+					icon={<FontAwesomeIcon icon={faEdit} />}
+					label="Edit Firebase config"
+					onClick={() => router.push("/config")}
+				/>
 				<TooltipButton
 					icon={<FontAwesomeIcon icon={colorMode === "light" ? faMoon : faSun} />}
 					label="Toggle dark mode"
@@ -40,8 +47,9 @@ const TooltipButton = ({ label, onClick, icon }) => (
 			w="50px"
 			h="50px"
 			variant="solid"
+			borderRadius="0"
 			_focus={{ outline: "none" }}
-			bgColor={useColorModeValue("white", "#1a202c")}
+			ml="2"
 			onClick={onClick}
 		>
 			{icon}
