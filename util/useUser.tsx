@@ -3,6 +3,7 @@ import axios from "axios";
 import { deleteApp, FirebaseApp, FirebaseOptions, initializeApp } from "firebase/app";
 import {
 	createUserWithEmailAndPassword,
+	getAuth,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
 	signOut,
@@ -64,6 +65,13 @@ export function AuthProvider({ children }) {
 						window.localStorage.setItem(`fb_config_${user.uid}`, JSON.stringify(data));
 					}
 				}
+
+			// 	const customerAuth = getAuth(app);
+			// 	await signInWithEmailAndPassword(customerAuth, "", "").catch(async (e) => {
+			// 		if (e.message.includes("auth/user-not-found")) {
+			// 			await createUserWithEmailAndPassword(customerAuth, "", "");
+			// 		}
+			// 	});
 			}
 
 			setCurrentUser(user);
