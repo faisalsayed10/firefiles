@@ -26,13 +26,11 @@ const metaFetcher = async (url: string, user: User) => {
 const File: React.FC<Props> = ({ file, dispatch }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const { currentUser } = useUser();
+	const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`;
 	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
-		metaFetcher(
-			`${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`,
-			currentUser
-		)
+		metaFetcher(file_url, currentUser)
 	);
-	const { onCopy } = useClipboard(data?.data?.download);
+	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.data?.downloadTokens}`);
 	const toast = useToast();
 	const cancelRef = useRef();
 
@@ -86,10 +84,10 @@ const File: React.FC<Props> = ({ file, dispatch }) => {
 			</Td>
 			<Td align="center">
 				<a
-					href={data?.data?.download}
+					href={`${file_url}?alt=media&token=${data?.data?.downloadTokens}`}
 					target="_blank"
 					rel="noreferrer"
-					download={data?.data?.download}
+					download={`${file_url}?alt=media&token=${data?.data?.downloadTokens}`}
 				>
 					<Button isLoading={!data?.data} variant="outline" colorScheme="blue">
 						<FontAwesomeIcon icon={faDownload} />
