@@ -1,4 +1,5 @@
 import { Flex, Spinner } from "@chakra-ui/react";
+import axios from "axios";
 import { deleteApp, FirebaseApp, FirebaseOptions, initializeApp } from "firebase/app";
 import {
 	createUserWithEmailAndPassword,
@@ -10,7 +11,6 @@ import {
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "./firebase";
-import { decrypt } from "./helpers";
 
 type ContextValue = {
 	currentUser?: User;
@@ -44,8 +44,8 @@ export function AuthProvider({ children }) {
 
 	const logout = async () => {
 		setConfig(undefined);
-		setApp(undefined);
 		deleteApp(app);
+		setApp(undefined);
 		window.localStorage.removeItem(`fb_config_${currentUser.uid}`);
 		return await signOut(auth);
 	};
@@ -56,7 +56,9 @@ export function AuthProvider({ children }) {
 				if (window.localStorage.getItem(`fb_config_${user.uid}`)) {
 					setConfig(JSON.parse(window.localStorage.getItem(`fb_config_${user.uid}`)));
 				} else {
-					const data = await decrypt();
+					const { data } = await axios.get("/api/config", {
+						headers: { uid: user.uid, token: await user.getIdToken() }
+					});
 					if (data) {
 						setConfig(data as FirebaseOptions);
 						window.localStorage.setItem(`fb_config_${user.uid}`, JSON.stringify(data));

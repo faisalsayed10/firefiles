@@ -12,8 +12,8 @@ import {
 import CenterContainer from "@components/CenterContainer";
 import { faLongArrowAltLeft, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { encrypt } from "@util/helpers";
 import useUser from "@util/useUser";
+import axios from "axios";
 import toObject from "convert-to-object";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -50,7 +50,9 @@ export default function Config() {
 				throw new Error("One or more fields are missing from the config.");
 			}
 
-			await encrypt(data);
+			await axios.post("/api/config", data, {
+				headers: { uid: currentUser.uid, token: await currentUser.getIdToken() }
+			});
 			setConfig(data);
 			window.localStorage.setItem(`fb_config_${currentUser.uid}`, JSON.stringify(data));
 
