@@ -8,9 +8,9 @@ import {
 	User,
 	UserCredential
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, firestore } from "./firebase";
+import { auth } from "./firebase";
+import { decrypt } from "./helpers";
 
 type ContextValue = {
 	currentUser?: User;
@@ -43,9 +43,9 @@ export function AuthProvider({ children }) {
 	};
 
 	const logout = async () => {
-		setConfig(null);
-		await deleteApp(app);
-		setApp(null);
+		setConfig(undefined);
+		setApp(undefined);
+		deleteApp(app);
 		window.localStorage.removeItem(`fb_config_${currentUser.uid}`);
 		return await signOut(auth);
 	};
@@ -56,12 +56,11 @@ export function AuthProvider({ children }) {
 				if (window.localStorage.getItem(`fb_config_${user.uid}`)) {
 					setConfig(JSON.parse(window.localStorage.getItem(`fb_config_${user.uid}`)));
 				} else {
-					await getDoc(doc(firestore, "users", user.uid)).then((doc) => {
-						if (doc.exists()) {
-							setConfig(doc.data() as FirebaseOptions);
-							window.localStorage.setItem(`fb_config_${user.uid}`, JSON.stringify(doc.data()));
-						}
-					});
+					const data = await decrypt();
+					if (data) {
+						setConfig(data as FirebaseOptions);
+						window.localStorage.setItem(`fb_config_${user.uid}`, JSON.stringify(data));
+					}
 				}
 			}
 

@@ -1,19 +1,19 @@
 import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  Text,
-  Textarea,
-  useToast
+	Alert,
+	AlertIcon,
+	Box,
+	Button,
+	Flex,
+	FormControl,
+	Text,
+	Textarea,
+	useToast
 } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import { faLongArrowAltLeft, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { encrypt } from "@util/helpers";
 import useUser from "@util/useUser";
-import axios from "axios";
 import toObject from "convert-to-object";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -50,7 +50,7 @@ export default function Config() {
 				throw new Error("One or more fields are missing from the config.");
 			}
 
-			await axios.post("/api/config", data);
+			await encrypt(data);
 			setConfig(data);
 			window.localStorage.setItem(`fb_config_${currentUser.uid}`, JSON.stringify(data));
 
