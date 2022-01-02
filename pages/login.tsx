@@ -1,12 +1,13 @@
 import { Alert, AlertIcon, Box, Button, FormControl, Input, Link, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
+import PasswordInput from "@components/PasswordInput";
 import useUser from "@util/useUser";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Login() {
 	const { login, currentUser } = useUser();
-	const emailRef = useRef<HTMLInputElement>();
-	const passwordRef = useRef<HTMLInputElement>();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export default function Login() {
 		try {
 			setError("");
 			setLoading(true);
-			await login(emailRef.current.value, passwordRef.current.value);
+			await login(email, password);
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
@@ -54,17 +55,16 @@ export default function Login() {
 							variant="outline"
 							placeholder="Enter your email"
 							type="email"
-							ref={emailRef}
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
 							required
 						/>
 					</FormControl>
 					<FormControl id="password" mb="3">
-						<Input
-							variant="outline"
-							type="password"
-							placeholder="Password"
-							ref={passwordRef}
-							required
+						<PasswordInput
+							placeholder="Enter your password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
 						/>
 					</FormControl>
 					<Button
