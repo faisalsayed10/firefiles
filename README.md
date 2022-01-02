@@ -4,6 +4,10 @@ Firefiles lets you turn your Firebase Cloud Storage into your own file hosting s
 
 This is the hosted version of Firefiles, Make sure you check the [docs](https://firefiles.vercel.app/docs/intro) to get some important information regarding it. You can also use the self-hosted version of Firefiles!
 
+## Roadmap / Upcoming Features
+
+- [ ] File Previews
+
 ## Sponsor this project
 
 Firefiles is an open-source project. If you want to support the project, you can do so by funding / sponsoring the project. Here are some ways you can fund the project:
