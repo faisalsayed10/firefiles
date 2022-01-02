@@ -63,10 +63,9 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 					</MenuItem>
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
-						onClick={() => {
-							const domain = process.env.DEPLOY_URL || "http://localhost:3000";
-							window.open(`${domain}/folder/${folder.fullPath}`, "_blank");
-						}}
+						onClick={() =>
+							window.open(`${window.location.hostname}/folder/${folder.fullPath}`, "_blank")
+						}
 					>
 						Open in new tab
 					</MenuItem>
