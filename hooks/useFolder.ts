@@ -1,6 +1,6 @@
-import { useToast } from "@chakra-ui/toast";
 import { getStorage, list, ref, StorageReference } from "firebase/storage";
 import { useEffect, useReducer } from "react";
+import useApp from "./useApp";
 import useUser from "./useUser";
 
 export const ROOT_FOLDER: StorageReference = {
@@ -106,9 +106,9 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 	}
 };
 
-export const useFolder = (fullPath: string = "") => {
-	const toast = useToast();
-	const { currentUser, app } = useUser();
+export default (fullPath: string = "") => {
+	const { currentUser } = useUser();
+	const { app, appUser } = useApp();
 	const [state, dispatch] = useReducer(reducer, {
 		fullPath,
 		folder: null,
@@ -120,7 +120,7 @@ export const useFolder = (fullPath: string = "") => {
 
 	// set current folder
 	useEffect(() => {
-		if (!currentUser || !app) return;
+		if (!currentUser || !app || !appUser) return;
 		const storage = getStorage(app);
 
 		dispatch({ type: ACTIONS.SELECT_FOLDER, payload: { fullPath } });
@@ -138,11 +138,11 @@ export const useFolder = (fullPath: string = "") => {
 			payload: { folder: ref(storage, fullPath) }
 		});
 		dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
-	}, [fullPath, currentUser]);
+	}, [fullPath, currentUser, app, appUser]);
 
 	// get child folders
 	useEffect(() => {
-		if (!currentUser || !app) return;
+		if (!currentUser || !app || !appUser) return;
 		const storage = getStorage(app);
 
 		dispatch({ type: ACTIONS.FOLDERS_LOADING, payload: null });
@@ -196,17 +196,11 @@ export const useFolder = (fullPath: string = "") => {
 				});
 			} catch (err) {
 				console.error(err);
-				toast({
-					title: "An Error Occurred",
-					description: err.message,
-					status: "error",
-					duration: 3000,
-					isClosable: true
-				});
 			}
 
+			dispatch({ type: ACTIONS.STOP_LOADING, payload: null });
 			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });
 		})();
-	}, [fullPath, currentUser]);
+	}, [fullPath, currentUser, app, appUser]);
 	return { ...state, dispatch };
 };

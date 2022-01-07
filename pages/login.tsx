@@ -1,29 +1,21 @@
-import {
-	Alert,
-	AlertIcon,
-	Box,
-	Button,
-	chakra,
-	FormControl,
-	Input,
-	Text,
-	useToast
-} from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import PasswordInput from "@components/PasswordInput";
-import useUser from "@util/useUser";
+import useApp from "@hooks/useApp";
+import useUser from "@hooks/useUser";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Login() {
-	const { login, currentUser, config } = useUser();
+	const { login, currentUser } = useUser();
+	const { config } = useApp();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const toast = useToast();
 
 	useEffect(() => {
 		if (loading) return;
@@ -41,16 +33,9 @@ export default function Login() {
 			setError("");
 			setLoading(true);
 			await login(email, password);
-			toast({
-				title: "Success",
-				description: "You have successfully logged in.",
-				status: "success",
-				duration: 3000,
-				isClosable: true
-			});
+			toast.success("You have successfully logged in.");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
-		} finally {
 			setLoading(false);
 		}
 	};
@@ -101,13 +86,16 @@ export default function Login() {
 					>
 						Login
 					</Button>
-					<Text as="p" fontSize="xs">
+					<Text as="p" fontSize="xs" align="center">
 						Don't have an account?{" "}
 						<Link href="/signup">
 							<chakra.span textDecor="underline" cursor="pointer">
 								Sign Up
 							</chakra.span>
 						</Link>
+					</Text>
+					<Text as="p" fontSize="xs" textDecor="underline" cursor="pointer" align="center">
+						<Link href="/forgot-password">Forgot Password?</Link>
 					</Text>
 				</Box>
 			</Box>

@@ -1,30 +1,25 @@
-import {
-	Alert,
-	AlertIcon,
-	Box,
-	Button,
-	Flex,
-	FormControl,
-	Text,
-	Textarea,
-	useToast
-} from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Button, Flex, FormControl, Text, Textarea } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import { faLongArrowAltLeft, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useUser from "@util/useUser";
+import useApp from "@hooks/useApp";
+import useUser from "@hooks/useUser";
 import axios from "axios";
 import toObject from "convert-to-object";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import _ from "underscore";
 
 export default function Config() {
-	const { currentUser, config, setConfig, logout } = useUser();
-	const [input, setInput] = useState(config ? JSON.stringify(config, null, 4) : "");
+	const { currentUser, logout } = useUser();
+	const { config, onConfigChange } = useApp();
+	const [input, setInput] = useState(
+		config ? JSON.stringify(_.omit(config, "password"), null, 4) : ""
+	);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const toast = useToast();
 
 	useEffect(() => {
 		if (!currentUser) {
@@ -50,19 +45,13 @@ export default function Config() {
 				throw new Error("One or more fields are missing from the config.");
 			}
 
-			await axios.post("/api/config", data, {
-				headers: { uid: currentUser.uid, token: await currentUser.getIdToken() }
-			});
-			setConfig(data);
-			window.localStorage.setItem(`fb_config_${currentUser.uid}`, JSON.stringify(data));
-
-			toast({
-				title: "Success",
-				description: "Firebase credentials updated successfully.",
-				status: "success",
-				duration: 3000,
-				isClosable: true
-			});
+			await axios.post(
+				"/api/config",
+				{ ...data, ...(config?.password ? { password: config?.password } : {}) },
+				{ headers: { uid: currentUser.uid, token: await currentUser.getIdToken() } }
+			);
+			onConfigChange({ ...data, ...(config?.password ? { password: config?.password } : {}) });
+			toast.success("Firebase credentials updated successfully.");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}

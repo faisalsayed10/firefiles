@@ -14,6 +14,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				const encrypted = response.data.fields.config.stringValue;
 				const bytes = AES.decrypt(encrypted, process.env.CIPHER_KEY).toString(enc.Utf8);
 
+				res.setHeader("Cache-Control", "s-maxage=300");
 				return res.status(200).json(JSON.parse(bytes));
 			case "POST":
 				const data = req.body;
@@ -31,10 +32,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 	} catch (err) {
 		console.error(err);
-		if (err.response?.status === 404) {
-			return res.status(200).json(undefined);
-		} else {
-			return res.status(200).json(undefined);
-		}
+		return res.status(200).json(undefined);
 	}
 };

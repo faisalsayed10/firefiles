@@ -1,13 +1,15 @@
 import { Box, Button, Flex, Tooltip, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { faDonate, faEdit, faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useUser from "@util/useUser";
+import useApp from "@hooks/useApp";
+import useUser from "@hooks/useUser";
 import { useRouter } from "next/router";
 import React from "react";
 
 export default function Navbar() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const { logout } = useUser();
+	const { onLogout } = useApp();
 	const router = useRouter();
 
 	return (
@@ -34,7 +36,10 @@ export default function Navbar() {
 				<TooltipButton
 					icon={<FontAwesomeIcon icon={faSignOutAlt} />}
 					label="Log out"
-					onClick={logout}
+					onClick={() => {
+						logout();
+						onLogout();
+					}}
 				/>
 			</Box>
 		</Flex>

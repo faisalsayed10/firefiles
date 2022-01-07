@@ -8,13 +8,14 @@ import FolderGrid from "@components/FolderGrid";
 import Navbar from "@components/Navbar";
 import UploadFileButton from "@components/UploadFileButton";
 import { CurrentlyUploading } from "@util/types";
-import useUser from "@util/useUser";
+import useUser from "@hooks/useUser";
 import Head from "next/head";
 import { NextRouter, useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
-import { useFolder } from "util/useFolder";
+import useFolder from "@hooks/useFolder";
+import useApp from "@hooks/useApp";
 
 const getFolderPath = (router: NextRouter) => {
 	const pathArray = router.asPath.split("/");
@@ -41,7 +42,8 @@ export default function Index() {
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { currentUser, config } = useUser();
+	const { currentUser } = useUser();
+	const { config, app, appUser } = useApp();
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } = useFolder(
@@ -76,6 +78,7 @@ export default function Index() {
 						setDraggedFilesToUpload(files);
 						setIsDragging(false);
 					}}
+					disabled={!app || !appUser}
 					noClick
 					onDragOver={() => setIsDragging(true)}
 					onDragLeave={() => setIsDragging(false)}

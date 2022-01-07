@@ -1,19 +1,11 @@
-import {
-	Alert,
-	AlertIcon,
-	Box,
-	Button,
-	chakra,
-	FormControl,
-	Input,
-	Text,
-	useToast
-} from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
-import useUser from "@util/useUser";
+import useApp from "@hooks/useApp";
+import useUser from "@hooks/useUser";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Signup() {
 	const [email, setEmail] = useState("");
@@ -21,8 +13,8 @@ export default function Signup() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { signup, currentUser, config } = useUser();
-	const toast = useToast();
+	const { signup, currentUser } = useUser();
+	const { config } = useApp();
 	const router = useRouter();
 
 	useEffect(() => {
@@ -45,13 +37,7 @@ export default function Signup() {
 			setError("");
 			setLoading(true);
 			await signup(email, password);
-			toast({
-				title: "Success",
-				description: "You have successfully signed up.",
-				status: "success",
-				duration: 3000,
-				isClosable: true
-			});
+			toast.success("You have successfully signed up.");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
@@ -117,7 +103,7 @@ export default function Signup() {
 					>
 						Sign Up
 					</Button>
-					<Text as="p" fontSize="xs">
+					<Text as="p" fontSize="xs" align="center">
 						Already have an account?{" "}
 						<Link href="/login">
 							<chakra.span textDecor="underline" cursor="pointer">

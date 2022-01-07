@@ -7,8 +7,8 @@ import {
 	faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ACTIONS, ReducerAction } from "@util/useFolder";
-import useUser from "@util/useUser";
+import useApp from "@hooks/useApp";
+import { ACTIONS, ReducerAction } from "@hooks/useFolder";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
@@ -49,7 +49,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 	const onClose = () => setIsOpen(false);
 	const router = useRouter();
 	const cancelRef = useRef();
-	const { app } = useUser();
+	const { app } = useApp();
 
 	return (
 		<ContextMenu<HTMLDivElement>
@@ -63,9 +63,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 					</MenuItem>
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
-						onClick={() =>
-							window.open(`${window.location.hostname}/folder/${folder.fullPath}`, "_blank")
-						}
+						onClick={() => window.open(`/folder/${folder.fullPath}`, "_blank")}
 					>
 						Open in new tab
 					</MenuItem>

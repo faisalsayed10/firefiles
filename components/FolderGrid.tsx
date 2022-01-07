@@ -1,6 +1,6 @@
 import { Box, SimpleGrid } from "@chakra-ui/react";
 import { StorageReference } from "@firebase/storage";
-import { ReducerAction } from "@util/useFolder";
+import { ReducerAction } from "hooks/useFolder";
 import React from "react";
 import AddFolderButton from "./AddFolderButton";
 import Folder from "./Folder";
