@@ -63,7 +63,7 @@ export function AppProvider({ children }) {
 	};
 
 	useEffect(() => {
-		if (!currentUser || router.pathname === "/error") return;
+		if (!currentUser) return;
 		const has_initialized = getApps().filter((app) => app.name === currentUser.uid).length > 0;
 		const has_logged_in = window.localStorage.getItem("has_logged_in") === "true" || false;
 
