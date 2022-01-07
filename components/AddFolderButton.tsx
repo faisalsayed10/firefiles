@@ -12,13 +12,13 @@ import {
 	ModalOverlay,
 	useColorModeValue,
 	useDisclosure,
-	useToast
 } from "@chakra-ui/react";
 import { StorageReference } from "@firebase/storage";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ACTIONS, ReducerAction } from "@util/useFolder";
+import { ACTIONS, ReducerAction } from "hooks/useFolder";
 import React, { useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 interface Props {
 	dispatch: React.Dispatch<ReducerAction>;
@@ -29,7 +29,6 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
-	const toast = useToast();
 	const inputRef = useRef<HTMLInputElement>();
 
 	const handleSubmit = async (e) => {
@@ -37,13 +36,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
 		setLoading(true);
 
 		if (/[#\$\[\]\*/]/.test(name)) {
-			toast({
-				title: "Invalid Folder Name",
-				description: "Folder names cannot contain #$[]*/",
-				status: "error",
-				duration: 3000,
-				isClosable: true
-			});
+			toast.error("Folder name cannot contain special characters.");
 			setLoading(false);
 			return;
 		}
@@ -70,14 +63,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
 		const folders: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
 		localStorage.setItem("local-folders", JSON.stringify([...folders, newFolder]));
 
-		toast({
-			title: "Folder Created Successfully",
-			description: "",
-			status: "success",
-			duration: 3000,
-			isClosable: true
-		});
-
+		toast.success("Folder Created Successfully.");
 		setName("");
 		setLoading(false);
 		onClose();

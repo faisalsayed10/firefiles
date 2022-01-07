@@ -1,12 +1,13 @@
-import { Button, chakra, Input, useColorModeValue, useToast } from "@chakra-ui/react";
+import { Button, chakra, Input, useColorModeValue } from "@chakra-ui/react";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useApp from "@hooks/useApp";
 import { CurrentlyUploading } from "@util/types";
-import { ACTIONS, ReducerAction, ROOT_FOLDER } from "@util/useFolder";
-import useUser from "@util/useUser";
 import { getStorage, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
+import { ACTIONS, ReducerAction, ROOT_FOLDER } from "hooks/useFolder";
+import { nanoid } from "nanoid";
 import React, { useEffect, useRef } from "react";
-import uniqid from "uniqid";
+import toast from "react-hot-toast";
 
 interface Props {
 	dispatch: React.Dispatch<ReducerAction>;
@@ -25,9 +26,8 @@ const UploadFileButton: React.FC<Props> = ({
 	uploadingFiles,
 	setUploadingFiles
 }) => {
-	const { app } = useUser();
+	const { app, appUser } = useApp();
 	const fileInput = useRef<HTMLInputElement>();
-	const toast = useToast();
 
 	useEffect(() => {
 		if (!filesToUpload || filesToUpload.length < 1) return;
@@ -37,20 +37,14 @@ const UploadFileButton: React.FC<Props> = ({
 	const handleUpload = (e: React.ChangeEvent<HTMLInputElement>, filesToUpload: File[]) => {
 		if (!app) return;
 		const storage = getStorage(app);
-		
+
 		const files = filesToUpload || e?.target.files;
 		if (currentFolder == null || files == null || files?.length < 1) return;
 
 		for (let i = 0; i < files.length; i++) {
-			const id = uniqid();
+			const id = nanoid();
 			if (/[#\$\[\]\*/]/.test(files[i].name)) {
-				toast({
-					title: "Invalid File Name",
-					description: "File names cannot contain #$[]*/",
-					status: "error",
-					duration: 3000,
-					isClosable: true
-				});
+				toast.error("File name cannot contain special characters (#$[]*/).");
 				return;
 			}
 
@@ -100,14 +94,7 @@ const UploadFileButton: React.FC<Props> = ({
 					});
 
 					dispatch({ type: ACTIONS.ADD_FILE, payload: { childFiles: [fileRef] } });
-					toast({
-						title: "Success",
-						description: "File uploaded successfully!",
-						status: "success",
-						duration: 3000,
-						isClosable: true
-					});
-
+					toast.success("File uploaded successfully.");
 					setFilesToUpload([]);
 				}
 			);
@@ -121,11 +108,15 @@ const UploadFileButton: React.FC<Props> = ({
 				ref={fileInput}
 				hidden={true}
 				onChange={(e) => handleUpload(e, null)}
-				key={uniqid()}
+				key={nanoid()}
 				multiple
 			/>
 			<Button
-				disabled={uploadingFiles.filter((uploadingFile) => !uploadingFile.error).length > 0}
+				disabled={
+					uploadingFiles.filter((uploadingFile) => !uploadingFile.error).length > 0 ||
+					!app ||
+					!appUser
+				}
 				pos="fixed"
 				p="6"
 				borderRadius="50%"
