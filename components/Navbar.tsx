@@ -1,7 +1,24 @@
-import { Box, Button, Flex, Tooltip, useColorMode } from "@chakra-ui/react";
-import { faDonate, faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
+import {
+	Box,
+	Button,
+	Flex,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
+	Tooltip,
+	useColorMode
+} from "@chakra-ui/react";
+import {
+	faChevronDown,
+	faDonate,
+	faFile,
+	faMoon,
+	faSignOutAlt,
+	faSun
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useUser from "@util/useUser";
+import useUser from "@hooks/useUser";
 import React from "react";
 
 export default function Navbar() {
@@ -16,19 +33,31 @@ export default function Navbar() {
 					label="Toggle dark mode"
 					onClick={toggleColorMode}
 				/>
-				<TooltipButton
-					icon={<FontAwesomeIcon icon={faDonate} />}
-					label="Sponsor this project"
-					onClick={() => {
-						const url = "https://github.com/faisalsayed10/firefiles#sponsor-this-project";
-						window.open(url, "_blank");
-					}}
-				/>
-				<TooltipButton
-					icon={<FontAwesomeIcon icon={faSignOutAlt} />}
-					label="Logout"
-					onClick={logout}
-				/>
+				<Menu>
+					<MenuButton h="50" as={Button} rightIcon={<FontAwesomeIcon icon={faChevronDown} />}>
+						Actions
+					</MenuButton>
+					<MenuList>
+						<MenuItem
+							icon={<FontAwesomeIcon icon={faFile} />}
+							onClick={() => window.open("https://firefiles-docs.vercel.app/docs/intro", "_blank")}
+						>
+							View Documentation
+						</MenuItem>
+						<MenuItem
+							icon={<FontAwesomeIcon icon={faDonate} />}
+							onClick={() => {
+								const url = "https://github.com/faisalsayed10/firefiles#sponsor-this-project";
+								window.open(url, "_blank");
+							}}
+						>
+							Donate Us
+						</MenuItem>
+						<MenuItem icon={<FontAwesomeIcon icon={faSignOutAlt} />} onClick={logout}>
+							Log Out
+						</MenuItem>
+					</MenuList>
+				</Menu>
 			</Box>
 		</Flex>
 	);
@@ -36,15 +65,7 @@ export default function Navbar() {
 
 const TooltipButton = ({ label, onClick, icon }) => (
 	<Tooltip label={label} hasArrow>
-		<Button
-			w="50px"
-			h="50px"
-			variant="solid"
-			borderRadius="0"
-			_focus={{ outline: "none" }}
-			ml="2"
-			onClick={onClick}
-		>
+		<Button w="50px" h="50px" variant="solid" _focus={{ outline: "none" }} mr="2" onClick={onClick}>
 			{icon}
 		</Button>
 	</Tooltip>

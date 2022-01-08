@@ -17,6 +17,7 @@
 		"paths": {
 			"@components/*": ["components/*"],
 			"@util/*": ["util/*"],
+			"@hooks/*": ["hooks/*"],
 			"@types/*": ["types/*"],
 			"@styles/*": ["styles/*"]
 		}

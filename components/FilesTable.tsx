@@ -1,5 +1,5 @@
 import { Box, Table, Th, Tr } from "@chakra-ui/react";
-import { ReducerAction } from "@util/useFolder";
+import { ReducerAction } from "hooks/useFolder";
 import { StorageReference } from "firebase/storage";
 import React from "react";
 import File from "./File";

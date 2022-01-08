@@ -107,8 +107,7 @@ const reducer = (state: ReducerState, action: ReducerAction) => {
 	}
 };
 
-export const useFolder = (fullPath: string = "") => {
-	const toast = useToast();
+export default (fullPath: string = "") => {
 	const { currentUser } = useUser();
 	const [state, dispatch] = useReducer(reducer, {
 		fullPath,
@@ -193,13 +192,6 @@ export const useFolder = (fullPath: string = "") => {
 				});
 			} catch (err) {
 				console.error(err);
-				toast({
-					title: "An Error Occurred",
-					description: err.message,
-					status: "error",
-					duration: 5000,
-					isClosable: true
-				});
 			}
 
 			dispatch({ type: ACTIONS.STOP_FOLDERS_LOADING, payload: null });

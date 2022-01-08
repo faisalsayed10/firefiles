@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { storage } from "@util/firebase";
-import { ACTIONS, ReducerAction } from "@util/useFolder";
+import { ACTIONS, ReducerAction } from "hooks/useFolder";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import { useRouter } from "next/router";
 import React from "react";
@@ -62,9 +62,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 					</MenuItem>
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
-						onClick={() => {
-							window.open(`${window.location.hostname}/folder/${folder.fullPath}`, "_blank");
-						}}
+						onClick={() => window.open(`/folder/${folder.fullPath}`, "_blank")}
 					>
 						Open in new tab
 					</MenuItem>

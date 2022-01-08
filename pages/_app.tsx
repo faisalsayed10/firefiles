@@ -1,7 +1,8 @@
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
+import { AuthProvider } from "@hooks/useUser";
 import "@styles/index.css";
 import theme from "@util/theme";
-import { AuthProvider } from "@util/useUser";
+import { Toaster } from "react-hot-toast";
 
 function MyApp({ Component, pageProps }) {
 	return (
@@ -9,6 +10,7 @@ function MyApp({ Component, pageProps }) {
 			<ChakraProvider resetCSS theme={theme}>
 				<ColorModeScript initialColorMode={theme.config.initialColorMode} />
 				<Component {...pageProps} />
+				<Toaster position="bottom-right" />
 			</ChakraProvider>
 		</AuthProvider>
 	);

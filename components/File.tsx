@@ -1,14 +1,15 @@
-import { Box, Button, Td, useClipboard, useToast } from "@chakra-ui/react";
+import { Box, Button, Td, Text, useClipboard } from "@chakra-ui/react";
 import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { storage } from "@util/firebase";
-import { ACTIONS, ReducerAction } from "@util/useFolder";
-import useUser from "@util/useUser";
+import { ACTIONS, ReducerAction } from "hooks/useFolder";
+import useUser from "@hooks/useUser";
 import axios from "axios";
 import { User } from "firebase/auth";
 import { deleteObject, ref, StorageReference } from "firebase/storage";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
+import toast from "react-hot-toast";
 import useSWRImmutable from "swr/immutable";
 import DeleteAlert from "./DeleteAlert";
 
@@ -31,18 +32,11 @@ const File: React.FC<Props> = ({ file, dispatch }) => {
 		metaFetcher(file_url, currentUser)
 	);
 	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.data?.downloadTokens}`);
-	const toast = useToast();
 	const cancelRef = useRef();
 
 	const handleClick = () => {
 		onCopy();
-		toast({
-			title: "Copied",
-			description: "File URL copied to clipboard!",
-			status: "success",
-			duration: 1000,
-			isClosable: true
-		});
+		toast.success("File URL copied to clipboard!");
 	};
 
 	const deleteFile = async () => {
@@ -51,23 +45,18 @@ const File: React.FC<Props> = ({ file, dispatch }) => {
 			deleteObject(reference).catch((e) => {});
 			dispatch({ type: ACTIONS.REMOVE_FILE, payload: { childFiles: [reference] } });
 			setIsOpen(false);
-			toast({
-				title: "Deleted",
-				description: "File deleted successfully!",
-				status: "info",
-				duration: 1000,
-				isClosable: true
-			});
+			toast.success("File deleted successfully!");
 		} catch (err) {
 			setIsOpen(false);
 			console.error(err);
-			toast({
-				title: "An Error Occurred",
-				description: err.message,
-				status: "error",
-				duration: 3000,
-				isClosable: true
-			});
+			toast.error((t) => (
+				<>
+					<Text fontWeight="bold">Error deleting file!</Text>
+					<Text as="p" fontSize="sm">
+						{err.message}
+					</Text>
+				</>
+			));
 		}
 	};
 

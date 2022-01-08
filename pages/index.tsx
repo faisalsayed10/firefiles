@@ -7,14 +7,14 @@ import FolderBreadCrumbs from "@components/FolderBreadCrumbs";
 import FolderGrid from "@components/FolderGrid";
 import Navbar from "@components/Navbar";
 import UploadFileButton from "@components/UploadFileButton";
+import useFolder from "@hooks/useFolder";
+import useUser from "@hooks/useUser";
 import { CurrentlyUploading } from "@util/types";
-import useUser from "@util/useUser";
 import Head from "next/head";
 import { NextRouter, useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
-import { useFolder } from "util/useFolder";
 
 const getFolderPath = (router: NextRouter) => {
 	const pathArray = router.asPath.split("/");
@@ -61,7 +61,7 @@ export default function Index() {
 	return (
 		<>
 			<Head>
-				<title>Firefiles — Your Files</title>
+				<title>firefiles — Your Files</title>
 				<meta charSet="utf-8" />
 			</Head>
 			<LoadingOverlay

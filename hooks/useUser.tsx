@@ -6,7 +6,7 @@ import {
   UserCredential
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "./firebase";
+import { auth } from "@util/firebase";
 
 type ContextValue = {
 	currentUser?: User;

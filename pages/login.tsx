@@ -1,8 +1,9 @@
 import { Alert, AlertIcon, Box, Button, FormControl, Input, Link, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import PasswordInput from "@components/PasswordInput";
-import useUser from "@util/useUser";
+import useUser from "@hooks/useUser";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Login() {
 	const { login, currentUser } = useUser();
@@ -24,6 +25,7 @@ export default function Login() {
 			setError("");
 			setLoading(true);
 			await login(email, password);
+			toast.success("You have successfully logged in.");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
@@ -77,7 +79,7 @@ export default function Login() {
 					>
 						Login
 					</Button>
-					<Text as="p" fontSize="xs">
+					<Text as="p" fontSize="xs" align="center">
 						Checkout the{" "}
 						<Link
 							href="https://github.com/faisalsayed10/firefiles/tree/self-host#readme"
