@@ -40,7 +40,7 @@ export default function Navbar() {
 					<MenuList>
 						<MenuItem
 							icon={<FontAwesomeIcon icon={faFile} />}
-							onClick={() => window.open("https://firefiles-docs.vercel.app/docs/intro", "_blank")}
+							onClick={() => window.open("https://firefiles.vercel.app/docs/intro", "_blank")}
 						>
 							View Documentation
 						</MenuItem>
