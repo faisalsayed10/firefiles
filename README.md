@@ -5,7 +5,7 @@
 
 # Description
 
-Get your own personal file hosting service in minutes. This is the self-hosted version of Firefiles. Refer to the [docs](https://firefiles.vercel.app/docs/self-hosted/firebase-setup) if you want to get help about self-hosting. You can also use the [hosted version](https://usefirefiles.vercel.app) of Firefiles.
+Get your own file hosting service in minutes. This is the self-hosted version of Firefiles. Refer to the [docs](https://firefiles.vercel.app/docs/self-hosted/firebase-setup) if you want to get help about self-hosting. You can also use the [hosted version](https://usefirefiles.vercel.app) of Firefiles.
 
 
 # Features
