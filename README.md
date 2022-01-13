@@ -5,7 +5,7 @@
 
 # Description
 
-Get your own personal file hosting service in minutes. This is the hosted version of Firefiles, Make sure you check the [docs](https://firefiles.vercel.app/docs/intro) before getting started.
+Get your own file hosting service in minutes. This is the hosted version of Firefiles, Make sure you check the [docs](https://firefiles.vercel.app/docs/intro) before getting started.
 
 
 # Features
