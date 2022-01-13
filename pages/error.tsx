@@ -21,7 +21,7 @@ const Error = () => {
 						{router.query.message}
 					</Alert>
 					<Text as="p" align="center" fontSize="sm" textDecor="underline" cursor="pointer" mb="1">
-						<Link href="https://firefiles-docs.vercel.app/docs/hosted" target="_blank">
+						<Link href="https://firefiles.vercel.app/docs/hosted" target="_blank">
 							Make sure you're not missing anything
 						</Link>
 					</Text>
