@@ -14,12 +14,12 @@ class MyDocument extends Document {
 					<meta name="title" content="Firefiles" />
 					<meta name="description" content="Get your own file hosting service in minutes. Firefiles provides you with a drive like interface for your storage buckets." />
 					<meta property="og:type" content="website" />
-					<meta property="og:url" content="https://firefiles.vercel.app" />
+					<meta property="og:url" content="https://usefirefiles.vercel.app" />
 					<meta property="og:title" content="Firefiles" />
 					<meta property="og:description" content="Get your own file hosting service in minutes. Firefiles provides you with a drive like interface for your storage buckets." />
-					<meta property="og:image" content="https://firefiles.vercel.app/firefiles-preview.png" />
+					<meta property="og:image" content="https://usefirefiles.vercel.app/firefiles-preview.png" />
 					<meta property="twitter:card" content="summary_large_image" />
-					<meta property="twitter:url" content="https://firefiles.vercel.app" />
+					<meta property="twitter:url" content="https://usefirefiles.vercel.app" />
 					<meta property="twitter:title" content="Firefiles" />
 					<meta
 						property="twitter:description"
@@ -27,7 +27,7 @@ class MyDocument extends Document {
 					/>
 					<meta
 						property="twitter:image"
-						content="https://firefiles.vercel.app/firefiles-preview.png"
+						content="https://usefirefiles.vercel.app/firefiles-preview.png"
 					/>
 				</Head>
 				<body>
