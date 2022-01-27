@@ -66,9 +66,9 @@ export default function Navbar() {
 						</MenuItem>
 						<MenuItem
 							icon={<FontAwesomeIcon icon={faSignOutAlt} />}
-							onClick={() => {
-								logout();
-								onLogout();
+							onClick={async () => {
+								await onLogout();
+								await logout();
 							}}
 						>
 							Log Out

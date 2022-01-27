@@ -49,14 +49,17 @@ export function AuthProvider({ children }) {
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (user) => {
 			if (user && !user.emailVerified) {
-				await sendEmailVerification(user).catch((_) => {});
-				await signOut(auth).catch((_) => {});
-				toast.success(
-					"An email has been sent to your address. Please verify your email and log in again.",
-					{ duration: 5000 }
-				);
+				try {
+					await sendEmailVerification(user);
+					await signOut(auth);
+					toast.success(
+						"An email has been sent to your address. Please verify your email and log in again.",
+						{ duration: 5000 }
+					);
+				} catch (err) {
+					toast.error(err.message.replace("Firebase: ", ""));
+				}
 			} else {
-				user && toast.success("You have successfully logged in.");
 				setCurrentUser(user);
 			}
 			setLoading(false);

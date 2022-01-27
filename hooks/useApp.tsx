@@ -19,7 +19,7 @@ type ContextValue = {
 	app?: FirebaseApp;
 	config?: Config;
 	appUser?: User;
-	onLogout?: () => void;
+	onLogout?: () => Promise<void>;
 	onConfigChange?: (newConfig: Config) => void;
 };
 
@@ -38,7 +38,7 @@ export function AppProvider({ children }) {
 
 	const onLogout = async () => {
 		await signOut(getAuth(app));
-		deleteApp(app);
+		app && deleteApp(app);
 		setApp(undefined);
 		setConfig(undefined);
 		window.localStorage.removeItem("has_logged_in");

@@ -14,7 +14,7 @@ import _ from "underscore";
 
 export default function Config() {
 	const { currentUser, logout } = useUser();
-	const { config, onConfigChange } = useApp();
+	const { config, onConfigChange, onLogout } = useApp();
 	const [input, setInput] = useState(
 		config ? JSON.stringify(_.omit(config, "password"), null, 4) : ""
 	);
@@ -84,7 +84,10 @@ export default function Config() {
 						</Button>
 						<Button
 							variant="link"
-							onClick={logout}
+							onClick={async () => {
+								await onLogout();
+								await logout();
+							}}
 							leftIcon={<FontAwesomeIcon icon={faSignOutAlt} />}
 							_focus={{ outline: "none" }}
 						>
