@@ -7,10 +7,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 export default function Login() {
-	const { login, currentUser } = useUser();
+	const { login, currentUser, loading: authLoading } = useUser();
 	const { config } = useApp();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -19,13 +18,13 @@ export default function Login() {
 	const router = useRouter();
 
 	useEffect(() => {
-		if (loading) return;
+		if (loading || authLoading) return;
 		if (currentUser && config) {
 			router.push("/");
 		} else if (currentUser) {
 			router.push("/config");
 		}
-	}, [currentUser, config, loading]);
+	}, [currentUser, config, loading, authLoading]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -34,11 +33,10 @@ export default function Login() {
 			setError("");
 			setLoading(true);
 			await login(email, password);
-			toast.success("You have successfully logged in.");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
-			setLoading(false);
 		}
+		setLoading(false);
 	};
 
 	return (

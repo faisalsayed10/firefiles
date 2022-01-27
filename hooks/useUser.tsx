@@ -2,12 +2,14 @@ import { auth } from "@util/firebase";
 import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
+	sendEmailVerification,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
 	User
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 type ContextValue = {
 	currentUser?: User;
@@ -46,7 +48,17 @@ export function AuthProvider({ children }) {
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (user) => {
-			setCurrentUser(user);
+			if (user && !user.emailVerified) {
+				await sendEmailVerification(user).catch((_) => {});
+				await signOut(auth).catch((_) => {});
+				toast.success(
+					"An email has been sent to your address. Please verify your email and log in again.",
+					{ duration: 5000 }
+				);
+			} else {
+				user && toast.success("You have successfully logged in.");
+				setCurrentUser(user);
+			}
 			setLoading(false);
 		});
 

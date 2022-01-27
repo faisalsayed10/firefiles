@@ -2,11 +2,10 @@ import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from 
 import CenterContainer from "@components/CenterContainer";
 import useApp from "@hooks/useApp";
 import useUser from "@hooks/useUser";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import Head from "next/head";
 
 export default function Signup() {
 	const [email, setEmail] = useState("");
@@ -14,17 +13,18 @@ export default function Signup() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { signup, currentUser } = useUser();
+	const { signup, currentUser, loading: authLoading } = useUser();
 	const { config } = useApp();
 	const router = useRouter();
 
 	useEffect(() => {
+		if (loading || authLoading) return;
 		if (currentUser && config) {
 			router.push("/");
 		} else if (currentUser) {
 			router.push("/config");
 		}
-	}, [currentUser, config]);
+	}, [currentUser, config, loading, authLoading]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -38,7 +38,6 @@ export default function Signup() {
 			setError("");
 			setLoading(true);
 			await signup(email, password);
-			toast.success("You have successfully signed up.");
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
