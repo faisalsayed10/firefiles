@@ -6,5 +6,8 @@ module.exports = {
 				destination: "/"
 			}
 		];
+	},
+	images: {
+		domains: ["s.gravatar.com"]
 	}
 };
