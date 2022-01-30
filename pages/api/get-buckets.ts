@@ -14,7 +14,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			buckets.push({ id: doc.id, ...doc.data() });
 		});
 
-		return res.status(200).json({ buckets });
+		return res.status(200).json(buckets);
 	} catch (err) {
 		console.error(err.message);
 		return res.status(500).json({ error: err.message });

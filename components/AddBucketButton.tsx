@@ -21,11 +21,13 @@ import { nanoid } from "nanoid";
 import "node_modules/video-react/dist/video-react.css";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useSWRConfig } from "swr";
 import BucketOptions from "./bucket-modals/BucketOptions";
 import FirebaseInput from "./bucket-modals/FirebaseInput";
 
 const AddBucketButton = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { mutate } = useSWRConfig();
 	const { currentUser } = useUser();
 	const [selectedType, setSelectedType] = useState<BucketType>(null);
 	const [error, setError] = useState("");
@@ -57,7 +59,7 @@ const AddBucketButton = () => {
 			}
 
 			const promise = axios.post(
-				"/api/create-bucket",
+				"/api/bucket",
 				{ data: dataToPost, name: nanoid(10), type: BucketType[selectedType] },
 				{ headers: { token: await currentUser.getIdToken() } }
 			);
@@ -67,6 +69,9 @@ const AddBucketButton = () => {
 				success: "Bucket created successfully.",
 				error: "An error occurred while creating the bucket."
 			});
+
+			promise.then(() => mutate("/api/get-buckets"));
+			onClose();
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
