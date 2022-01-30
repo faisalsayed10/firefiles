@@ -1,16 +1,16 @@
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Alert,
-  AlertIcon,
-  Flex,
-  FormControl,
-  Link,
-  Text,
-  Textarea
+	Accordion,
+	AccordionButton,
+	AccordionIcon,
+	AccordionItem,
+	AccordionPanel,
+	Alert,
+	AlertIcon,
+	Flex,
+	FormControl,
+	Link,
+	Text,
+	Textarea
 } from "@chakra-ui/react";
 import { LoadingSpinner, Player } from "video-react";
 

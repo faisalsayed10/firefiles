@@ -1,7 +1,6 @@
 import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
 import PasswordInput from "@components/PasswordInput";
-import useApp from "@hooks/useApp";
 import useUser from "@hooks/useUser";
 import Head from "next/head";
 import Link from "next/link";
@@ -10,7 +9,6 @@ import React, { useEffect, useState } from "react";
 
 export default function Login() {
 	const { login, currentUser, loading: authLoading } = useUser();
-	const { config } = useApp();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
@@ -19,12 +17,8 @@ export default function Login() {
 
 	useEffect(() => {
 		if (loading || authLoading) return;
-		if (currentUser && config) {
-			router.push("/");
-		} else if (currentUser) {
-			router.push("/config");
-		}
-	}, [currentUser, config, loading, authLoading]);
+		if (currentUser) router.push("/");
+	}, [currentUser, loading, authLoading]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();

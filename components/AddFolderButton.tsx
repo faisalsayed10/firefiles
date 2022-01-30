@@ -11,25 +11,27 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useColorModeValue,
-	useDisclosure,
+	useDisclosure
 } from "@chakra-ui/react";
 import { StorageReference } from "@firebase/storage";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ACTIONS, ReducerAction } from "hooks/useFolder";
+import useFirebase from "@hooks/useFirebase";
+import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 interface Props {
-	dispatch: React.Dispatch<ReducerAction>;
 	currentFolder: StorageReference;
 }
 
-const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
+const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
+	const router = useRouter();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<HTMLInputElement>();
+	const { addFolder } = useFirebase();
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -57,11 +59,12 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder, dispatch }) => {
 			parent: null
 		};
 
-		dispatch({ type: ACTIONS.ADD_FOLDER, payload: { childFolders: [newFolder] } });
+		addFolder(newFolder);
 
-		const localFolders = localStorage.getItem("local-folders");
+		const id = router.asPath.split("/")[2];
+		const localFolders = localStorage.getItem(`local_folders_${id}`);
 		const folders: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
-		localStorage.setItem("local-folders", JSON.stringify([...folders, newFolder]));
+		localStorage.setItem(`local_folders_${id}`, JSON.stringify([...folders, newFolder]));
 
 		toast.success("Folder Created Successfully.");
 		setName("");

@@ -1,11 +1,10 @@
 import { Box, Button, Td, Text, useClipboard } from "@chakra-ui/react";
 import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useApp from "@hooks/useApp";
+import useFirebase from "@hooks/useFirebase";
 import axios from "axios";
 import { User } from "firebase/auth";
 import { deleteObject, getStorage, ref, StorageReference } from "firebase/storage";
-import { ACTIONS, ReducerAction } from "hooks/useFolder";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -13,7 +12,6 @@ import useSWRImmutable from "swr/immutable";
 import DeleteAlert from "./DeleteAlert";
 
 interface Props {
-	dispatch: React.Dispatch<ReducerAction>;
 	file: StorageReference;
 }
 
@@ -23,9 +21,9 @@ const metaFetcher = async (url: string, user: User) => {
 	return axios.get(url, { headers: { Authorization: `Firebase ${token}` } });
 };
 
-const File: React.FC<Props> = ({ file, dispatch }) => {
+const File: React.FC<Props> = ({ file }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { app, appUser } = useApp();
+	const { app, appUser, removeFile } = useFirebase();
 	const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`;
 	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
 		metaFetcher(file_url, appUser)
@@ -45,13 +43,13 @@ const File: React.FC<Props> = ({ file, dispatch }) => {
 
 			const reference = ref(storage, `${file?.parent.fullPath}/${file.name}`);
 			deleteObject(reference).catch((e) => {});
-			dispatch({ type: ACTIONS.REMOVE_FILE, payload: { childFiles: [reference] } });
+			removeFile(reference);
 			setIsOpen(false);
 			toast.success("File deleted successfully!");
 		} catch (err) {
 			setIsOpen(false);
 			console.error(err);
-			toast.error((t) => (
+			toast.error(() => (
 				<>
 					<Text fontWeight="bold">Error deleting file!</Text>
 					<Text as="p" fontSize="sm">

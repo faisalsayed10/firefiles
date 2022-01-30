@@ -22,6 +22,7 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 			isTruncated={true}
 			width="100%"
 			px={["2", "6", "8"]}
+			my={2}
 			separator={<FontAwesomeIcon icon={faChevronRight} />}
 			fontSize="lg"
 		>
@@ -31,7 +32,9 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 					isTruncated={true}
 					_hover={{ textDecor: "none" }}
 					textColor={colorMode === "light" ? "#2D3748" : "white"}
-					onClick={() => router.push("/")}
+					onClick={() =>
+						router.push(router.asPath.replace(currentFolder.fullPath.replace(" ", "%20"), ""))
+					}
 				>
 					<FontAwesomeIcon icon={faHome} />
 				</BreadcrumbLink>
@@ -49,7 +52,13 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 									const route =
 										currentFolder.fullPath.substring(0, currentFolder.fullPath.indexOf(path)) +
 										path;
-									router.push(`/folder/${route}`);
+
+									router.push(
+										`${router.asPath.replace(
+											currentFolder.fullPath.replace(" ", "%20"),
+											""
+										)}${route}`
+									);
 								}}
 							>
 								{decodeURIComponent(path)}

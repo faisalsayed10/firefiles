@@ -13,27 +13,37 @@ import {
 import {
 	faChevronDown,
 	faDonate,
-	faEdit,
 	faFile,
 	faMoon,
 	faSignOutAlt,
 	faSun
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useApp from "@hooks/useApp";
 import useUser from "@hooks/useUser";
+import { onLogout } from "@util/helpers";
 import { useRouter } from "next/router";
 import React from "react";
 
 export default function Navbar() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const { logout } = useUser();
-	const { onLogout } = useApp();
 	const router = useRouter();
 
 	return (
 		<>
-			<Flex align="center" justify="end" px="2" mt="2" boxShadow="sm" w="full">
+			<Flex
+				align="center"
+				justify={router.route !== "/" ? "space-between" : "end"}
+				px="4"
+				mt="2"
+				boxShadow="sm"
+				w="full"
+			>
+				{router.route !== "/" ? (
+					<Button variant="link" fontWeight="bold" onClick={() => router.push("/")}>
+						Dashboard
+					</Button>
+				) : null}
 				<Box mb="2">
 					<TooltipButton
 						icon={<FontAwesomeIcon icon={colorMode === "light" ? faMoon : faSun} />}
@@ -41,7 +51,12 @@ export default function Navbar() {
 						onClick={toggleColorMode}
 					/>
 					<Menu>
-						<MenuButton h="50" as={Button} rightIcon={<FontAwesomeIcon icon={faChevronDown} />}>
+						<MenuButton
+							h="50"
+							as={Button}
+							variant="ghost"
+							rightIcon={<FontAwesomeIcon icon={faChevronDown} />}
+						>
 							Actions
 						</MenuButton>
 						<MenuList>
@@ -80,7 +95,14 @@ export default function Navbar() {
 
 const TooltipButton = ({ label, onClick, icon }) => (
 	<Tooltip label={label} hasArrow>
-		<Button w="50px" h="50px" variant="solid" _focus={{ outline: "none" }} mr="2" onClick={onClick}>
+		<Button
+			w="50px"
+			h="50px"
+			variant="outline"
+			_focus={{ outline: "none" }}
+			mr="2"
+			onClick={onClick}
+		>
 			{icon}
 		</Button>
 	</Tooltip>

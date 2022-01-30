@@ -27,7 +27,7 @@ const SkeletonRow: React.FC<Props> = ({ width }) => (
 
 const FilesTableSkeleton = () => {
   return (
-		<Box borderWidth="1px" borderRadius="lg" overflowX="auto">
+		<Box borderWidth="1px" borderRadius="lg" overflowX="auto" mx="4">
 			<Table>
 				<thead>
 					<Tr>

@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import nookies from "nookies";
 
 type ContextValue = {
 	currentUser?: User;
@@ -46,21 +47,36 @@ export function AuthProvider({ children }) {
 		return signOut(auth);
 	};
 
+	const verifyEmail = async (user: User) => {
+		try {
+			await sendEmailVerification(user);
+			await signOut(auth);
+			toast.success(
+				"An email has been sent to your address. Please verify your email and log in again.",
+				{ duration: 5000 }
+			);
+			setLoading(false);
+		} catch (err) {
+			toast.error(err.message.replace("Firebase: ", ""));
+		}
+	};
+
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (user) => {
 			if (user && !user.emailVerified) {
-				try {
-					await sendEmailVerification(user);
-					await signOut(auth);
-					toast.success(
-						"An email has been sent to your address. Please verify your email and log in again.",
-						{ duration: 5000 }
-					);
-				} catch (err) {
-					toast.error(err.message.replace("Firebase: ", ""));
-				}
+				await verifyEmail(user);
+				return;
+			}
+
+			if (!user) {
+				setCurrentUser(null);
+				nookies.destroy(null, "token");
+				nookies.set(undefined, "token", "", { path: "/" });
 			} else {
+				const token = await user.getIdToken();
 				setCurrentUser(user);
+				nookies.destroy(null, "token");
+				nookies.set(undefined, "token", token, { path: "/" });
 			}
 			setLoading(false);
 		});

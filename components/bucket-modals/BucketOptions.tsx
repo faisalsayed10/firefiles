@@ -1,10 +1,10 @@
-import { Badge, Flex, Image, SimpleGrid, Text } from '@chakra-ui/react';
-import { PROVIDERS } from '@util/globals';
-import { BucketType } from '@util/types';
-import React from 'react';
+import { Badge, Flex, Image, SimpleGrid, Text } from "@chakra-ui/react";
+import { PROVIDERS } from "@util/globals";
+import { BucketType } from "@util/types";
+import React from "react";
 
 const BucketOptions = ({ setSelectedType }) => {
-  return (
+	return (
 		<SimpleGrid minChildWidth="120px" spacing="20px" spacingY="40px" placeItems="center" mb="4">
 			{PROVIDERS.map((p) => (
 				<Flex

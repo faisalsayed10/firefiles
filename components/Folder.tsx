@@ -7,26 +7,24 @@ import {
 	faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useApp from "@hooks/useApp";
-import { ACTIONS, ReducerAction } from "@hooks/useFolder";
+import useFirebase from "@hooks/useFirebase";
 import { ContextMenu } from "chakra-ui-contextmenu";
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import DeleteAlert from "./DeleteAlert";
 
 interface Props {
-	dispatch: React.Dispatch<ReducerAction>;
 	folder: StorageReference;
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
-	childFolders: StorageReference[];
 }
 
 const deleteLocalFolder = (folder: StorageReference) => {
-	const localFolders = localStorage.getItem("local-folders");
+	const id = router.asPath.split("/")[2];
+	const localFolders = localStorage.getItem(`local_folders_${id}`);
 	if (localFolders) {
 		const folders = JSON.parse(localFolders);
 		const filtered = folders.filter((f) => !f.fullPath.includes(folder.fullPath));
-		localStorage.setItem("local-folders", JSON.stringify(filtered));
+		localStorage.setItem(`local_folders_${id}`, JSON.stringify(filtered));
 	}
 };
 
@@ -44,12 +42,12 @@ const recursiveDelete = async (folders: StorageReference[], files: StorageRefere
 	}
 };
 
-const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, dispatch }) => {
+const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const onClose = () => setIsOpen(false);
 	const router = useRouter();
 	const cancelRef = useRef();
-	const { app } = useApp();
+	const { app, removeFolder } = useFirebase();
 
 	return (
 		<ContextMenu<HTMLDivElement>
@@ -57,13 +55,13 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 				<MenuList>
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faPlus} />}
-						onClick={() => router.push(`/folder/${folder.fullPath}`)}
+						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
 					>
 						Open
 					</MenuItem>
 					<MenuItem
 						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
-						onClick={() => window.open(`/folder/${folder.fullPath}`, "_blank")}
+						onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
 					>
 						Open in new tab
 					</MenuItem>
@@ -89,12 +87,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 								const currentRef = ref(storage, decodeURIComponent(folder.fullPath) + "/");
 								const res = await listAll(currentRef);
 
-								dispatch({
-									type: ACTIONS.SET_CHILD_FOLDERS,
-									payload: {
-										childFolders: childFolders.filter((f) => f.fullPath !== folder.fullPath)
-									}
-								});
+								removeFolder(folder);
 								deleteLocalFolder(folder);
 								recursiveDelete(res.prefixes, res.items);
 							} catch (err) {
@@ -105,7 +98,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, childFolders, di
 						}}
 					/>
 					<Flex
-						onClick={() => router.push(`/folder/${folder.fullPath}`)}
+						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
 						direction="column"
 						align="center"
 						justify="space-between"
