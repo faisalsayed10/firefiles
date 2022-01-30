@@ -1,16 +1,14 @@
 import { Button, chakra, Input, useColorModeValue } from "@chakra-ui/react";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useApp from "@hooks/useApp";
+import useFirebase, { ROOT_FOLDER } from "@hooks/useFirebase";
 import { CurrentlyUploading } from "@util/types";
 import { getStorage, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
-import { ACTIONS, ReducerAction, ROOT_FOLDER } from "hooks/useFolder";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
 interface Props {
-	dispatch: React.Dispatch<ReducerAction>;
 	currentFolder: StorageReference;
 	filesToUpload: File[];
 	uploadingFiles: CurrentlyUploading[];
@@ -19,14 +17,13 @@ interface Props {
 }
 
 const UploadFileButton: React.FC<Props> = ({
-	dispatch,
 	currentFolder,
 	filesToUpload,
 	setFilesToUpload,
 	uploadingFiles,
 	setUploadingFiles
 }) => {
-	const { app, appUser } = useApp();
+	const { app, appUser, addFile } = useFirebase();
 	const fileInput = useRef<HTMLInputElement>();
 
 	useEffect(() => {
@@ -93,7 +90,7 @@ const UploadFileButton: React.FC<Props> = ({
 						});
 					});
 
-					dispatch({ type: ACTIONS.ADD_FILE, payload: { childFiles: [fileRef] } });
+					addFile(fileRef);
 					toast.success("File uploaded successfully.");
 					setFilesToUpload([]);
 				}

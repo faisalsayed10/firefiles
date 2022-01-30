@@ -28,9 +28,6 @@ const Error = () => {
 					<Button mb="1" variant="solid" w="full" onClick={() => router.push("/")}>
 						Back to Home
 					</Button>
-					<Button variant="solid" w="full" onClick={() => router.push("/config")}>
-						Edit Firebase Config
-					</Button>
 				</Box>
 			</CenterContainer>
 		</>

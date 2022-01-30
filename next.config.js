@@ -2,9 +2,12 @@ module.exports = {
 	async rewrites() {
 		return [
 			{
-				source: "/folder/:id*",
-				destination: "/"
+				source: "/buckets/:id/:folderId*",
+				destination: "/buckets/:id"
 			}
 		];
+	},
+	images: {
+		domains: ["s.gravatar.com"]
 	}
 };

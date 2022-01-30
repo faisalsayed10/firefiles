@@ -3,8 +3,8 @@ import React from "react";
 
 const FilesEmptyState = () => (
   <Flex
-    width="100%"
     p={["8", "16", "16"]}
+    mx="4"
     borderWidth="1px"
     borderRadius="lg"
     justify="center"

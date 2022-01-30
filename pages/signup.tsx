@@ -1,6 +1,5 @@
 import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/CenterContainer";
-import useApp from "@hooks/useApp";
 import useUser from "@hooks/useUser";
 import Head from "next/head";
 import Link from "next/link";
@@ -14,17 +13,12 @@ export default function Signup() {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const { signup, currentUser, loading: authLoading } = useUser();
-	const { config } = useApp();
 	const router = useRouter();
 
 	useEffect(() => {
 		if (loading || authLoading) return;
-		if (currentUser && config) {
-			router.push("/");
-		} else if (currentUser) {
-			router.push("/config");
-		}
-	}, [currentUser, config, loading, authLoading]);
+		if (currentUser) router.push("/");
+	}, [currentUser, loading, authLoading]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();

@@ -1,202 +1,145 @@
-import { Box, Center, Progress, SimpleGrid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
-import AddFolderButton from "@components/AddFolderButton";
-import FilesEmptyState from "@components/FilesEmptyState";
-import FilesTable from "@components/FilesTable";
-import FilesTableSkeleton from "@components/FilesTableSkeleton";
-import FolderBreadCrumbs from "@components/FolderBreadCrumbs";
-import FolderGrid from "@components/FolderGrid";
+import {
+	Box,
+	Button,
+	Divider,
+	Flex,
+	Grid,
+	IconButton,
+	Image,
+	Skeleton,
+	Tag,
+	Text
+} from "@chakra-ui/react";
+import AddBucketButton from "@components/AddBucketButton";
 import Navbar from "@components/Navbar";
-import UploadFileButton from "@components/UploadFileButton";
-import { CurrentlyUploading } from "@util/types";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
+import { PROVIDERS } from "@util/globals";
+import { deleteBucket } from "@util/helpers";
+import { Bucket, BucketType } from "@util/types";
+import axios from "axios";
+import gravatar from "gravatar";
 import Head from "next/head";
-import { NextRouter, useRouter } from "next/router";
-import React, { useEffect, useMemo, useState } from "react";
-import Dropzone from "react-dropzone";
-import LoadingOverlay from "react-loading-overlay";
-import useFolder from "@hooks/useFolder";
-import useApp from "@hooks/useApp";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+import toast from "react-hot-toast";
+import useSWR from "swr";
 
-const getFolderPath = (router: NextRouter) => {
-	const pathArray = router.asPath.split("/");
-	return pathArray.slice(2).join("/");
-};
-
-const baseStyle = {
-	outline: "none",
-	transition: "border .2s ease-in-out"
-};
-
-const activeStyle = {
-	borderWidth: 2,
-	borderRadius: 2,
-	borderStyle: "dashed",
-	borderColor: "#2196f3",
-	backgroundColor: "rgba(0, 0, 0, 0.25)"
-};
-
-export default function Index() {
+const Dashboard = () => {
 	const router = useRouter();
-	const [folderPath, setFolderPath] = useState(getFolderPath(router));
-	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
-	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
-	const [isDragging, setIsDragging] = useState(false);
-	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { currentUser } = useUser();
-	const { config, app, appUser } = useApp();
-	const { colorMode } = useColorMode();
-	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
-	const { folder, childFolders, childFiles, loading, foldersLoading, dispatch } = useFolder(
-		decodeURIComponent(folderPath)
+	const { currentUser, loading: authLoading } = useUser();
+	const fetcher = async (key?: string) =>
+		axios.get(key, { headers: { token: await currentUser.getIdToken() } }).then(({ data }) => data);
+	const { data, error, isValidating, mutate } = useSWR<Bucket[]>(
+		currentUser ? `/api/get-buckets` : null,
+		fetcher,
+		{ revalidateOnFocus: false, errorRetryCount: 1 }
 	);
 
 	useEffect(() => {
-		setFolderPath(getFolderPath(router));
-	}, [router.asPath]);
-
-	useEffect(() => {
+		if (authLoading) return;
 		if (!currentUser) {
 			router.push("/login");
-		} else if (!config) {
-			router.push("/config");
 		}
-	}, [currentUser]);
+	}, [currentUser, authLoading]);
+
+	if (error) toast.error("An error occurred while fetching buckets");
 
 	return (
 		<>
 			<Head>
-				<title>firefiles - Your Files</title>
+				<title>Firefiles - Dashboard</title>
 				<meta charSet="utf-8" />
 			</Head>
-			<LoadingOverlay
-				active={isFolderDeleting}
-				spinner={true}
-				text={`Deleting Files... \nPlease DO NOT close this tab.`}
-			>
-				<Dropzone
-					onDrop={(files) => {
-						setDraggedFilesToUpload(files);
-						setIsDragging(false);
-					}}
-					disabled={!app || !appUser}
-					noClick
-					onDragOver={() => setIsDragging(true)}
-					onDragLeave={() => setIsDragging(false)}
-				>
-					{({ getRootProps, getInputProps }) => (
-						<Box {...getRootProps({ style })} minH="93vh">
-							<input {...getInputProps()} />
-							<Text
-								hidden={!isDragging}
-								fontSize={["2xl", "3xl", "3xl"]}
-								opacity="0.9"
-								color={colorMode === "light" ? "gray.700" : "gray.300"}
-								fontWeight="700"
-								textTransform="uppercase"
-								align="center"
-								pos="absolute"
-								top="50%"
-								left="50%"
-								w="full"
-								transform="translate(-50%, -50%)"
-								p="0"
-								px="2"
-								m="0"
-							>
-								Drop files anywhere on the screen
+			<Flex flexDir="column">
+				<Navbar />
+				<Flex my="4" flexDir={["column", "row", "row", "row"]} mx={["4", "8", "12"]}>
+					<Image
+						src={gravatar.url(currentUser?.email, { s: "110", protocol: "https" })}
+						maxW="110px"
+						maxH="110px"
+						ml="4"
+						borderRadius="50%"
+					/>
+					<Box ml="4">
+						<Text as="h1" fontSize="2xl" fontWeight="semibold">
+							👋 Hello There!
+						</Text>
+						<Flex align="baseline">
+							<Text>
+								<strong>Your Email:</strong> {currentUser?.email}
 							</Text>
-							<Navbar />
-							<Box width="100%" px={["4", "6", "8"]} py="4">
-								<FolderBreadCrumbs currentFolder={folder} />
-								<hr style={{ marginBottom: "2rem" }} />
-								<Box>
-									{foldersLoading && (
-										<>
-											<SimpleGrid columns={[2, 4, 6]} spacing="10px">
-												<Skeleton h="110px" w="110px" borderRadius="3px" />
-												<Skeleton h="110px" w="110px" borderRadius="3px" />
-												<Skeleton h="110px" w="110px" borderRadius="3px" />
-												<Skeleton h="110px" w="110px" borderRadius="3px" />
-											</SimpleGrid>
-											<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
-										</>
-									)}
-									{childFolders?.length > 0 ? (
-										<>
-											<FolderGrid
-												dispatch={dispatch}
-												childFolders={childFolders}
-												currentFolder={folder}
-												setIsFolderDeleting={setIsFolderDeleting}
-											/>
-											<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
-										</>
-									) : (
-										!foldersLoading && (
-											<>
-												<AddFolderButton dispatch={dispatch} currentFolder={folder} />
-												<hr style={{ marginTop: "2rem", marginBottom: "2rem" }} />
-											</>
-										)
-									)}
-									{loading && (
-										<>
-											<Text fontSize="3xl" fontWeight="600" mb={4}>
-												Your Files
-											</Text>
-											<FilesTableSkeleton />
-										</>
-									)}
-									{!loading && childFiles?.length === 0 && (
-										<>
-											<Text fontSize="3xl" fontWeight="600" mb={4}>
-												Your Files
-											</Text>
-											<FilesEmptyState />
-										</>
-									)}
-									{childFiles?.length > 0 && (
-										<>
-											<Text fontSize="3xl" fontWeight="600" mb={4}>
-												Your Files
-											</Text>
-											<FilesTable dispatch={dispatch} childFiles={childFiles} />
-										</>
-									)}
-								</Box>
-							</Box>
-						</Box>
-					)}
-				</Dropzone>
-				<UploadFileButton
-					dispatch={dispatch}
-					filesToUpload={draggedFilesToUpload}
-					setFilesToUpload={setDraggedFilesToUpload}
-					currentFolder={folder}
-					uploadingFiles={uploadingFiles}
-					setUploadingFiles={setUploadingFiles}
-				/>
-			</LoadingOverlay>
-			{uploadingFiles.length > 0 && (
-				<Center>
-					<Box
-						borderRadius="sm"
-						px="4"
-						pos="fixed"
-						bottom="5%"
-						width={["90vw", "60vw", "60vw"]}
-						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
-						backgroundColor={colorMode === "dark" ? "gray.700" : "white"}
-					>
-						{uploadingFiles.map((file) => (
-							<Box key={file.id} my="4">
-								<Text fontSize="md">{`Uploading ${file.name} (${file.progress}%)`}</Text>
-								<Progress hasStripe value={file.progress} height="5px" />
-							</Box>
-						))}
+						</Flex>
+						<Flex align="baseline">
+							<strong>Current Plan: </strong>
+							<Tag variant="solid" colorScheme="purple" ml="1">
+								Free Plan
+							</Tag>
+							<Button variant="link" ml="1">
+								Upgrade
+							</Button>
+						</Flex>
+						<Button variant="link">View Payment Settings</Button>
 					</Box>
-				</Center>
-			)}
+				</Flex>
+				<Divider />
+				<Box mx={["4", "8", "12"]}>
+					<Text as="h1" fontSize="3xl" fontWeight="600" my="3">
+						Your Buckets
+					</Text>
+					<Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={6}>
+						{!data && isValidating ? (
+							<>
+								<Skeleton borderRadius="3px" />
+								<Skeleton borderRadius="3px" />
+								<Skeleton borderRadius="3px" />
+								<Skeleton borderRadius="3px" />
+							</>
+						) : (
+							data?.map((bucket) => (
+								<Flex
+									key={bucket.id}
+									transition="ease-in-out 0.1s"
+									align="center"
+									pos="relative"
+									cursor="pointer"
+									className="hoverAnim"
+									onClick={() => router.push(`/buckets/${bucket.id}`)}
+								>
+									<Image
+										m="0 auto"
+										src={PROVIDERS.filter((p) => p.id === bucket.type)[0].logo}
+										h="80px"
+									/>
+									<IconButton
+										colorScheme="red"
+										pos="absolute"
+										bottom="2"
+										right="0"
+										variant="link"
+										aria-label="delete bucket"
+										icon={<FontAwesomeIcon icon={faTrash} />}
+										onClick={async (e) => {
+											e.stopPropagation();
+											await deleteBucket(
+												BucketType[bucket.type],
+												await currentUser.getIdToken(),
+												bucket.id
+											);
+
+											mutate(data.filter((b) => b.id !== bucket.id));
+										}}
+									/>
+								</Flex>
+							))
+						)}
+						<AddBucketButton />
+					</Grid>
+				</Box>
+			</Flex>
 		</>
 	);
-}
+};
+
+export default Dashboard;
