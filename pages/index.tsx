@@ -15,6 +15,7 @@ import Navbar from "@components/Navbar";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
+import { sendEvent } from "@util/firebase";
 import { PROVIDERS } from "@util/globals";
 import { deleteBucket } from "@util/helpers";
 import { Bucket, BucketType } from "@util/types";
@@ -129,6 +130,7 @@ const Dashboard = () => {
 											);
 
 											mutate(data.filter((b) => b.id !== bucket.id));
+											sendEvent("bucket_delete", {});
 										}}
 									/>
 								</Flex>

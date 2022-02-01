@@ -1,12 +1,12 @@
+import { sendEvent } from "@util/firebase";
 import { Bucket, Config } from "@util/types";
 import axios from "axios";
-import { deleteApp, FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
+import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
 	createUserWithEmailAndPassword,
 	getAuth,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
-	signOut,
 	User
 } from "firebase/auth";
 import { getStorage, list, ref, StorageReference } from "firebase/storage";
@@ -113,6 +113,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 					await createUserWithEmailAndPassword(auth, email, password).then(() => setLoggedIn());
 				} else {
 					router.push("/error?message=" + err.message);
+					sendEvent("bucket_error", { type: data.type, message: err.message });
 				}
 			});
 

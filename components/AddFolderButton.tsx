@@ -17,6 +17,7 @@ import { StorageReference } from "@firebase/storage";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
+import { sendEvent } from "@util/firebase";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -67,6 +68,8 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 		localStorage.setItem(`local_folders_${id}`, JSON.stringify([...folders, newFolder]));
 
 		toast.success("Folder Created Successfully.");
+		sendEvent("folder_create", {});
+
 		setName("");
 		setLoading(false);
 		onClose();

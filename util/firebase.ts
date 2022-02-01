@@ -1,6 +1,7 @@
 import { initializeApp } from "@firebase/app";
 import { getAuth } from "@firebase/auth";
 import { getFirestore } from "@firebase/firestore";
+import { getAnalytics, logEvent } from "@firebase/analytics";
 
 const app = initializeApp({
 	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,4 +13,9 @@ const app = initializeApp({
 
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+
+const analytics = getAnalytics(app);
+export const sendEvent = (event: string, properties: object) =>
+	logEvent(analytics, event, properties);
+
 export default app;

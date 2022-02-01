@@ -14,6 +14,7 @@ import {
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
+import { sendEvent } from "@util/firebase";
 import { BucketType } from "@util/types";
 import axios from "axios";
 import toObject from "convert-to-object";
@@ -70,10 +71,14 @@ const AddBucketButton = () => {
 				error: "An error occurred while creating the bucket."
 			});
 
-			promise.then(() => mutate("/api/get-buckets"));
+			promise.then(() => {
+				mutate("/api/get-buckets");
+				sendEvent("bucket_create", { type: BucketType[selectedType] });
+			});
 			onClose();
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
+			sendEvent("bucket_create_error", { message: err.message });
 		}
 
 		setLoading(false);

@@ -2,6 +2,7 @@ import { Button, chakra, Input, useColorModeValue } from "@chakra-ui/react";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase, { ROOT_FOLDER } from "@hooks/useFirebase";
+import { sendEvent } from "@util/firebase";
 import { CurrentlyUploading } from "@util/types";
 import { getStorage, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
 import { nanoid } from "nanoid";
@@ -96,6 +97,7 @@ const UploadFileButton: React.FC<Props> = ({
 				}
 			);
 		}
+		sendEvent("file_upload", { count: files.length });
 	};
 
 	return (

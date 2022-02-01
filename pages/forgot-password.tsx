@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import Head from "next/head";
 import toast from "react-hot-toast";
+import { sendEvent } from "@util/firebase";
 
 const ForgotPassword = () => {
 	const { reset } = useUser();
@@ -30,6 +31,7 @@ const ForgotPassword = () => {
 			setError("");
 			setLoading(true);
 			await reset(email);
+			sendEvent("reset_password", { email });
 			toast.success("Check your inbox! :)");
 			setTimeout(() => {
 				router.push("/login");

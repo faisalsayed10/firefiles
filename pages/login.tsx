@@ -2,6 +2,7 @@ import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from 
 import CenterContainer from "@components/CenterContainer";
 import PasswordInput from "@components/PasswordInput";
 import useUser from "@hooks/useUser";
+import { sendEvent } from "@util/firebase";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -27,6 +28,7 @@ export default function Login() {
 			setError("");
 			setLoading(true);
 			await login(email, password);
+			sendEvent("login", { email });
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}
