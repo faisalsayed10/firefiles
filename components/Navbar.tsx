@@ -11,6 +11,7 @@ import {
 	useColorMode
 } from "@chakra-ui/react";
 import {
+	faArrowCircleLeft,
 	faChevronDown,
 	faDonate,
 	faFile,
@@ -40,7 +41,12 @@ export default function Navbar() {
 				w="full"
 			>
 				{router.route !== "/" ? (
-					<Button variant="link" fontWeight="bold" onClick={() => router.push("/")}>
+					<Button
+						variant="link"
+						leftIcon={<FontAwesomeIcon icon={faArrowCircleLeft} />}
+						fontWeight="bold"
+						onClick={() => router.push("/")}
+					>
 						Dashboard
 					</Button>
 				) : null}
