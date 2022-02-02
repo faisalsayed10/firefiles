@@ -1,7 +1,20 @@
-import { Box, Button, Td, Text, useClipboard } from "@chakra-ui/react";
+import {
+	Box,
+	Button,
+	Modal,
+	ModalCloseButton,
+	ModalContent,
+	ModalOverlay,
+	Td,
+	Text,
+	useClipboard,
+	useDisclosure
+} from "@chakra-ui/react";
 import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
+import { sendEvent } from "@util/firebase";
+import { download } from "@util/helpers";
 import axios from "axios";
 import { User } from "firebase/auth";
 import { deleteObject, getStorage, ref, StorageReference } from "firebase/storage";
@@ -10,16 +23,17 @@ import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import useSWRImmutable from "swr/immutable";
 import DeleteAlert from "./DeleteAlert";
+import FilePreview from "./FilePreview";
 
 interface Props {
 	file: StorageReference;
 }
 
 const firebase_url = `https://firebasestorage.googleapis.com/v0/b`;
-const metaFetcher = async (url: string, user: User) => {
-	const token = await user.getIdToken();
-	return axios.get(url, { headers: { Authorization: `Firebase ${token}` } });
-};
+const metaFetcher = async (url: string, user: User) =>
+	axios
+		.get(url, { headers: { Authorization: `Firebase ${await user.getIdToken()}` } })
+		.then(({ data }) => data);
 
 const File: React.FC<Props> = ({ file }) => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -28,12 +42,14 @@ const File: React.FC<Props> = ({ file }) => {
 	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
 		metaFetcher(file_url, appUser)
 	);
-	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.data?.downloadTokens}`);
+	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.downloadTokens}`);
+	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 	const cancelRef = useRef();
 
 	const handleClick = () => {
 		onCopy();
 		toast.success("File URL copied to clipboard!");
+		sendEvent("file_share", {});
 	};
 
 	const deleteFile = async () => {
@@ -42,10 +58,11 @@ const File: React.FC<Props> = ({ file }) => {
 			const storage = getStorage(app);
 
 			const reference = ref(storage, `${file?.parent.fullPath}/${file.name}`);
-			deleteObject(reference).catch((e) => {});
+			deleteObject(reference).catch((_) => {});
 			removeFile(reference);
 			setIsOpen(false);
 			toast.success("File deleted successfully!");
+			sendEvent("file_delete", {});
 		} catch (err) {
 			setIsOpen(false);
 			console.error(err);
@@ -61,40 +78,58 @@ const File: React.FC<Props> = ({ file }) => {
 	};
 
 	return (
-		<Box as="tr">
-			<Td fontWeight="medium" isTruncated maxW={["250px", "300px", "300px"]}>
-				{file.name}
-			</Td>
-			<Td minW="110px">{data?.data && prettyBytes(parseInt(data?.data.size) || 0)}</Td>
-			<Td align="center">
-				<Button onClick={handleClick} isLoading={!data?.data} variant="outline" colorScheme="blue">
-					<FontAwesomeIcon icon={faCopy} />
-				</Button>
-			</Td>
-			<Td align="center">
-				<a
-					href={`${file_url}?alt=media&token=${data?.data?.downloadTokens}`}
-					target="_blank"
-					rel="noreferrer"
-					download={`${file_url}?alt=media&token=${data?.data?.downloadTokens}`}
+		<>
+			<Box as="tr">
+				<Td
+					fontWeight="medium"
+					isTruncated
+					maxW={["250px", "300px", "300px"]}
+					onClick={onPreviewOpen}
 				>
-					<Button isLoading={!data?.data} variant="outline" colorScheme="blue">
+					{file.name}
+				</Td>
+				<Td minW="110px">{data && prettyBytes(parseInt(data.size) || 0)}</Td>
+				<Td align="center">
+					<Button onClick={handleClick} isLoading={!data} variant="outline" colorScheme="blue">
+						<FontAwesomeIcon icon={faCopy} />
+					</Button>
+				</Td>
+				<Td align="center">
+					<Button
+						isLoading={!data}
+						variant="outline"
+						colorScheme="blue"
+						onClick={() =>
+							download(file.name, `${file_url}?alt=media&token=${data?.downloadTokens}`)
+						}
+					>
 						<FontAwesomeIcon icon={faDownload} />
 					</Button>
-				</a>
-			</Td>
-			<Td>
-				<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="red">
-					<FontAwesomeIcon icon={faTrash} />
-				</Button>
-				<DeleteAlert
-					isOpen={isOpen}
-					onClose={() => setIsOpen(false)}
-					cancelRef={cancelRef}
-					onClick={deleteFile}
-				/>
-			</Td>
-		</Box>
+				</Td>
+				<Td>
+					<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="red">
+						<FontAwesomeIcon icon={faTrash} />
+					</Button>
+					<DeleteAlert
+						isOpen={isOpen}
+						onClose={() => setIsOpen(false)}
+						cancelRef={cancelRef}
+						onClick={deleteFile}
+					/>
+				</Td>
+			</Box>
+			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered>
+				<ModalOverlay />
+				<ModalContent p="0">
+					<ModalCloseButton />
+					<FilePreview
+						mimetype={data?.contentType}
+						url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+						file={file}
+					/>
+				</ModalContent>
+			</Modal>
+		</>
 	);
 };
 

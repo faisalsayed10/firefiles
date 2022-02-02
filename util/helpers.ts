@@ -36,3 +36,29 @@ export const onLogout = async () => {
 		window.localStorage.removeItem(`local_folders_${app.name}`);
 	});
 };
+
+export const download = async (name: string, url: string) => {
+	try {
+		const res = await fetch(url);
+		const blob = await res.blob();
+		const reader = new FileReader();
+		await new Promise((resolve, reject) => {
+			reader.onload = resolve;
+			reader.onerror = reject;
+			reader.readAsDataURL(blob);
+		});
+		const base64 = (reader.result as string).replace(
+			/^data:.+;base64,/,
+			"data:application/octet-stream;base64,"
+		);
+
+		const a = document.createElement("a");
+		a.href = base64;
+		a.download = name;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	} catch (err) {
+		window.open(url, "_blank");
+	}
+};
