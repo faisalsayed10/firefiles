@@ -2,6 +2,7 @@ import {
 	Box,
 	Button,
 	Modal,
+	ModalBody,
 	ModalCloseButton,
 	ModalContent,
 	ModalOverlay,
@@ -85,6 +86,9 @@ const File: React.FC<Props> = ({ file }) => {
 					isTruncated
 					maxW={["250px", "300px", "300px"]}
 					onClick={onPreviewOpen}
+					textDecor="underline"
+					cursor="pointer"
+					_hover={{ textDecor: "none" }}
 				>
 					{file.name}
 				</Td>
@@ -118,15 +122,17 @@ const File: React.FC<Props> = ({ file }) => {
 					/>
 				</Td>
 			</Box>
-			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered>
+			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
 				<ModalOverlay />
 				<ModalContent p="0">
-					<ModalCloseButton />
-					<FilePreview
-						mimetype={data?.contentType}
-						url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
-						file={file}
-					/>
+					<ModalCloseButton _focus={{ outline: "none", border: "none" }} />
+					<ModalBody p="0">
+						<FilePreview
+							mimetype={data?.contentType}
+							url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+							file={file}
+						/>
+					</ModalBody>
 				</ModalContent>
 			</Modal>
 		</>
