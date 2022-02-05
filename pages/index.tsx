@@ -10,8 +10,8 @@ import {
 	Tag,
 	Text
 } from "@chakra-ui/react";
-import AddBucketButton from "@components/AddBucketButton";
-import Navbar from "@components/Navbar";
+import AddBucketButton from "@components/ui/AddBucketButton";
+import Navbar from "@components/ui/Navbar";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";

@@ -23,8 +23,8 @@ import "node_modules/video-react/dist/video-react.css";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useSWRConfig } from "swr";
-import BucketOptions from "./bucket-modals/BucketOptions";
-import FirebaseInput from "./bucket-modals/FirebaseInput";
+import BucketOptions from "../popups/BucketOptions";
+import FirebaseInput from "../popups/FirebaseInput";
 
 const AddBucketButton = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();

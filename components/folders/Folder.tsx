@@ -12,7 +12,7 @@ import { sendEvent } from "@util/firebase";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
-import DeleteAlert from "./DeleteAlert";
+import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
 	folder: StorageReference;

@@ -1,5 +1,5 @@
 import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
-import CenterContainer from "@components/CenterContainer";
+import CenterContainer from "@components/ui/CenterContainer";
 import useUser from "@hooks/useUser";
 import { sendEvent } from "@util/firebase";
 import Head from "next/head";

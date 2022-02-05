@@ -1,5 +1,4 @@
 import {
-	Box,
 	Button,
 	Modal,
 	ModalBody,
@@ -8,6 +7,7 @@ import {
 	ModalOverlay,
 	Td,
 	Text,
+	Tr,
 	useClipboard,
 	useDisclosure
 } from "@chakra-ui/react";
@@ -19,11 +19,13 @@ import { download } from "@util/helpers";
 import axios from "axios";
 import { User } from "firebase/auth";
 import { deleteObject, getStorage, ref, StorageReference } from "firebase/storage";
+import { nanoid } from "nanoid";
 import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import useSWRImmutable from "swr/immutable";
-import DeleteAlert from "./DeleteAlert";
+import DeleteAlert from "../popups/DeleteAlert";
+import FileIcon from "./FileIcon";
 import FilePreview from "./FilePreview";
 
 interface Props {
@@ -40,6 +42,7 @@ const File: React.FC<Props> = ({ file }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const { app, appUser, removeFile } = useFirebase();
 	const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`;
+	const [id] = useState(nanoid());
 	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
 		metaFetcher(file_url, appUser)
 	);
@@ -80,7 +83,10 @@ const File: React.FC<Props> = ({ file }) => {
 
 	return (
 		<>
-			<Box as="tr">
+			<Tr>
+				<Td maxW="36px">
+					<FileIcon extension={file.name.split(".").pop()} id={id} />
+				</Td>
 				<Td
 					fontWeight="medium"
 					isTruncated
@@ -93,12 +99,12 @@ const File: React.FC<Props> = ({ file }) => {
 					{file.name}
 				</Td>
 				<Td minW="110px">{data && prettyBytes(parseInt(data.size) || 0)}</Td>
-				<Td align="center">
+				<Td textAlign="center">
 					<Button onClick={handleClick} isLoading={!data} variant="outline" colorScheme="blue">
 						<FontAwesomeIcon icon={faCopy} />
 					</Button>
 				</Td>
-				<Td align="center">
+				<Td textAlign="center">
 					<Button
 						isLoading={!data}
 						variant="outline"
@@ -110,7 +116,7 @@ const File: React.FC<Props> = ({ file }) => {
 						<FontAwesomeIcon icon={faDownload} />
 					</Button>
 				</Td>
-				<Td>
+				<Td textAlign="center">
 					<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="red">
 						<FontAwesomeIcon icon={faTrash} />
 					</Button>
@@ -121,7 +127,7 @@ const File: React.FC<Props> = ({ file }) => {
 						onClick={deleteFile}
 					/>
 				</Td>
-			</Box>
+			</Tr>
 			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
 				<ModalOverlay />
 				<ModalContent p="0">

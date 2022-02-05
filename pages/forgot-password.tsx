@@ -9,7 +9,7 @@ import {
 	Link,
 	Text
 } from "@chakra-ui/react";
-import CenterContainer from "@components/CenterContainer";
+import CenterContainer from "@components/ui/CenterContainer";
 import useUser from "@hooks/useUser";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
