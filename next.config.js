@@ -1,4 +1,6 @@
-module.exports = {
+const removeImports = require("next-remove-imports")();
+
+module.exports = removeImports({
 	async rewrites() {
 		return [
 			{
@@ -7,7 +9,6 @@ module.exports = {
 			}
 		];
 	},
-	images: {
-		domains: ["s.gravatar.com"]
-	}
-};
+	images: { domains: ["s.gravatar.com"] },
+	experimental: { esmExternals: true }
+});

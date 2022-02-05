@@ -11,17 +11,33 @@ import {
 	Text,
 	Th,
 	Thead,
-	Tr
+	Tr,
+	useColorMode
 } from "@chakra-ui/react";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
+import "@uiw/react-markdown-preview/markdown.css";
+import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
+import "@uiw/react-textarea-code-editor/dist.css";
 import { download } from "@util/helpers";
 import { StorageReference } from "firebase/storage";
+import dynamic from "next/dynamic";
 import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { LoadingSpinner, Player } from "video-react";
+
+const CodeEditor: React.ComponentType<TextareaCodeEditorProps> = dynamic(
+	() => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
+	{ ssr: false }
+);
+
+const MarkdownPreview: React.ComponentType<MarkdownPreviewProps> = dynamic(
+	() => import("@uiw/react-markdown-preview").then((mod) => mod.default),
+	{ ssr: false }
+);
 
 type Props = {
 	mimetype: string;
@@ -31,7 +47,39 @@ type Props = {
 
 const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 	const [isError, setIsError] = useState(false);
+	const [showRaw, setShowRaw] = useState(false);
+	const [rawMd, setRawMd] = useState(false);
+	const [text, setText] = useState("");
+
 	const extension = file.name.split(".").pop();
+	const { colorMode } = useColorMode();
+
+	const codeEditorStyles: React.CSSProperties = useMemo(
+		() => ({
+			height: "98%",
+			color: colorMode === "light" ? "#2D3748" : "#FFFFFF",
+			fontSize: 13,
+			backgroundColor: colorMode === "light" ? "#FFFFFF" : "#2D3748",
+			overflowY: "auto",
+			fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace"
+		}),
+		[colorMode]
+	);
+
+	useEffect(() => {
+		if (
+			mimetype.startsWith("text") ||
+			mimetype === "application/json" ||
+			mimetype === "text/markdown" ||
+			extension === "md" ||
+			showRaw
+		) {
+			(async () => {
+				const raw = await fetch(url).then((res) => res.text());
+				setText(raw);
+			})();
+		}
+	}, [showRaw]);
 
 	if (isError) {
 		return <Error file={file} url={url} />;
@@ -72,11 +120,44 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 		);
 	} else if (/^docx?$|^xlsx?$|^pptx?$/.test(extension)) {
 		return <GoogleDocsViewer file={file} url={url} />;
-	} else if (mimetype.startsWith("text") || mimetype === "application/json") {
-		return <>text viewer</>;
+	} else if (mimetype === "text/markdown" || extension === "md") {
+		return (
+			<Box height="600px">
+				<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
+					{!rawMd ? "View Raw" : "View Parsed"}
+				</Button>
+				{!rawMd ? (
+					<MarkdownPreview
+						source={text}
+						disallowedElements={["script"]}
+						style={{ height: "90%", overflowY: "auto", padding: 15 }}
+					/>
+				) : (
+					<CodeEditor
+						value={text}
+						disabled
+						language={extension}
+						padding={15}
+						style={codeEditorStyles}
+					/>
+				)}
+			</Box>
+		);
+	} else if (mimetype.startsWith("text") || mimetype === "application/json" || showRaw) {
+		return (
+			<Box height="600px">
+				<CodeEditor
+					value={text}
+					disabled
+					language={extension}
+					padding={15}
+					style={{ ...codeEditorStyles, marginTop: 40 }}
+				/>
+			</Box>
+		);
 	}
 
-	return <NoPreview file={file} url={url} />;
+	return <NoPreview file={file} url={url} setShowRaw={setShowRaw} />;
 };
 
 const Error = ({ file, url }) => {
@@ -110,14 +191,14 @@ const Error = ({ file, url }) => {
 	);
 };
 
-const NoPreview = ({ file, url }) => {
+const NoPreview = ({ file, url, setShowRaw }) => {
 	return (
 		<Flex flexDir="column" align="center" justify="center" p="6">
 			<Text as="h1" fontSize="2xl" mb="4" align="center">
 				Preview not available
 			</Text>
 			<ButtonGroup>
-				<Button>Show Raw</Button>
+				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
 				<Button
 					leftIcon={<FontAwesomeIcon icon={faDownload} />}
 					onClick={() => download(file.name, url)}
