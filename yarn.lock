@@ -3397,6 +3397,11 @@ figures@^3.0.0:
   dependencies:
     escape-string-regexp "^1.0.5"
 
+file-icon-vectors@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/file-icon-vectors/-/file-icon-vectors-1.0.0.tgz#eccdc849d8d3a815dd8b653b2e68eacc6f4b07c3"
+  integrity sha512-me+C0t1IU+ggE31CpZNImXID8HV8/eD4eO8go4RwLLZdMaIFr25x23m1xmzYBZH3r/FxyMbbQkD0SNGnRC4meg==
+
 file-selector@^0.2.2:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/file-selector/-/file-selector-0.2.4.tgz#7b98286f9dbb9925f420130ea5ed0a69238d4d80"
