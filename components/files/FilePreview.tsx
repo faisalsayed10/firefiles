@@ -14,7 +14,7 @@ import {
 	Tr,
 	useColorMode
 } from "@chakra-ui/react";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -74,10 +74,10 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 			extension === "md" ||
 			showRaw
 		) {
-			(async () => {
-				const raw = await fetch(url).then((res) => res.text());
-				setText(raw);
-			})();
+			fetch(url)
+				.then((res) => res.text())
+				.then((text) => setText(text))
+				.catch((err) => setIsError(true));
 		}
 	}, [showRaw]);
 
@@ -175,7 +175,7 @@ const Error = ({ file, url }) => {
 			</Text>
 			<ButtonGroup>
 				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
+					leftIcon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
 					onClick={() => window.open(url, "_blank")}
 				>
 					Open in new tab
@@ -245,26 +245,20 @@ const CsvViewer = ({ file, url }) => {
 
 	useEffect(() => {
 		if (!file || !url) return;
-		(async () => {
-			const res = await urlToFile(url, file.name);
-			setRawFile(res);
-		})();
+		try {
+			urlToFile(url, file.name).then((file) => setRawFile(file));
+		} catch (err) {
+			throw err.message;
+		}
 	}, [file, url]);
 
 	useEffect(() => {
 		if (!rawFile) return;
-		Papa.parse(rawFile, {
-			header: true,
-			dynamicTyping: true,
-			complete: handleDataChange
-		});
+		Papa.parse(rawFile, { header: true, dynamicTyping: true, complete: handleDataChange });
 	}, [rawFile]);
 
-	const makeColumns = (rawColumns) => {
-		return rawColumns.map((column) => {
-			return { Header: column, accessor: column };
-		});
-	};
+	const makeColumns = (rawColumns) =>
+		rawColumns.map((column) => ({ Header: column, accessor: column }));
 
 	const handleDataChange = (file) => {
 		file.data.pop();
@@ -299,10 +293,14 @@ const CsvViewer = ({ file, url }) => {
 };
 
 const urlToFile = async (url: string, name: string) => {
-	const blob: any = await fetch(url).then((r) => r.blob());
-	blob.lastModifiedDate = new Date();
-	blob.name = name;
-	return blob as File;
+	try {
+		const blob: any = await fetch(url).then((r) => r.blob());
+		blob.lastModifiedDate = new Date();
+		blob.name = name;
+		return blob as File;
+	} catch (err) {
+		throw err.message;
+	}
 };
 
 export default FilePreview;

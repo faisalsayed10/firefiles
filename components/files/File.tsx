@@ -1,7 +1,6 @@
 import {
 	Button,
 	Modal,
-	ModalBody,
 	ModalCloseButton,
 	ModalContent,
 	ModalOverlay,
@@ -130,15 +129,16 @@ const File: React.FC<Props> = ({ file }) => {
 			</Tr>
 			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
 				<ModalOverlay />
-				<ModalContent p="0">
-					<ModalCloseButton _focus={{ outline: "none", border: "none" }} />
-					<ModalBody p="0">
+				<ModalContent p="0" maxH="700px">
+					<ModalCloseButton
+						_focus={{ outline: "none", border: "none" }}
+						backgroundColor="gray.700"
+					/>
 						<FilePreview
 							mimetype={data?.contentType}
 							url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
 							file={file}
 						/>
-					</ModalBody>
 				</ModalContent>
 			</Modal>
 		</>
