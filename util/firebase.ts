@@ -1,7 +1,7 @@
+import { getAnalytics, isSupported, logEvent } from "@firebase/analytics";
 import { initializeApp } from "@firebase/app";
 import { getAuth } from "@firebase/auth";
 import { getFirestore } from "@firebase/firestore";
-import { getAnalytics, logEvent, Analytics, isSupported } from "@firebase/analytics";
 
 const app = initializeApp({
 	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,14 +14,9 @@ const app = initializeApp({
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 
-let analytics: Analytics;
-
-if (isSupported() && typeof window !== "undefined") {
-	analytics = getAnalytics(app);
-}
-
 export const sendEvent = (event: string, properties: object) => {
-	if (analytics) {
+	if (isSupported() && typeof window !== "undefined") {
+		const analytics = getAnalytics(app);
 		logEvent(analytics, event, properties);
 	}
 };

@@ -167,9 +167,8 @@ const Error = ({ file, url }) => {
 				Failed to preview the file
 			</Text>
 			<Text as="p" mb="2">
-				{/* TODO: Create documentation for CORS  */}
 				Make sure you've{" "}
-				<Link href="https://firefiles.vercel.app/docs/" target="_blank" textDecor="underline">
+				<Link href="https://firefiles.vercel.app/docs/cors" target="_blank" textDecor="underline">
 					configured CORS correctly.
 				</Link>
 			</Text>
