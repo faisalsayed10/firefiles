@@ -46,10 +46,6 @@ const UploadFileButton: React.FC<Props> = ({
 				return;
 			}
 
-			setUploadingFiles((prev) =>
-				prev.concat([{ id, name: files[i].name, progress: 0, error: false }])
-			);
-
 			const filePath =
 				currentFolder === ROOT_FOLDER
 					? files[i].name
@@ -57,6 +53,12 @@ const UploadFileButton: React.FC<Props> = ({
 
 			const fileRef = ref(storage, filePath);
 			const uploadTask = uploadBytesResumable(fileRef, files[i]);
+
+			setUploadingFiles((prev) =>
+				prev.concat([
+					{ id, name: files[i].name, task: uploadTask, state: "running", progress: 0, error: false }
+				])
+			);
 
 			uploadTask.on(
 				"state_changed",
@@ -66,6 +68,7 @@ const UploadFileButton: React.FC<Props> = ({
 							if (uploadFile.id === id) {
 								return {
 									...uploadFile,
+									state: snapshot.state,
 									progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
 								};
 							}
@@ -85,11 +88,9 @@ const UploadFileButton: React.FC<Props> = ({
 					});
 				},
 				async () => {
-					setUploadingFiles((prevUploadingFiles) => {
-						return prevUploadingFiles.filter((uploadFile) => {
-							return uploadFile.id !== id;
-						});
-					});
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+					);
 
 					addFile(fileRef);
 					toast.success("File uploaded successfully.");

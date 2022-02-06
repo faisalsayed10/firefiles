@@ -1,33 +1,45 @@
-import { Box, Center, Progress, Text, useColorMode } from "@chakra-ui/react";
+import { Box, Flex, IconButton, Progress, Text } from "@chakra-ui/react";
+import { faMinusSquare, faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CurrentlyUploading } from "@util/types";
 import React from "react";
+import toast from "react-hot-toast";
 
 type Props = {
-  uploadingFiles: CurrentlyUploading[];
+	file: CurrentlyUploading;
+	setUploadingFiles: React.Dispatch<React.SetStateAction<CurrentlyUploading[]>>;
 };
 
-const UploadProgress: React.FC<Props> = ({ uploadingFiles }) => {
-  const { colorMode } = useColorMode();
-
+const UploadProgress: React.FC<Props> = ({ file, setUploadingFiles }) => {
 	return (
-		<Center>
-			<Box
-				borderRadius="sm"
-				px="4"
-				pos="fixed"
-				bottom="5%"
-				width={["90vw", "60vw", "60vw"]}
-				boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
-				backgroundColor={colorMode === "dark" ? "gray.700" : "white"}
-			>
-				{uploadingFiles.map((file) => (
-					<Box key={file.id} my="4">
-						<Text fontSize="md">{`Uploading ${file.name} (${file.progress}%)`}</Text>
-						<Progress hasStripe value={file.progress} height="5px" />
-					</Box>
-				))}
+		<Flex align="baseline">
+			<Box my="4" flex="1">
+				<Text fontSize="md">{`Uploading ${file.name} (${file.progress}%)`}</Text>
+				<Progress
+					hasStripe
+					isAnimated={file.state === "running"}
+					value={file.progress}
+					height="5px"
+				/>
 			</Box>
-		</Center>
+			<IconButton
+				onClick={() => (file.state === "running" ? file.task.pause() : file.task.resume())}
+				variant="link"
+				isDisabled={file.state === "error"}
+				aria-label="pause"
+				icon={<FontAwesomeIcon icon={file.state === "running" ? faPause : faPlay} />}
+			/>
+			<IconButton
+				onClick={() => {
+					file.task.cancel();
+					setUploadingFiles((prev) => prev.filter((f) => f.id !== file.id));
+					toast.error("File upload cancelled.");
+				}}
+				variant="link"
+				aria-label="cancel"
+				icon={<FontAwesomeIcon icon={faMinusSquare} />}
+			/>
+		</Flex>
 	);
 };
 
