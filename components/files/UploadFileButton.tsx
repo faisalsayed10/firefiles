@@ -2,6 +2,7 @@ import { Button, chakra, Input, useColorModeValue } from "@chakra-ui/react";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase, { ROOT_FOLDER } from "@hooks/useFirebase";
+import { sendEvent } from "@util/firebase";
 import { CurrentlyUploading } from "@util/types";
 import { getStorage, ref, StorageReference, uploadBytesResumable } from "firebase/storage";
 import { nanoid } from "nanoid";
@@ -45,10 +46,6 @@ const UploadFileButton: React.FC<Props> = ({
 				return;
 			}
 
-			setUploadingFiles((prev) =>
-				prev.concat([{ id, name: files[i].name, progress: 0, error: false }])
-			);
-
 			const filePath =
 				currentFolder === ROOT_FOLDER
 					? files[i].name
@@ -56,6 +53,12 @@ const UploadFileButton: React.FC<Props> = ({
 
 			const fileRef = ref(storage, filePath);
 			const uploadTask = uploadBytesResumable(fileRef, files[i]);
+
+			setUploadingFiles((prev) =>
+				prev.concat([
+					{ id, name: files[i].name, task: uploadTask, state: "running", progress: 0, error: false }
+				])
+			);
 
 			uploadTask.on(
 				"state_changed",
@@ -65,6 +68,7 @@ const UploadFileButton: React.FC<Props> = ({
 							if (uploadFile.id === id) {
 								return {
 									...uploadFile,
+									state: snapshot.state,
 									progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
 								};
 							}
@@ -84,11 +88,9 @@ const UploadFileButton: React.FC<Props> = ({
 					});
 				},
 				async () => {
-					setUploadingFiles((prevUploadingFiles) => {
-						return prevUploadingFiles.filter((uploadFile) => {
-							return uploadFile.id !== id;
-						});
-					});
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+					);
 
 					addFile(fileRef);
 					toast.success("File uploaded successfully.");
@@ -96,6 +98,7 @@ const UploadFileButton: React.FC<Props> = ({
 				}
 			);
 		}
+		sendEvent("file_upload", { count: files.length });
 	};
 
 	return (

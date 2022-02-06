@@ -1,18 +1,18 @@
-import { Box, Divider, Grid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
-import AddFolderButton from "@components/AddFolderButton";
-import FilesEmptyState from "@components/FilesEmptyState";
-import FilesTable from "@components/FilesTable";
-import FilesTableSkeleton from "@components/FilesTableSkeleton";
-import Folder from "@components/Folder";
-import FolderBreadCrumbs from "@components/FolderBreadCrumbs";
-import Navbar from "@components/Navbar";
-import UploadFileButton from "@components/UploadFileButton";
-import UploadProgress from "@components/UploadProgress";
+import { Box, Center, Divider, Grid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
+import FilesEmptyState from "@components/files/FilesEmptyState";
+import FilesTable from "@components/files/FilesTable";
+import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
+import UploadFileButton from "@components/files/UploadFileButton";
+import AddFolderButton from "@components/folders/AddFolderButton";
+import Folder from "@components/folders/Folder";
+import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
+import Navbar from "@components/ui/Navbar";
 import useFirebase from "@hooks/useFirebase";
 import { CurrentlyUploading } from "@util/types";
 import React, { useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
+import UploadProgress from "./files/UploadProgress";
 
 const baseStyle = {
 	outline: "none",
@@ -118,7 +118,23 @@ const Dashboard = () => {
 					setUploadingFiles={setUploadingFiles}
 				/>
 			</LoadingOverlay>
-			{uploadingFiles.length > 0 && <UploadProgress uploadingFiles={uploadingFiles} />}
+			{uploadingFiles.length > 0 && (
+				<Center>
+					<Box
+						borderRadius="sm"
+						px="4"
+						pos="fixed"
+						bottom="5%"
+						width={["90vw", "60vw", "60vw"]}
+						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
+						backgroundColor={colorMode === "dark" ? "gray.700" : "white"}
+					>
+						{uploadingFiles.map((file) => (
+							<UploadProgress key={file.id} file={file} setUploadingFiles={setUploadingFiles} />
+						))}
+					</Box>
+				</Center>
+			)}
 		</>
 	);
 };

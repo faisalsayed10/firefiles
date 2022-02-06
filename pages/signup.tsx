@@ -1,6 +1,7 @@
 import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
-import CenterContainer from "@components/CenterContainer";
+import CenterContainer from "@components/ui/CenterContainer";
 import useUser from "@hooks/useUser";
+import { sendEvent } from "@util/firebase";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -32,6 +33,7 @@ export default function Signup() {
 			setError("");
 			setLoading(true);
 			await signup(email, password);
+			sendEvent("signup", { email });
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
 		}

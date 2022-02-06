@@ -1,5 +1,5 @@
 import { Alert, AlertIcon, Box, Button, Link, Text } from "@chakra-ui/react";
-import CenterContainer from "@components/CenterContainer";
+import CenterContainer from "@components/ui/CenterContainer";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
@@ -9,7 +9,7 @@ const Error = () => {
 	return (
 		<>
 			<Head>
-				<title>firefiles - Something Went Wrong</title>
+				<title>Firefiles - Something Went Wrong</title>
 			</Head>
 			<CenterContainer>
 				<Box w="md" px="6" py="8">

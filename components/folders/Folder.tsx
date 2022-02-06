@@ -8,10 +8,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
+import { sendEvent } from "@util/firebase";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
-import DeleteAlert from "./DeleteAlert";
+import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
 	folder: StorageReference;
@@ -90,6 +91,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 								removeFolder(folder);
 								deleteLocalFolder(folder);
 								recursiveDelete(res.prefixes, res.items);
+								sendEvent("folder_delete", {});
 							} catch (err) {
 								console.error(err);
 							} finally {

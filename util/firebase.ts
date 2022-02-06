@@ -1,3 +1,4 @@
+import { getAnalytics, isSupported, logEvent } from "@firebase/analytics";
 import { initializeApp } from "@firebase/app";
 import { getAuth } from "@firebase/auth";
 import { getFirestore } from "@firebase/firestore";
@@ -12,4 +13,12 @@ const app = initializeApp({
 
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+
+export const sendEvent = (event: string, properties: object) => {
+	if (isSupported() && typeof window !== "undefined") {
+		const analytics = getAnalytics(app);
+		logEvent(analytics, event, properties);
+	}
+};
+
 export default app;
