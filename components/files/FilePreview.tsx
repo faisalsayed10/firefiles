@@ -27,7 +27,7 @@ import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { LoadingSpinner, Player } from "video-react";
+import { Player } from "video-react";
 
 const CodeEditor: React.ComponentType<TextareaCodeEditorProps> = dynamic(
 	() => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
@@ -86,13 +86,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 	} else if (mimetype.startsWith("image")) {
 		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
 	} else if (mimetype.startsWith("video")) {
-		return (
-			<Box>
-				<Player playsInline src={url} onError={() => setIsError(true)}>
-					<LoadingSpinner />
-				</Player>
-			</Box>
-		);
+		return <Box children={<Player playsInline src={url} onError={() => setIsError(true)} />} />;
 	} else if (mimetype.startsWith("audio")) {
 		return (
 			<Flex p="6" align="center" justify="center">

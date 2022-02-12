@@ -127,18 +127,15 @@ const File: React.FC<Props> = ({ file }) => {
 					/>
 				</Td>
 			</Tr>
-			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
+			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl" autoFocus={false}>
 				<ModalOverlay />
 				<ModalContent p="0" maxH="700px">
-					<ModalCloseButton
-						_focus={{ outline: "none", border: "none" }}
-						backgroundColor="gray.700"
+					<ModalCloseButton _focus={{ outline: "none", border: "none" }} />
+					<FilePreview
+						mimetype={data?.contentType}
+						url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+						file={file}
 					/>
-						<FilePreview
-							mimetype={data?.contentType}
-							url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
-							file={file}
-						/>
 				</ModalContent>
 			</Modal>
 		</>

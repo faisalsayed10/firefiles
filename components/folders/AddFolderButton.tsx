@@ -92,7 +92,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 			>
 				<FontAwesomeIcon icon={faPlus} size="2x" />
 			</Flex>
-			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose}>
+			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose} autoFocus={false}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Create A Folder</ModalHeader>
