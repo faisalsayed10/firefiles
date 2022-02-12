@@ -1,25 +1,14 @@
-import {
-	Accordion,
-	AccordionButton,
-	AccordionIcon,
-	AccordionItem,
-	AccordionPanel,
-	Alert,
-	AlertIcon,
-	Flex,
-	FormControl,
-	Link,
-	Text,
-	Textarea
-} from "@chakra-ui/react";
-import { LoadingSpinner, Player } from "video-react";
+import { Alert, AlertIcon, Flex, FormControl, Input, Link, Text, Textarea } from "@chakra-ui/react";
+import VideoAccordion from "@components/ui/VideoAccordion";
+import toObject from "convert-to-object";
+import { useState } from "react";
 
-const FirebaseInput = ({ value, setValue, error }) => {
+const FirebaseInput = ({ setValue, error }) => {
+	const [raw, setRaw] = useState("");
+	const [name, setName] = useState("");
+
 	return (
 		<Flex flexDir="column" maxW="sm" m="0 auto">
-			<Text as="h2" fontSize="2xl" align="center" mb="2">
-				Paste your Firebase Credentials
-			</Text>
 			{error && (
 				<Alert status="error" fontSize="md" mb="2">
 					<AlertIcon />
@@ -27,14 +16,30 @@ const FirebaseInput = ({ value, setValue, error }) => {
 				</Alert>
 			)}
 			<FormControl mb="2">
+				<Input
+					variant="flushed"
+					placeholder="Name in Firefiles"
+					type="text"
+					value={name}
+					onChange={(e) => {
+						setName(e.target.value);
+						setValue((prev: any) => ({ ...prev, name: e.target.value }));
+					}}
+					required
+				/>
+			</FormControl>
+			<FormControl mb="2">
 				<Textarea
 					autoComplete="off"
-					variant="outline"
+					variant="flushed"
 					type="text"
 					fontSize="sm"
-					value={value}
-					minH="150px"
-					onChange={(e) => setValue(e.target.value)}
+					value={raw}
+					minH="200px"
+					onChange={(e) => {
+						setRaw(e.target.value);
+						setValue((prev: any) => ({ name: prev.name, ...toObject(e.target.value) }));
+					}}
 					required
 					placeholder={`{
   apiKey: "AIzafeaubu13ub13j",
@@ -45,37 +50,18 @@ const FirebaseInput = ({ value, setValue, error }) => {
 }`}
 				/>
 			</FormControl>
-			<Text fontSize="xs">
+			<Text fontSize="xs" mb="1">
 				The fields <strong>apiKey</strong>, <strong>authDomain</strong>, <strong>projectId</strong>,{" "}
-				<strong>storageBucket</strong> and <strong>appId</strong> must be present in the JSON.
+				<strong>storageBucket</strong> and <strong>appId</strong> must be present.
 			</Text>
 			<Text fontSize="xs">
 				Make sure you've followed all the{" "}
-				<Link
-					href="https://firefiles.vercel.app/docs/hosted"
-					target="_blank"
-					color="blue.600"
-					textDecor="underline"
-				>
+				<Link href="https://firefiles.vercel.app/docs/hosted" target="_blank" textDecor="underline">
 					instructions
 				</Link>
 				.
 			</Text>
-			<Accordion allowToggle>
-				<AccordionItem border="none">
-					<AccordionButton pl="0">
-						<Text flex="1" textAlign="left">
-							Here's how you get the keys:
-						</Text>
-						<AccordionIcon />
-					</AccordionButton>
-					<AccordionPanel>
-						<Player playsInline src="/firebase-config-tutorial.mov">
-							<LoadingSpinner />
-						</Player>
-					</AccordionPanel>
-				</AccordionItem>
-			</Accordion>
+			<VideoAccordion src="/firebase-config-tutorial.mov" />
 		</Flex>
 	);
 };

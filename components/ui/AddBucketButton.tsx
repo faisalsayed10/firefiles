@@ -11,19 +11,20 @@ import {
 	ModalOverlay,
 	useDisclosure
 } from "@chakra-ui/react";
+import S3Input from "@components/popups/S3Input";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
 import { sendEvent } from "@util/firebase";
 import { BucketType } from "@util/types";
 import axios from "axios";
-import toObject from "convert-to-object";
 import { nanoid } from "nanoid";
 import "node_modules/video-react/dist/video-react.css";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useSWRConfig } from "swr";
-import BucketOptions from "../popups/BucketOptions";
+import { omit } from "underscore";
+import BucketOptions from "../popups/BucketSelector";
 import FirebaseInput from "../popups/FirebaseInput";
 
 const AddBucketButton = () => {
@@ -33,35 +34,32 @@ const AddBucketButton = () => {
 	const [selectedType, setSelectedType] = useState<BucketType>(null);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const [value, setValue] = useState<string>("");
+	const [value, setValue] = useState(null);
 
 	const onSubmit = async (e: any) => {
-		e.preventDefault();
-
 		try {
+			e.preventDefault();
 			setError("");
 			setLoading(true);
-			let dataToPost: any;
 
-			switch (selectedType) {
-				case 0:
-					const data = toObject(value);
-					if (
-						!data ||
-						!data.apiKey ||
-						!data.projectId ||
-						!data.appId ||
-						!data.authDomain ||
-						!data.storageBucket
-					)
-						throw new Error("One or more fields are missing from the config.");
-
-					dataToPost = data;
+			if (selectedType === BucketType.firebase) {
+				if (
+					!value ||
+					!value.apiKey ||
+					!value.projectId ||
+					!value.appId ||
+					!value.authDomain ||
+					!value.storageBucket
+				)
+					throw new Error("One or more fields are missing from the config.");
+			} else if (selectedType === BucketType.s3) {
+				if (!value || !value.accessKey || !value.secretKey)
+					throw new Error("Access Key and Secret Key are required.");
 			}
 
 			const promise = axios.post(
 				"/api/bucket",
-				{ data: dataToPost, name: nanoid(10), type: BucketType[selectedType] },
+				{ data: omit(value, "name"), name: value.name || nanoid(10), type: BucketType[selectedType] },
 				{ headers: { token: await currentUser.getIdToken() } }
 			);
 
@@ -89,7 +87,9 @@ const AddBucketButton = () => {
 			case null:
 				return <BucketOptions setSelectedType={setSelectedType} />;
 			case BucketType.firebase:
-				return <FirebaseInput value={value} setValue={setValue} error={error} />;
+				return <FirebaseInput setValue={setValue} error={error} />;
+			case BucketType.s3:
+				return <S3Input setValue={setValue} error={error} />;
 		}
 	};
 
@@ -107,7 +107,7 @@ const AddBucketButton = () => {
 			>
 				<FontAwesomeIcon icon={faPlus} size="2x" />
 			</Flex>
-			<Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
+			<Modal isOpen={isOpen} onClose={onClose} isCentered autoFocus={false}>
 				<ModalOverlay />
 				<ModalContent maxH="700px" overflowY="auto">
 					<ModalHeader>
