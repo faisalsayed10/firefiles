@@ -1,4 +1,4 @@
-import { Flex, MenuItem, MenuList, Text, useColorModeValue } from "@chakra-ui/react";
+import { Flex, MenuItem, Box, MenuList, Text, useColorModeValue } from "@chakra-ui/react";
 import { deleteObject, getStorage, listAll, ref, StorageReference } from "@firebase/storage";
 import {
 	faExternalLinkAlt,
@@ -17,6 +17,7 @@ import DeleteAlert from "../popups/DeleteAlert";
 interface Props {
 	folder: StorageReference;
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
+	bigIcon?: boolean;
 }
 
 const deleteLocalFolder = (folder: StorageReference) => {
@@ -43,7 +44,7 @@ const recursiveDelete = async (folders: StorageReference[], files: StorageRefere
 	}
 };
 
-const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
+const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, bigIcon = false }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const onClose = () => setIsOpen(false);
 	const router = useRouter();
@@ -108,17 +109,18 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 						transition="ease-in-out 0.1s"
 						cursor="pointer"
 						className="hoverAnim"
-						w="110px"
-						h="110px"
-						pt="4"
-						pb="2"
+						w="100%"
+						h="100%"
+						p={bigIcon ? '6' : '4'}
 						ref={reactRef}
 					>
+						<Box ml="1">
 						<FontAwesomeIcon
 							icon={faFolderOpen}
-							size="3x"
+							size={bigIcon ? '5x' : '3x'}
 							color={useColorModeValue("#2D3748", "white")}
 						/>
+						</Box>
 						<Text isTruncated={true} as="p" fontSize="xs" align="center" px="2" maxW="105px">
 							{folder.name}
 						</Text>

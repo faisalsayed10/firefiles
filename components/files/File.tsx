@@ -1,5 +1,7 @@
 import {
 	Button,
+	Flex,
+	Box,
 	Modal,
 	ModalCloseButton,
 	ModalContent,
@@ -8,7 +10,8 @@ import {
 	Text,
 	Tr,
 	useClipboard,
-	useDisclosure
+	useDisclosure,
+	Image
 } from "@chakra-ui/react";
 import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -29,6 +32,7 @@ import FilePreview from "./FilePreview";
 
 interface Props {
 	file: StorageReference;
+	bigIcon?: boolean;
 }
 
 const firebase_url = `https://firebasestorage.googleapis.com/v0/b`;
@@ -37,7 +41,7 @@ const metaFetcher = async (url: string, user: User) =>
 		.get(url, { headers: { Authorization: `Firebase ${await user.getIdToken()}` } })
 		.then(({ data }) => data);
 
-const File: React.FC<Props> = ({ file }) => {
+const File: React.FC<Props> = ({ file, bigIcon = false }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const { app, appUser, removeFile } = useFirebase();
 	const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`;
@@ -48,6 +52,7 @@ const File: React.FC<Props> = ({ file }) => {
 	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.downloadTokens}`);
 	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 	const cancelRef = useRef();
+	const [isError, setIsError] = useState(false);
 
 	const handleClick = () => {
 		onCopy();
@@ -81,68 +86,133 @@ const File: React.FC<Props> = ({ file }) => {
 	};
 
 	return (
-		<>
-			<Tr>
-				<Td maxW="36px">
-					<FileIcon extension={file.name.split(".").pop()} id={id} />
-				</Td>
-				<Td
-					fontWeight="medium"
-					isTruncated
-					maxW={["250px", "300px", "300px"]}
-					onClick={onPreviewOpen}
-					textDecor="underline"
-					cursor="pointer"
-					_hover={{ textDecor: "none" }}
-				>
-					{file.name}
-				</Td>
-				<Td minW="110px">{data && prettyBytes(parseInt(data.size) || 0)}</Td>
-				<Td textAlign="center">
-					<Button onClick={handleClick} isLoading={!data} variant="outline" colorScheme="blue">
-						<FontAwesomeIcon icon={faCopy} />
-					</Button>
-				</Td>
-				<Td textAlign="center">
-					<Button
-						isLoading={!data}
-						variant="outline"
-						colorScheme="blue"
-						onClick={() =>
-							download(file.name, `${file_url}?alt=media&token=${data?.downloadTokens}`)
-						}
-					>
-						<FontAwesomeIcon icon={faDownload} />
-					</Button>
-				</Td>
-				<Td textAlign="center">
-					<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="red">
-						<FontAwesomeIcon icon={faTrash} />
-					</Button>
-					<DeleteAlert
-						isOpen={isOpen}
-						onClose={() => setIsOpen(false)}
-						cancelRef={cancelRef}
-						onClick={deleteFile}
-					/>
-				</Td>
-			</Tr>
-			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
-				<ModalOverlay />
-				<ModalContent p="0" maxH="700px">
-					<ModalCloseButton
-						_focus={{ outline: "none", border: "none" }}
-						backgroundColor="gray.700"
-					/>
-						<FilePreview
-							mimetype={data?.contentType}
-							url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
-							file={file}
-						/>
-				</ModalContent>
-			</Modal>
-		</>
-	);
+    <>
+      {bigIcon ? (
+        <Flex
+          onClick={onPreviewOpen}
+          direction="column"
+          align="center"
+          justify="space-between"
+          boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+          transition="ease-in-out 0.1s"
+          cursor="pointer"
+          className="hoverAnim"
+          w="100%"
+          h="100%"
+          p="6"
+        >
+          <Box ml="1" w="100%" h="120px" textAlign="center" 
+				 objectFit="cover" overflow="hidden">
+            {data?.contentType.startsWith("image") ? (
+              <Image
+                src={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+                alt={file.name}
+				w="100%"
+				h="100%"
+				 objectFit="cover"
+                onError={() => setIsError(true)}
+              />
+            ) : (
+              <FileIcon
+                extension={file.name.split(".").pop()}
+                id={id}
+			
+                bigIcon={true}
+              />
+            )}
+          </Box>
+          <Text
+            isTruncated={true}
+            as="p"
+            fontSize="xs"
+            align="center"
+            px="2"
+            maxW="105px"
+          >
+            {file.name}
+          </Text>
+        </Flex>
+      ) : (
+        <Tr>
+          <Td maxW="36px">
+            <FileIcon extension={file.name.split(".").pop()} id={id} />
+          </Td>
+          <Td
+            fontWeight="medium"
+            isTruncated
+            maxW={["250px", "300px", "300px"]}
+            onClick={onPreviewOpen}
+            textDecor="underline"
+            cursor="pointer"
+            _hover={{ textDecor: "none" }}
+          >
+            {file.name}
+          </Td>
+          <Td minW="110px">{data && prettyBytes(parseInt(data.size) || 0)}</Td>
+          <Td textAlign="center">
+            <Button
+              onClick={handleClick}
+              isLoading={!data}
+              variant="outline"
+              colorScheme="blue"
+            >
+              <FontAwesomeIcon icon={faCopy} />
+            </Button>
+          </Td>
+          <Td textAlign="center">
+            <Button
+              isLoading={!data}
+              variant="outline"
+              colorScheme="blue"
+              onClick={() =>
+                download(
+                  file.name,
+                  `${file_url}?alt=media&token=${data?.downloadTokens}`
+                )
+              }
+            >
+              <FontAwesomeIcon icon={faDownload} />
+            </Button>
+          </Td>
+          <Td textAlign="center">
+            <Button
+              onClick={() => setIsOpen(true)}
+              variant="outline"
+              colorScheme="red"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+            <DeleteAlert
+              isOpen={isOpen}
+              onClose={() => setIsOpen(false)}
+              cancelRef={cancelRef}
+              onClick={deleteFile}
+            />
+          </Td>
+        </Tr>
+      )}
+
+      <Modal
+        isOpen={isPreviewOpen}
+        onClose={onPreviewClose}
+        isCentered
+        size="xl"
+      >
+        <ModalOverlay />
+        <ModalContent p="0" maxH="700px">
+          <ModalCloseButton
+            _focus={{ outline: "none", border: "none" }}
+            backgroundColor="gray.700"
+          />
+          <FilePreview
+            mimetype={data?.contentType}
+            url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+            file={file}
+          />
+        </ModalContent>
+      </Modal>
+    </>
+  );
 };
 
 export default File;
