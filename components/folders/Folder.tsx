@@ -111,13 +111,13 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, bigIcon = false 
 						className="hoverAnim"
 						w="100%"
 						h="100%"
-						p={bigIcon ? '6' : '4'}
+						p={bigIcon ? '4' : '4'}
 						ref={reactRef}
 					>
 						<Box ml="1">
 						<FontAwesomeIcon
 							icon={faFolderOpen}
-							size={bigIcon ? '5x' : '3x'}
+							size={bigIcon ? '3x' : '3x'}
 							color={useColorModeValue("#2D3748", "white")}
 						/>
 						</Box>

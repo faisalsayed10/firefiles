@@ -25,10 +25,15 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
       mb="4"
     >
       {gridOn ? (
-        <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)", "repeat(3, 1fr)", "repeat(4, 1fr)", "repeat(5, 1fr)", "repeat(6, 1fr)"]} gap={6}>
+        <Grid templateColumns={["repeat(2, 1fr)", "repeat(3, 1fr)", "repeat(4, 1fr)", "repeat(6, 1fr)", "repeat(7, 1fr)", "repeat(8, 1fr)"]} gap={6}>
           {childFolders.length > 0 &&
             childFolders.map((childFolder) => (
-              <GridItem w="100%" h="200px" borderWidth="1px" borderRadius="lg">
+              <GridItem w="100%" h="140px" 
+              borderWidth="1px" borderRadius="lg"
+						boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+						transition="ease-in-out 0.1s"
+						cursor="pointer"
+						className="hoverAnim">
                 <Folder
                   bigIcon={true}
                   setIsFolderDeleting={setIsFolderDeleting}
@@ -38,7 +43,13 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
             ))}
           {childFiles.length > 0 &&
             childFiles.map((childFile) => (
-              <GridItem w="100%" h="200px" borderWidth="1px" borderRadius="lg">
+              <GridItem w="100%" h="140px" 
+              p="4"
+              borderWidth="1px" borderRadius="lg"
+						boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+						transition="ease-in-out 0.1s"
+						cursor="pointer"
+						className="hoverAnim">
                 <File file={childFile} bigIcon={true} />
               </GridItem>
             ))
