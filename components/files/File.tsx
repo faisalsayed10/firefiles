@@ -14,12 +14,23 @@ import {
   Image,
   MenuItem,
   MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
+  Portal,
+  Spacer,
 } from "@chakra-ui/react";
 import {
   faCopy,
   faDownload,
   faExternalLinkAlt,
   faPlus,
+  faEllipsisH,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -113,93 +124,121 @@ const File: React.FC<Props> = ({ file, bigIcon = false }) => {
   return (
     <>
       {bigIcon ? (
-        <ContextMenu<HTMLDivElement>
-          renderMenu={() => (
-            <MenuList>
-              <MenuItem
-                icon={<FontAwesomeIcon icon={faCopy} />}
-                onClick={handleClick}
-              >
-                Share
-              </MenuItem>
-              <MenuItem
-                icon={<FontAwesomeIcon icon={faDownload} />}
-                isLoading={!data}
-                onClick={() =>
-                  download(
-                    file.name,
-                    `${file_url}?alt=media&token=${data?.downloadTokens}`
-                  )
-                }
-              >
-                Download
-              </MenuItem>
-              <MenuItem
-                icon={<FontAwesomeIcon icon={faTrash} />}
-                onClick={() => setIsOpen(true)}
-              >
-                Delete
-              </MenuItem>
-            </MenuList>
-          )}
-        >
-          {(reactRef: React.RefObject<HTMLDivElement>) => (
-            <>
-              <DeleteAlert
-                isOpen={isOpen}
-                onClose={() => setIsOpen(false)}
-                cancelRef={cancelRef}
-                onClick={deleteFile}
-              />
-              <Flex
-                onClick={onPreviewOpen}
-                direction="column"
-                align="center"
-                justify="space-between"
-                cursor="pointer"
-                w="100%"
-                h="100%"
-                ref={reactRef}
-              >
-                <Box
-                  ml="1"
+        <>
+          <DeleteAlert
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            cancelRef={cancelRef}
+            onClick={deleteFile}
+          />
+
+          <Flex
+            direction="column"
+            align="center"
+            justify="space-between"
+            w="100%"
+            h="100%"
+          >
+            <Box
+              w="100%"
+              h="100px"
+              textAlign="center"
+              objectFit="cover"
+              overflow="hidden"
+              onClick={onPreviewOpen}
+              cursor="pointer"
+            >
+              {data?.contentType.startsWith("image") ? (
+                <Image
+                  src={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+                  alt={file.name}
                   w="100%"
-                  h="100px"
-                  textAlign="center"
+                  h="100%"
                   objectFit="cover"
-                  overflow="hidden"
-                >
-                  {data?.contentType.startsWith("image") ? (
-                    <Image
-                      src={`${file_url}?alt=media&token=${data?.downloadTokens}`}
-                      alt={file.name}
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                      onError={() => setIsError(true)}
-                    />
-                  ) : (
-                    <FileIcon
-                      extension={file.name.split(".").pop()}
-                      id={id}
-                      bigIcon={true}
-                    />
-                  )}
-                </Box>
-                <Text
-                  isTruncated={true}
-                  as="p"
-                  fontSize="xs"
-                  align="center"
-                  pt="2"
-                  maxW="85px"
-                >
-                  {file.name}
-                </Text>
-              </Flex>
-            </>
-          )}
-        </ContextMenu>
+                  onError={() => setIsError(true)}
+                />
+              ) : (
+                <FileIcon
+                  extension={file.name.split(".").pop()}
+                  id={id}
+                  bigIcon={true}
+                />
+              )}
+            </Box>
+            <Flex
+              p="2"
+              w="100%"
+              borderTop="1px"
+              borderColor="gray.700"
+              justify="space-between"
+              alignItems="center"
+            >
+              <Text
+                isTruncated={true}
+                as="p"
+                fontSize="xs"
+                maxW="auto"
+                pr="2"
+                onClick={onPreviewOpen}
+                cursor="pointer"
+              >
+                {file.name}
+              </Text>
+              <Popover ml="2">
+                <PopoverTrigger>
+                  <Box as="button">
+                    <FontAwesomeIcon icon={faEllipsisH} />
+                  </Box>
+                </PopoverTrigger>
+                <Portal>
+                  <PopoverContent w="200px">
+                    <PopoverArrow />
+                    <PopoverHeader maxW="100%">
+                      <Text fontSize="16" fontStyle="bold" isTruncated={true}>
+                        {file.name}
+                      </Text>
+                    </PopoverHeader>
+                    <PopoverCloseButton />
+                    <PopoverBody>
+                      <Flex alignItems="start" flexDirection="column">
+                        <Button
+                          leftIcon={<FontAwesomeIcon icon={faCopy} />}
+                          onClick={handleClick}
+                          mb="2"
+                        >
+                          Share
+                        </Button>
+                        <Button
+                          leftIcon={<FontAwesomeIcon icon={faDownload} />}
+                          isLoading={!data}
+                          onClick={() =>
+                            download(
+                              file.name,
+                              `${file_url}?alt=media&token=${data?.downloadTokens}`
+                            )
+                          }
+                          mb="2"
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          leftIcon={<FontAwesomeIcon icon={faTrash} />}
+                          onClick={() => setIsOpen(true)}
+                          colorScheme="red"
+                        >
+                          Delete
+                        </Button>
+                      </Flex>
+                    </PopoverBody>
+                    <PopoverFooter fontSize="12" fontStyle="italic">
+                      Size: {data && prettyBytes(parseInt(data.size) || 0)}
+                    </PopoverFooter>
+                  </PopoverContent>
+                </Portal>
+              </Popover>
+            </Flex>
+          </Flex>
+        </>
       ) : (
         <Tr>
           <Td maxW="36px">
