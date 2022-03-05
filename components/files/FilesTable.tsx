@@ -49,8 +49,6 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                   bigIcon={true}
                   setIsFolderDeleting={setIsFolderDeleting}
                   folder={childFolder}
-                  foldersCount={childFolders.length}
-                  filesCount={childFiles.length}
                 />
               </GridItem>
             ))}

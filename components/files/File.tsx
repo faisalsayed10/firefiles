@@ -184,7 +184,7 @@ const File: React.FC<Props> = ({ file, bigIcon = false }) => {
               >
                 {file.name}
               </Text>
-              <Popover ml="2">
+              <Popover>
                 <PopoverTrigger>
                   <Box as="button">
                     <FontAwesomeIcon icon={faEllipsisH} />

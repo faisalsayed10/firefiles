@@ -42,8 +42,6 @@ interface Props {
   folder: StorageReference;
   setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
   bigIcon?: boolean;
-  foldersCount: int;
-  filesCount: int;
 }
 
 const deleteLocalFolder = (folder: StorageReference) => {
@@ -78,9 +76,7 @@ const recursiveDelete = async (
 const Folder: React.FC<Props> = ({
   folder,
   setIsFolderDeleting,
-  bigIcon = false,
-  foldersCount,
-  filesCount,
+  bigIcon = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const onClose = () => setIsOpen(false);
@@ -181,7 +177,7 @@ const Folder: React.FC<Props> = ({
               >
                 {folder.name}
               </Text>
-              <Popover ml="2">
+              <Popover>
                 <PopoverTrigger>
                   <Box as="button">
                     <FontAwesomeIcon icon={faEllipsisH} />
@@ -223,7 +219,8 @@ const Folder: React.FC<Props> = ({
                         </Button>
                         <Button
                           leftIcon={<FontAwesomeIcon icon={faTrash} />}
-                          onClick={() => setIsOpen(true)}
+                          onClick={() => setIsOpen(true)} 
+						              colorScheme="red"
                         >
                           Delete Folder
                         </Button>
