@@ -42,8 +42,8 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                 h="140px"
                 borderWidth="1px"
                 borderRadius="lg"
-                borderColor="gray.700"
-                boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+                // borderColor="gray.700"
+                boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.05)"
               >
                 <Folder
                   bigIcon={true}
@@ -59,9 +59,9 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                 h="140px"
                 borderWidth="1px"
                 borderRadius="lg"
-                borderColor="gray.700"
+                // borderColor="gray.700"
                 overflow="hidden"
-                boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+                boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.05)"
               >
                 <File file={childFile} bigIcon={true} />
               </GridItem>

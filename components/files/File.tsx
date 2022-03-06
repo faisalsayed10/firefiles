@@ -168,8 +168,6 @@ const File: React.FC<Props> = ({ file, bigIcon = false }) => {
             <Flex
               p="2"
               w="100%"
-              borderTop="1px"
-              borderColor="gray.700"
               justify="space-between"
               alignItems="center"
             >
