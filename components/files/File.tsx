@@ -65,7 +65,7 @@ const firebase_url = `https://firebasestorage.googleapis.com/v0/b`;
 const metaFetcher = async (url: string, user: User) =>
   axios
     .get(url, {
-      headers: { Authorization: `Firebase ${await user.getIdToken()}` },
+      headers: { Authorization: `Firebase ${await user.getIdToken(true)}` },
     })
     .then(({ data }) => data);
 

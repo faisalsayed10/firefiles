@@ -146,7 +146,6 @@ const Folder: React.FC<Props> = ({
             align="center"
             justify="space-between"
             boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
-            cursor="pointer"
             w="100%"
             h="100%"
           >
@@ -157,6 +156,8 @@ const Folder: React.FC<Props> = ({
               alignItems="center"
               objectFit="cover"
               h="100%"
+              w="100%"
+            cursor="pointer"
               onClick={() => router.push(`${router.asPath}/${folder.name}`)}
             >
               <FontAwesomeIcon
