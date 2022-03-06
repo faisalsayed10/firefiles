@@ -186,44 +186,66 @@ const Folder: React.FC<Props> = ({
                 <Portal>
                   <PopoverContent w="250px">
                     <PopoverArrow />
-                    <PopoverHeader maxW="100%">
-                      <Text fontSize="16" fontStyle="bold" isTruncated={true}>
+                    <PopoverHeader>
+                      <Text fontSize="sm" maxW="150px" fontStyle="bold" isTruncated={true}>
                         {folder.name}
                       </Text>
                     </PopoverHeader>
-                    <PopoverCloseButton />
-                    <PopoverBody>
+                    <PopoverCloseButton mt="0.5" />
+                    <PopoverBody my="-2" mx="-3">
                       <Flex alignItems="start" flexDirection="column">
-                        <Button
-                          leftIcon={<FontAwesomeIcon icon={faPlus} />}
-                          mb="2"
+                        <Box
+                          as="button"
+                          py="2"
+                          px="4"
+                          w="100%"
+                          textAlign="left"
                           onClick={() =>
                             router.push(`${router.asPath}/${folder.name}`)
                           }
+                          _hover={{ backgroundColor: "gray.600" }}
                         >
+                          <FontAwesomeIcon
+                            style={{ marginRight: "10px" }}
+                            icon={faPlus}
+                          />
                           Open
-                        </Button>
-                        <Button
-                          leftIcon={
-                            <FontAwesomeIcon icon={faExternalLinkAlt} />
-                          }
-                          mb="2"
+                        </Box>
+                        <Box
+                          as="button"
+                          py="2"
+                          px="4"
+                          w="100%"
+                          textAlign="left"
                           onClick={() =>
                             window.open(
                               `${router.asPath}/${folder.name}`,
                               "_blank"
                             )
                           }
+                          _hover={{ backgroundColor: "gray.600" }}
                         >
+                          <FontAwesomeIcon
+                            style={{ marginRight: "10px" }}
+                            icon={faExternalLinkAlt}
+                          />
                           Open in new tab
-                        </Button>
-                        <Button
-                          leftIcon={<FontAwesomeIcon icon={faTrash} />}
-                          onClick={() => setIsOpen(true)} 
-						              colorScheme="red"
+                        </Box>
+                        <Box
+                          as="button"
+                          py="2"
+                          px="4"
+                          w="100%"
+                          textAlign="left"
+                          onClick={() => setIsOpen(true)}
+                          _hover={{ backgroundColor: "gray.600" }}
                         >
+                          <FontAwesomeIcon
+                            style={{ marginRight: "10px" }}
+                            icon={faTrash}
+                          />
                           Delete Folder
-                        </Button>
+                        </Box>
                       </Flex>
                     </PopoverBody>
                   </PopoverContent>

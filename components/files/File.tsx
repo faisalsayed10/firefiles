@@ -193,41 +193,55 @@ const File: React.FC<Props> = ({ file, bigIcon = false }) => {
                 <Portal>
                   <PopoverContent w="200px">
                     <PopoverArrow />
-                    <PopoverHeader maxW="100%">
-                      <Text fontSize="16" fontStyle="bold" isTruncated={true}>
+                    <PopoverHeader>
+                      <Text fontSize="sm" maxW="150px" fontStyle="bold" isTruncated={true}>
                         {file.name}
                       </Text>
                     </PopoverHeader>
-                    <PopoverCloseButton />
-                    <PopoverBody>
+                    <PopoverCloseButton mt="0.5" />
+                    <PopoverBody  my="-2" mx="-3">
                       <Flex alignItems="start" flexDirection="column">
-                        <Button
-                          leftIcon={<FontAwesomeIcon icon={faCopy} />}
+                        <Box
+                          as="button"
+                          py="2"
+                          px="4"
+                          w="100%"
+                          textAlign="left"
                           onClick={handleClick}
-                          mb="2"
+                          _hover={{ backgroundColor: "gray.600" }}
                         >
+                          <FontAwesomeIcon style={{marginRight: '10px'}} icon={faCopy} />
                           Share
-                        </Button>
-                        <Button
-                          leftIcon={<FontAwesomeIcon icon={faDownload} />}
-                          isLoading={!data}
+                        </Box>
+                        <Box
+                          as="button"
+                          py="2"
+                          px="4"
+                          w="100%"
+                          textAlign="left"
                           onClick={() =>
                             download(
                               file.name,
                               `${file_url}?alt=media&token=${data?.downloadTokens}`
                             )
                           }
-                          mb="2"
+                          _hover={{ backgroundColor: "gray.600" }}
                         >
+                          <FontAwesomeIcon style={{marginRight: '10px'}} icon={faDownload} />
                           Download
-                        </Button>
-                        <Button
-                          leftIcon={<FontAwesomeIcon icon={faTrash} />}
+                        </Box>
+                        <Box
+                          as="button"
+                          py="2"
+                          px="4"
+                          w="100%"
+                          textAlign="left"
                           onClick={() => setIsOpen(true)}
-                          colorScheme="red"
+                          _hover={{ backgroundColor: "gray.600" }}
                         >
+                          <FontAwesomeIcon style={{marginRight: '10px'}} icon={faTrash} />
                           Delete
-                        </Button>
+                        </Box>
                       </Flex>
                     </PopoverBody>
                     <PopoverFooter fontSize="12" fontStyle="italic">

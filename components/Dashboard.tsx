@@ -166,11 +166,11 @@ const Dashboard = () => {
               </Flex>
               {files === null || loading ? (
                 <FilesTableSkeleton />
-              ) : files.length === 0 ? (
+              ) : (files.length === 0 && !gridOn ? (
                 <FilesEmptyState />
               ) : (
                 <FilesTable childFolders={folders} childFiles={files} gridOn={gridOn} />
-              )}
+              ))}
             </Box>
           )}
         </Dropzone>
