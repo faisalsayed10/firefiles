@@ -8,7 +8,7 @@ export const deleteBucket = async (type: BucketType, token: string, id: string) 
 		case BucketType.firebase:
 			if (window.confirm("Are you sure you want to delete this bucket?")) {
 				await axios.delete(`/api/bucket?id=${id}`, {
-					headers: { token }
+					headers: { token },
 				});
 
 				const has_logged_in =

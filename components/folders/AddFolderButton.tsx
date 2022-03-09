@@ -11,7 +11,7 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useColorModeValue,
-	useDisclosure
+	useDisclosure,
 } from "@chakra-ui/react";
 import { StorageReference } from "@firebase/storage";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -57,7 +57,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 			root: null,
 			bucket: null,
 			storage: null,
-			parent: null
+			parent: null,
 		};
 
 		addFolder(newFolder);

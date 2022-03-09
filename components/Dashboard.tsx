@@ -16,7 +16,7 @@ import UploadProgress from "./files/UploadProgress";
 
 const baseStyle = {
 	outline: "none",
-	transition: "border .2s ease-in-out"
+	transition: "border .2s ease-in-out",
 };
 
 const activeStyle = {
@@ -24,7 +24,7 @@ const activeStyle = {
 	borderRadius: 2,
 	borderStyle: "dashed",
 	borderColor: "#2196f3",
-	backgroundColor: "rgba(0, 0, 0, 0.25)"
+	backgroundColor: "rgba(0, 0, 0, 0.25)",
 };
 
 const Dashboard = () => {

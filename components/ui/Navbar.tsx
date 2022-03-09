@@ -8,7 +8,7 @@ import {
 	MenuItem,
 	MenuList,
 	Tooltip,
-	useColorMode
+	useColorMode,
 } from "@chakra-ui/react";
 import {
 	faArrowCircleLeft,
@@ -17,7 +17,7 @@ import {
 	faFile,
 	faMoon,
 	faSignOutAlt,
-	faSun
+	faSun,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";

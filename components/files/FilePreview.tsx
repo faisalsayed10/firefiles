@@ -12,7 +12,7 @@ import {
 	Th,
 	Thead,
 	Tr,
-	useColorMode
+	useColorMode,
 } from "@chakra-ui/react";
 import { faDownload, faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -61,7 +61,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 			fontSize: 13,
 			backgroundColor: colorMode === "light" ? "#FFFFFF" : "#2D3748",
 			overflowY: "auto",
-			fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace"
+			fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
 		}),
 		[colorMode]
 	);

@@ -4,7 +4,7 @@ import {
 	faExternalLinkAlt,
 	faFolderOpen,
 	faPlus,
-	faTrash
+	faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";

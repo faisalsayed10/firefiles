@@ -8,7 +8,7 @@ import {
 	Text,
 	Tr,
 	useClipboard,
-	useDisclosure
+	useDisclosure,
 } from "@chakra-ui/react";
 import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -134,11 +134,11 @@ const File: React.FC<Props> = ({ file }) => {
 						_focus={{ outline: "none", border: "none" }}
 						backgroundColor="gray.700"
 					/>
-						<FilePreview
-							mimetype={data?.contentType}
-							url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
-							file={file}
-						/>
+					<FilePreview
+						mimetype={data?.contentType}
+						url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
+						file={file}
+					/>
 				</ModalContent>
 			</Modal>
 		</>
