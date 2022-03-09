@@ -9,7 +9,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
-	useDisclosure
+	useDisclosure,
 } from "@chakra-ui/react";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -68,7 +68,7 @@ const AddBucketButton = () => {
 			toast.promise(promise, {
 				loading: "Creating bucket...",
 				success: "Bucket created successfully.",
-				error: "An error occurred while creating the bucket."
+				error: "An error occurred while creating the bucket.",
 			});
 
 			promise.then(() => {

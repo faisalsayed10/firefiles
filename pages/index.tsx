@@ -8,7 +8,7 @@ import {
 	Image,
 	Skeleton,
 	Tag,
-	Text
+	Text,
 } from "@chakra-ui/react";
 import AddBucketButton from "@components/ui/AddBucketButton";
 import Navbar from "@components/ui/Navbar";

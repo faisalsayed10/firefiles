@@ -9,7 +9,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		if (!token) return res.status(400).json({ error: "Token not found." });
 		const { uid } = await auth.verifyIdToken(token);
 
-    // READ
+		// READ
 		if (req.method === "GET") {
 			const id = req.query.id as string;
 			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
@@ -24,8 +24,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			return res
 				.status(200)
 				.json({ id: snapshot.id, keys: JSON.parse(decrypted), name, type, userId });
-    
-    // CREATE
+
+			// CREATE
 		} else if (req.method === "POST") {
 			const { data, name, type } = req.body;
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
@@ -33,7 +33,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
 			return res.status(200).json("success");
 
-    // DELETE
+			// DELETE
 		} else if (req.method === "DELETE") {
 			const id = req.query.id as string;
 			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
@@ -45,7 +45,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			await firestore.collection("buckets").doc(id).delete();
 			return res.status(200).json("success");
 
-    // UPDATE
+			// UPDATE
 		} else if (req.method === "PUT") {
 			const id = req.query.id as string;
 			const data = req.body;

@@ -10,7 +10,7 @@ import {
 	FormControl,
 	Link,
 	Text,
-	Textarea
+	Textarea,
 } from "@chakra-ui/react";
 import { LoadingSpinner, Player } from "video-react";
 

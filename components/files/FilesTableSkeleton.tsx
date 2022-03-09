@@ -2,31 +2,31 @@ import { Box, Skeleton, Table, Td, Th, Tr } from "@chakra-ui/react";
 import React from "react";
 
 interface Props {
-  width?: string;
+	width?: string;
 }
 
 const SkeletonRow: React.FC<Props> = ({ width }) => (
-  <Box as="tr">
-    <Td>
-      <Skeleton height="5px" width={width} my={3} />
-    </Td>
-    <Td>
-      <Skeleton height="5px" width={width} my={3} />
-    </Td>
-    <Td>
-      <Skeleton height="5px" width={width} my={3} />
-    </Td>
-    <Td>
-      <Skeleton height="5px" width={width} my={3} />
-    </Td>
-    <Td>
-      <Skeleton height="5px" width={width} my={3} />
-    </Td>
-  </Box>
+	<Box as="tr">
+		<Td>
+			<Skeleton height="5px" width={width} my={3} />
+		</Td>
+		<Td>
+			<Skeleton height="5px" width={width} my={3} />
+		</Td>
+		<Td>
+			<Skeleton height="5px" width={width} my={3} />
+		</Td>
+		<Td>
+			<Skeleton height="5px" width={width} my={3} />
+		</Td>
+		<Td>
+			<Skeleton height="5px" width={width} my={3} />
+		</Td>
+	</Box>
 );
 
 const FilesTableSkeleton = () => {
-  return (
+	return (
 		<Box borderWidth="1px" borderRadius="lg" overflowX="auto" mx="4">
 			<Table>
 				<thead>

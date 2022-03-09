@@ -7,7 +7,7 @@ import {
 	getAuth,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
-	User
+	User,
 } from "firebase/auth";
 import { getStorage, list, ref, StorageReference } from "firebase/storage";
 import { nanoid } from "nanoid";
@@ -36,7 +36,7 @@ export const ROOT_FOLDER: StorageReference = {
 	parent: null,
 	root: null,
 	bucket: null,
-	storage: null
+	storage: null,
 };
 
 export default () => useContext(FirebaseContext);
@@ -165,13 +165,13 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				while (results.nextPageToken) {
 					const more = await list(reference, {
 						maxResults: 100,
-						pageToken: results.nextPageToken
+						pageToken: results.nextPageToken,
 					});
 
 					results = {
 						nextPageToken: more.nextPageToken,
 						items: [...results.items, ...more.items],
-						prefixes: [...results.prefixes, ...more.prefixes]
+						prefixes: [...results.prefixes, ...more.prefixes],
 					};
 
 					setFiles(results.items);
@@ -210,7 +210,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				addFile,
 				addFolder,
 				removeFile,
-				removeFolder
+				removeFolder,
 			}}
 		>
 			{children}
