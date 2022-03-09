@@ -63,52 +63,69 @@ interface Props {
 
 const firebase_url = `https://firebasestorage.googleapis.com/v0/b`;
 const metaFetcher = async (url: string, user: User) =>
-	axios
-		.get(url, { headers: { Authorization: `Firebase ${await user.getIdToken()}` } })
-		.then(({ data }) => data);
+        axios
+                .get(url, {
+                        headers: {
+                                Authorization: `Firebase ${await user.getIdToken()}`
+                        }
+                })
+                .then(({ data }) => data);
 
 const File: React.FC<Props> = ({ file, bigIcon = false }) => {
         const [isOpen, setIsOpen] = useState(false);
-	const { app, appUser, removeFile } = useFirebase();
-	const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`;
-	const [id] = useState(nanoid());
-	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
-		metaFetcher(file_url, appUser)
-	);
-	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.downloadTokens}`);
-	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
-	const cancelRef = useRef();
+        const { app, appUser, removeFile } = useFirebase();
+        const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(
+                file.fullPath
+        )}`;
+        const [id] = useState(nanoid());
+        const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
+                metaFetcher(file_url, appUser)
+        );
+        const { onCopy } = useClipboard(
+                `${file_url}?alt=media&token=${data?.downloadTokens}`
+        );
+        const {
+                isOpen: isPreviewOpen,
+                onOpen: onPreviewOpen,
+                onClose: onPreviewClose
+        } = useDisclosure();
+        const cancelRef = useRef();
 
-	const handleClick = () => {
-		onCopy();
-		toast.success("File URL copied to clipboard!");
-		sendEvent("file_share", {});
-	};
+        const handleClick = () => {
+                onCopy();
+                toast.success('File URL copied to clipboard!');
+                sendEvent('file_share', {});
+        };
 
-	const deleteFile = async () => {
-		try {
-			if (!app) return;
-			const storage = getStorage(app);
+        const deleteFile = async () => {
+                try {
+                        if (!app) return;
+                        const storage = getStorage(app);
 
-			const reference = ref(storage, `${file?.parent.fullPath}/${file.name}`);
-			deleteObject(reference).catch((_) => {});
-			removeFile(reference);
-			setIsOpen(false);
-			toast.success("File deleted successfully!");
-			sendEvent("file_delete", {});
-		} catch (err) {
-			setIsOpen(false);
-			console.error(err);
-			toast.error(() => (
-				<>
-					<Text fontWeight="bold">Error deleting file!</Text>
-					<Text as="p" fontSize="sm">
-						{err.message}
-					</Text>
-				</>
-			));
-		}
-	};
+                        const reference = ref(
+                                storage,
+                                `${file?.parent.fullPath}/${file.name}`
+                        );
+                        deleteObject(reference).catch((_) => {});
+                        removeFile(reference);
+                        setIsOpen(false);
+                        toast.success('File deleted successfully!');
+                        sendEvent('file_delete', {});
+                } catch (err) {
+                        setIsOpen(false);
+                        console.error(err);
+                        toast.error(() => (
+                                <>
+                                        <Text fontWeight="bold">
+                                                Error deleting file!
+                                        </Text>
+                                        <Text as="p" fontSize="sm">
+                                                {err.message}
+                                        </Text>
+                                </>
+                        ));
+                }
+        };
 
         return (
                 <>

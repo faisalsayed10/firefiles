@@ -16,7 +16,13 @@ const FileIcon: React.FC<Props> = ({ extension, id, bigIcon = false }) => {
                         : icon.classList.add('fiv-icon-blank');
         }, []);
 
-        return <span className={`fiv-sqo ${bigIcon ? 'fiv-size-2xl' : 'fiv-size-md'} icon-${id}`} />
+        return (
+                <span
+                        className={`fiv-sqo ${
+                                bigIcon ? 'fiv-size-2xl' : 'fiv-size-md'
+                        } icon-${id}`}
+                />
+        );
 };
 
 export default FileIcon;

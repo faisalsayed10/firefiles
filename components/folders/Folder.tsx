@@ -1,6 +1,35 @@
-import {Flex, MenuItem, Box, MenuList, Text, useColorModeValue, Popover, Button, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, Portal} from '@chakra-ui/react';
-import {deleteObject, getStorage, listAll, ref, StorageReference} from '@firebase/storage';
-import {faExternalLinkAlt, faFolderOpen, faPlus, faEllipsisH, faTrash} from '@fortawesome/free-solid-svg-icons';
+import {
+        Flex,
+        MenuItem,
+        Box,
+        MenuList,
+        Text,
+        useColorModeValue,
+        Popover,
+        Button,
+        PopoverArrow,
+        PopoverBody,
+        PopoverCloseButton,
+        PopoverContent,
+        PopoverFooter,
+        PopoverHeader,
+        PopoverTrigger,
+        Portal
+} from '@chakra-ui/react';
+import {
+        deleteObject,
+        getStorage,
+        listAll,
+        ref,
+        StorageReference
+} from '@firebase/storage';
+import {
+        faExternalLinkAlt,
+        faFolderOpen,
+        faPlus,
+        faEllipsisH,
+        faTrash
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useFirebase from '@hooks/useFirebase';
 import { sendEvent } from '@util/firebase';
@@ -20,8 +49,13 @@ const deleteLocalFolder = (folder: StorageReference) => {
         const localFolders = localStorage.getItem(`local_folders_${id}`);
         if (localFolders) {
                 const folders = JSON.parse(localFolders);
-                const filtered = folders.filter((f) => !f.fullPath.includes(folder.fullPath));
-                localStorage.setItem(`local_folders_${id}`, JSON.stringify(filtered));
+                const filtered = folders.filter(
+                        (f) => !f.fullPath.includes(folder.fullPath)
+                );
+                localStorage.setItem(
+                        `local_folders_${id}`,
+                        JSON.stringify(filtered)
+                );
         }
 };
 
@@ -37,7 +71,10 @@ const recursiveDelete = async (
         } else {
                 for (const folder of folders) {
                         const subFolders = await listAll(folder);
-                        return recursiveDelete(subFolders.prefixes,  subFolders.items);
+                        return recursiveDelete(
+                                subFolders.prefixes,
+                                subFolders.items
+                        );
                 }
         }
 };
@@ -61,15 +98,10 @@ const Folder: React.FC<Props> = ({
                                 isOpen={isOpen}
                                 onClick={async () => {
                                         try {
-                                                if (!app)
-                                                        return;
-                                                const storage = getStorage(
-                                                        app
-                                                );
+                                                if (!app) return;
+                                                const storage = getStorage(app);
 
-                                                setIsFolderDeleting(
-                                                        true
-                                                );
+                                                setIsFolderDeleting(true);
                                                 onClose();
                                                 const currentRef = ref(
                                                         storage,
@@ -81,28 +113,17 @@ const Folder: React.FC<Props> = ({
                                                         currentRef
                                                 );
 
-                                                removeFolder(
-                                                        folder
-                                                );
-                                                deleteLocalFolder(
-                                                        folder
-                                                );
+                                                removeFolder(folder);
+                                                deleteLocalFolder(folder);
                                                 recursiveDelete(
                                                         res.prefixes,
                                                         res.items
                                                 );
-                                                sendEvent(
-                                                        'folder_delete',
-                                                        {}
-                                                );
+                                                sendEvent('folder_delete', {});
                                         } catch (err) {
-                                                console.error(
-                                                        err
-                                                );
+                                                console.error(err);
                                         } finally {
-                                                setIsFolderDeleting(
-                                                        false
-                                                );
+                                                setIsFolderDeleting(false);
                                         }
                                 }}
                         />
@@ -130,14 +151,8 @@ const Folder: React.FC<Props> = ({
                                         }
                                 >
                                         <FontAwesomeIcon
-                                                icon={
-                                                        faFolderOpen
-                                                }
-                                                size={
-                                                        bigIcon
-                                                                ? '3x'
-                                                                : '3x'
-                                                }
+                                                icon={faFolderOpen}
+                                                size={bigIcon ? '3x' : '3x'}
                                                 color={useColorModeValue(
                                                         '#2D3748',
                                                         'white'
@@ -151,9 +166,7 @@ const Folder: React.FC<Props> = ({
                                         alignItems="center"
                                 >
                                         <Text
-                                                isTruncated={
-                                                        true
-                                                }
+                                                isTruncated={true}
                                                 as="p"
                                                 fontSize="xs"
                                                 align="center"

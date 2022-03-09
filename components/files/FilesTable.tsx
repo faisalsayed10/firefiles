@@ -23,7 +23,14 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                 >
                         {gridOn ? (
                                 <Grid
-                                        templateColumns={['repeat(2, 1fr)', 'repeat(3, 1fr)', 'repeat(4, 1fr)', 'repeat(6, 1fr)', 'repeat(7, 1fr)', 'repeat(8, 1fr)']}
+                                        templateColumns={[
+                                                'repeat(2, 1fr)',
+                                                'repeat(3, 1fr)',
+                                                'repeat(4, 1fr)',
+                                                'repeat(6, 1fr)',
+                                                'repeat(7, 1fr)',
+                                                'repeat(8, 1fr)'
+                                        ]}
                                         gap={6}
                                 >
                                         {childFolders.length > 0 &&
@@ -37,9 +44,15 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                                                                         boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.05)"
                                                                 >
                                                                         <Folder
-                                                                                bigIcon={true}
-                                                                                setIsFolderDeleting={setIsFolderDeleting}
-                                                                                folder={childFolder}
+                                                                                bigIcon={
+                                                                                        true
+                                                                                }
+                                                                                setIsFolderDeleting={
+                                                                                        setIsFolderDeleting
+                                                                                }
+                                                                                folder={
+                                                                                        childFolder
+                                                                                }
                                                                         />
                                                                 </GridItem>
                                                         )
@@ -55,8 +68,12 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                                                                 boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.05)"
                                                         >
                                                                 <File
-                                                                        file={childFile}
-                                                                        bigIcon={true}
+                                                                        file={
+                                                                                childFile
+                                                                        }
+                                                                        bigIcon={
+                                                                                true
+                                                                        }
                                                                 />
                                                         </GridItem>
                                                 ))}
@@ -68,13 +85,31 @@ const FilesTable: React.FC<Props> = ({ childFolders, childFiles, gridOn }) => {
                                                         <Th></Th>
                                                         <Th>Name</Th>
                                                         <Th>Size</Th>
-                                                        <Th textAlign="center">Share</Th>
-                                                        <Th textAlign="center">Download</Th>
-                                                        <Th textAlign="center">Delete</Th>
+                                                        <Th textAlign="center">
+                                                                Share
+                                                        </Th>
+                                                        <Th textAlign="center">
+                                                                Download
+                                                        </Th>
+                                                        <Th textAlign="center">
+                                                                Delete
+                                                        </Th>
                                                 </Tr>
                                         </thead>
                                         <tbody>
-                                                {childFiles.length > 0 && childFiles.map((childFile) => <File key={childFile.name} file={childFile}/>)}
+                                                {childFiles.length > 0 &&
+                                                        childFiles.map(
+                                                                (childFile) => (
+                                                                        <File
+                                                                                key={
+                                                                                        childFile.name
+                                                                                }
+                                                                                file={
+                                                                                        childFile
+                                                                                }
+                                                                        />
+                                                                )
+                                                        )}
                                         </tbody>
                                 </Table>
                         )}

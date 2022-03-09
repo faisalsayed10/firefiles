@@ -1,4 +1,15 @@
-import {Box, Button, Center, Divider, Flex, Grid, Skeleton, Spacer, Text, useColorMode} from '@chakra-ui/react';
+import {
+        Box,
+        Button,
+        Center,
+        Divider,
+        Flex,
+        Grid,
+        Skeleton,
+        Spacer,
+        Text,
+        useColorMode
+} from '@chakra-ui/react';
 import FilesEmptyState from '@components/files/FilesEmptyState';
 import FilesTable from '@components/files/FilesTable';
 import FilesTableSkeleton from '@components/files/FilesTableSkeleton';
