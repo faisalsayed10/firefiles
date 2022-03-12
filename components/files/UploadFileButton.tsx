@@ -88,7 +88,10 @@ const UploadFileButton: React.FC<Props> = ({
 					setUploadingFiles((prevUploadingFiles) => {
 						return prevUploadingFiles.map((uploadFile) => {
 							if (uploadFile.id === id) {
-								return { ...uploadFile, error: true };
+								return {
+									...uploadFile,
+									error: true,
+								};
 							}
 							return uploadFile;
 						});

@@ -130,7 +130,11 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 					<MarkdownPreview
 						source={text}
 						disallowedElements={["script"]}
-						style={{ height: "90%", overflowY: "auto", padding: 15 }}
+						style={{
+							height: "90%",
+							overflowY: "auto",
+							padding: 15,
+						}}
 					/>
 				) : (
 					<CodeEditor
@@ -151,7 +155,10 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 					disabled
 					language={extension}
 					padding={15}
-					style={{ ...codeEditorStyles, marginTop: 40 }}
+					style={{
+						...codeEditorStyles,
+						marginTop: 40,
+					}}
 				/>
 			</Box>
 		);
@@ -253,11 +260,18 @@ const CsvViewer = ({ file, url }) => {
 
 	useEffect(() => {
 		if (!rawFile) return;
-		Papa.parse(rawFile, { header: true, dynamicTyping: true, complete: handleDataChange });
+		Papa.parse(rawFile, {
+			header: true,
+			dynamicTyping: true,
+			complete: handleDataChange,
+		});
 	}, [rawFile]);
 
 	const makeColumns = (rawColumns) =>
-		rawColumns.map((column) => ({ Header: column, accessor: column }));
+		rawColumns.map((column) => ({
+			Header: column,
+			accessor: column,
+		}));
 
 	const handleDataChange = (file) => {
 		file.data.pop();

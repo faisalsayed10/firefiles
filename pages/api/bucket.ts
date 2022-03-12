@@ -31,26 +31,43 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
 			await firestore.collection("buckets").doc(nanoid()).set({ keys, name, type, userId: uid });
 
-			return res.status(200).json("success");
+			// CREATE
+		} else if (req.method === "POST") {
+			const { data, name, type } = req.body;
+			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
+			await firestore.collection("buckets").doc(nanoid()).set({ keys, name, type, userId: uid });
 
 			// DELETE
 		} else if (req.method === "DELETE") {
 			const id = req.query.id as string;
 			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
 
+			// DELETE
+		} else if (req.method === "DELETE") {
+			const id = req.query.id as string;
+			if (!id)
+				return res.status(400).json({
+					error: "Bucket ID not found.",
+				});
+
 			const snapshot = await firestore.collection("buckets").doc(id).get();
 			if (!snapshot.exists || snapshot.data().userId !== uid)
 				return res.status(404).json({ error: "Bucket not found." });
-
-			await firestore.collection("buckets").doc(id).delete();
-			return res.status(200).json("success");
 
 			// UPDATE
 		} else if (req.method === "PUT") {
 			const id = req.query.id as string;
 			const data = req.body;
 
-			if (!id) return res.status(400).json({ error: "Token / Bucket ID not found." });
+			// UPDATE
+		} else if (req.method === "PUT") {
+			const id = req.query.id as string;
+			const data = req.body;
+
+			if (!id)
+				return res.status(400).json({
+					error: "Token / Bucket ID not found.",
+				});
 
 			const snapshot = await firestore.collection("buckets").doc(id).get();
 			if (!snapshot.exists || snapshot.data().userId !== uid)

@@ -61,8 +61,16 @@ const AddBucketButton = () => {
 
 			const promise = axios.post(
 				"/api/bucket",
-				{ data: dataToPost, name: nanoid(10), type: BucketType[selectedType] },
-				{ headers: { token: await currentUser.getIdToken() } }
+				{
+					data: dataToPost,
+					name: nanoid(10),
+					type: BucketType[selectedType],
+				},
+				{
+					headers: {
+						token: await currentUser.getIdToken(),
+					},
+				}
 			);
 
 			toast.promise(promise, {
@@ -73,12 +81,16 @@ const AddBucketButton = () => {
 
 			promise.then(() => {
 				mutate("/api/get-buckets");
-				sendEvent("bucket_create", { type: BucketType[selectedType] });
+				sendEvent("bucket_create", {
+					type: BucketType[selectedType],
+				});
 			});
 			onClose();
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
-			sendEvent("bucket_create_error", { message: err.message });
+			sendEvent("bucket_create_error", {
+				message: err.message,
+			});
 		}
 
 		setLoading(false);
