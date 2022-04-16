@@ -1,3 +1,11 @@
+import {
+	CreateBucketCommand,
+	ListBucketsCommand,
+	PutBucketCorsCommand,
+	PutBucketCorsCommandInput,
+	PutPublicAccessBlockCommand,
+	S3Client
+} from "@aws-sdk/client-s3";
 import axios from "axios";
 import { deleteApp, getApps } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
@@ -61,4 +69,41 @@ export const download = async (name: string, url: string) => {
 	} catch (err) {
 		window.open(url, "_blank");
 	}
+};
+
+export const validateInput = async (value: any, selectedType: BucketType) => {
+	if (selectedType === BucketType.firebase) {
+		if (
+			!value ||
+			!value.apiKey ||
+			!value.projectId ||
+			!value.appId ||
+			!value.authDomain ||
+			!value.storageBucket
+		)
+			throw new Error("One or more fields are missing!");
+	} else if (selectedType === BucketType.s3) {
+		if (!value || !value.accessKey || !value.secretKey || !value.bucketName || !value.region)
+			throw new Error("One or more fields are missing!");
+	}
+};
+
+export const createNewBucket = async (
+	client: S3Client,
+	Bucket: string,
+	corsOptions: PutBucketCorsCommandInput
+) => {
+	await client.send(new CreateBucketCommand({ Bucket, ObjectOwnership: "BucketOwnerEnforced" }));
+	await client.send(
+		new PutPublicAccessBlockCommand({
+			Bucket,
+			PublicAccessBlockConfiguration: {
+				BlockPublicAcls: true,
+				BlockPublicPolicy: true,
+				IgnorePublicAcls: true,
+				RestrictPublicBuckets: true
+			}
+		})
+	);
+	await client.send(new PutBucketCorsCommand(corsOptions));
 };

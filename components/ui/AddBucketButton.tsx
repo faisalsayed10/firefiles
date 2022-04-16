@@ -12,15 +12,16 @@ import {
 	useDisclosure
 } from "@chakra-ui/react";
 import S3Input from "@components/popups/S3Input";
-import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faLongArrowAltLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
 import { sendEvent } from "@util/firebase";
+import { validateInput } from "@util/helpers";
 import { BucketType } from "@util/types";
 import axios from "axios";
 import { nanoid } from "nanoid";
 import "node_modules/video-react/dist/video-react.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useSWRConfig } from "swr";
 import { omit } from "underscore";
@@ -36,43 +37,48 @@ const AddBucketButton = () => {
 	const [loading, setLoading] = useState(false);
 	const [value, setValue] = useState(null);
 
+	const reset = () => {
+		setSelectedType(null);
+		setValue(null);
+		setLoading(false);
+		setError("");
+	};
+
 	const onSubmit = async (e: any) => {
 		try {
 			e.preventDefault();
 			setError("");
 			setLoading(true);
+			await validateInput(value, selectedType);
 
-			if (selectedType === BucketType.firebase) {
-				if (
-					!value ||
-					!value.apiKey ||
-					!value.projectId ||
-					!value.appId ||
-					!value.authDomain ||
-					!value.storageBucket
-				)
-					throw new Error("One or more fields are missing from the config.");
-			} else if (selectedType === BucketType.s3) {
-				if (!value || !value.accessKey || !value.secretKey)
-					throw new Error("Access Key and Secret Key are required.");
-			}
+			// TODO: api path will change according to provider
+			// TODO: each provider will have their own single api route for CRUD
+			// (/api/buckets probably renames to /api/firebase)
+			// (/api/check-connection probably renames to /api/aws)
 
-			const promise = axios.post(
-				"/api/bucket",
-				{ data: omit(value, "name"), name: value.name || nanoid(10), type: BucketType[selectedType] },
-				{ headers: { token: await currentUser.getIdToken() } }
-			);
-
-			toast.promise(promise, {
-				loading: "Creating bucket...",
-				success: "Bucket created successfully.",
-				error: "An error occurred while creating the bucket."
+			const promise = axios.post("/api/check-connection", {
+				accessKey: value.accessKey,
+				secretKey: value.secretKey,
+				bucketName: value.bucketName,
+				region: value.region
 			});
 
-			promise.then(() => {
-				mutate("/api/get-buckets");
-				sendEvent("bucket_create", { type: BucketType[selectedType] });
-			});
+			// const promise = axios.post(
+			// 	"/api/bucket",
+			// 	{ data: omit(value, "name"), name: value.name || nanoid(10), type: BucketType[selectedType] },
+			// 	{ headers: { token: await currentUser.getIdToken() } }
+			// );
+
+			// toast.promise(promise, {
+			// 	loading: "Creating bucket...",
+			// 	success: "Bucket created successfully.",
+			// 	error: "An error occurred while creating the bucket."
+			// });
+
+			// promise.then(() => {
+			// 	mutate("/api/get-buckets");
+			// 	sendEvent("bucket_create", { type: BucketType[selectedType] });
+			// });
 			onClose();
 		} catch (err) {
 			setError(err.message.replace("Firebase: ", ""));
@@ -107,17 +113,25 @@ const AddBucketButton = () => {
 			>
 				<FontAwesomeIcon icon={faPlus} size="2x" />
 			</Flex>
-			<Modal isOpen={isOpen} onClose={onClose} isCentered autoFocus={false}>
+			<Modal
+				isOpen={isOpen}
+				onClose={() => {
+					reset();
+					onClose();
+				}}
+				isCentered
+				autoFocus={false}
+			>
 				<ModalOverlay />
-				<ModalContent maxH="700px" overflowY="auto">
+				<ModalContent overflowY="auto">
 					<ModalHeader>
 						{selectedType != null ? (
 							<>
 								<IconButton
 									aria-label="back"
-									icon={<FontAwesomeIcon icon={faArrowLeft} />}
+									icon={<FontAwesomeIcon icon={faLongArrowAltLeft} />}
 									variant="unstyled"
-									onClick={() => setSelectedType(null)}
+									onClick={reset}
 								/>
 								Enter Keys
 							</>
@@ -125,12 +139,19 @@ const AddBucketButton = () => {
 							"Select Provider"
 						)}
 					</ModalHeader>
-					<ModalCloseButton />
+					<ModalCloseButton margin="3" />
 					<ModalBody>{modalBody()}</ModalBody>
 					<ModalFooter>
 						{selectedType != null ? (
 							<>
-								<Button mr={3} onClick={onClose} variant="ghost">
+								<Button
+									mr={3}
+									onClick={() => {
+										reset();
+										onClose();
+									}}
+									variant="ghost"
+								>
 									Close
 								</Button>
 								<Button onClick={onSubmit} colorScheme="blue" isLoading={loading}>
