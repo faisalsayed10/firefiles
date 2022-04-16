@@ -1,36 +1,21 @@
-import { Alert, AlertIcon, Flex, FormControl, Input, Text } from "@chakra-ui/react";
+import { Flex, FormControl, Input, Text } from "@chakra-ui/react";
 import AWSRegionSelect from "@components/ui/AWSRegionSelect";
-import VideoAccordion from "@components/ui/VideoAccordion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const S3Input = ({ setValue, error }) => {
-	const [name, setName] = useState("");
 	const [accessKey, setAccessKey] = useState("");
 	const [secretKey, setSecretKey] = useState("");
 	const [bucketName, setBucketName] = useState("");
 	const [region, setRegion] = useState("");
 
+	useEffect(() => {
+		if (!error.trim()) return;
+		toast.error(error);
+	}, [error]);
+
 	return (
 		<Flex flexDir="column" maxW="sm" m="0 auto">
-			{error && (
-				<Alert status="error" fontSize="md" mb="2">
-					<AlertIcon />
-					{error}
-				</Alert>
-			)}
-			<FormControl mb="2">
-				<Input
-					variant="flushed"
-					placeholder="Name in Firefiles"
-					type="text"
-					value={name}
-					onChange={(e) => {
-						setName(e.target.value);
-						setValue((prev) => ({ ...prev, name: e.target.value }));
-					}}
-					required
-				/>
-			</FormControl>
 			<FormControl mb="2">
 				<Input
 					variant="flushed"
@@ -71,12 +56,18 @@ const S3Input = ({ setValue, error }) => {
 				/>
 			</FormControl>
 			<FormControl mb="2">
-				<AWSRegionSelect value={region} setValue={setRegion} />
+				<AWSRegionSelect
+					value={region}
+					onChange={(e) => {
+						setRegion(e.target.value);
+						setValue((prev) => ({ ...prev, region: e.target.value }));
+					}}
+				/>
 			</FormControl>
 			<Text as="p" fontSize="xs">
 				We'll create a new AWS bucket in this region if the bucket with provided name doesn't exist.
 			</Text>
-			<VideoAccordion src="/aws-keys-tutorial.mov" />
+			{/* TODO: <VideoAccordion src="/aws-keys-tutorial.mov" /> */}
 		</Flex>
 	);
 };

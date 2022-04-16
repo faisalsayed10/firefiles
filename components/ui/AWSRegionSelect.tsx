@@ -7,7 +7,7 @@ const regions = [
 	{ name: "US West (N. California)", code: "us-west-1" },
 	{ name: "US West (Oregon)", code: "us-west-2" },
 	{ name: "Africa (Cape Town)", code: "af-south-1" },
-	{ name: "Asia Pacific (Hong Kong)", code: "ap-east-1" },
+	// { name: "Asia Pacific (Hong Kong)", code: "ap-east-1" },
 	{ name: "Asia Pacific (Jakarta)", code: "ap-southeast-3" },
 	{ name: "Asia Pacific (Mumbai)", code: "ap-south-1" },
 	{ name: "Asia Pacific (Osaka)", code: "ap-northeast-3" },
@@ -30,16 +30,16 @@ const regions = [
 
 type Props = {
 	value: string;
-	setValue: React.Dispatch<React.SetStateAction<string>>;
+	onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 };
 
-const AWSRegionSelect: React.FC<Props> = ({ value, setValue }) => {
+const AWSRegionSelect: React.FC<Props> = ({ value, onChange }) => {
 	return (
 		<Select
 			placeholder="Select Region"
 			variant="flushed"
 			value={value}
-			onChange={(e) => setValue(e.target.value)}
+			onChange={onChange}
 			isRequired
 		>
 			{regions.map((region) => (

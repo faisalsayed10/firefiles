@@ -8,6 +8,7 @@
     "type-check": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.72.0",
     "@chakra-ui/react": "^1.7.2",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
@@ -38,7 +39,6 @@
     "react-error-boundary": "^3.1.4",
     "react-hot-toast": "^2.2.0",
     "react-loading-overlay": "^1.0.1",
-    "s3-upload-resume": "^1.1.6",
     "swr": "^1.1.2-beta.0",
     "underscore": "^1.13.2",
     "video-react": "^0.15.0"
