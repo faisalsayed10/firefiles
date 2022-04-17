@@ -1,4 +1,5 @@
 import { auth, firestore } from "@util/firebase-admin";
+import { beforeCreatingDoc } from "@util/helpers";
 import { AES, enc } from "crypto-js";
 import { nanoid } from "nanoid";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -9,7 +10,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		if (!token) return res.status(400).json({ error: "Token not found." });
 		const { uid } = await auth.verifyIdToken(token);
 
-    // READ
+		// READ
 		if (req.method === "GET") {
 			const id = req.query.id as string;
 			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
@@ -24,16 +25,21 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			return res
 				.status(200)
 				.json({ id: snapshot.id, keys: JSON.parse(decrypted), name, type, userId });
-    
-    // CREATE
+
+			// CREATE
 		} else if (req.method === "POST") {
 			const { data, name, type } = req.body;
+			if (!data || !name || !type) return res.status(400).json({ error: "Invalid request." });
+			const { success, error } = await beforeCreatingDoc(req, res, req.body);
+
+			if (!success) return res.status(400).json({ error });
+
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
 			await firestore.collection("buckets").doc(nanoid()).set({ keys, name, type, userId: uid });
 
 			return res.status(200).json("success");
 
-    // DELETE
+			// DELETE
 		} else if (req.method === "DELETE") {
 			const id = req.query.id as string;
 			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
@@ -45,12 +51,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			await firestore.collection("buckets").doc(id).delete();
 			return res.status(200).json("success");
 
-    // UPDATE
+			// UPDATE
 		} else if (req.method === "PUT") {
 			const id = req.query.id as string;
 			const data = req.body;
 
-			if (!id) return res.status(400).json({ error: "Token / Bucket ID not found." });
+			if (!id || !data) return res.status(400).json({ error: "Data / Bucket ID not found." });
 
 			const snapshot = await firestore.collection("buckets").doc(id).get();
 			if (!snapshot.exists || snapshot.data().userId !== uid)
