@@ -6,10 +6,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 	const client = new S3Client({
 		region,
 		maxAttempts: 1,
-		credentials: {
-			accessKeyId: accessKey,
-			secretAccessKey: secretKey
-		}
+		credentials: { accessKeyId: accessKey, secretAccessKey: secretKey }
 	});
 
 	try {

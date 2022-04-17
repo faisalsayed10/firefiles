@@ -21,8 +21,6 @@ import toast from "react-hot-toast";
 import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
 
-// TODO: Bucket name must be unique and must not contain spaces or uppercase letters
-
 const NewS3 = () => {
 	const { currentUser } = useUser();
 	const router = useRouter();
@@ -71,6 +69,9 @@ const NewS3 = () => {
 
 			if (selectedBucket === "Not Selected" && !bucketName.trim())
 				throw new Error("Select an existing bucket or enter a new bucket name!");
+
+			if (bucketName.trim().length < 3 || bucketName.trim().length > 63)
+				throw new Error("Bucket name must be between 3 and 63 characters!");
 
 			const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
@@ -158,7 +159,11 @@ const NewS3 = () => {
 								placeholder="Bucket Name"
 								type="text"
 								value={bucketName}
-								onChange={(e) => setBucketName(e.target.value)}
+								onChange={(e) => {
+									// Bucket name must not contain spaces or uppercase letters
+									const text = e.target.value.replace(" ", "").toLowerCase();
+									setBucketName(text);
+								}}
 								required
 							/>
 							<Button
