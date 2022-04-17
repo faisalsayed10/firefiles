@@ -12,9 +12,6 @@
     "@chakra-ui/react": "^1.7.2",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
-    "@fortawesome/fontawesome-svg-core": "^1.2.36",
-    "@fortawesome/free-solid-svg-icons": "^5.15.4",
-    "@fortawesome/react-fontawesome": "^0.1.16",
     "@react-hook/media-query": "^1.1.1",
     "@uiw/react-markdown-preview": "^3.4.7",
     "@uiw/react-textarea-code-editor": "^1.4.15",
@@ -40,6 +37,7 @@
     "react-hot-toast": "^2.2.0",
     "react-loading-overlay": "^1.0.1",
     "swr": "^1.1.2-beta.0",
+    "tabler-icons-react": "^1.45.0",
     "underscore": "^1.13.2",
     "video-react": "^0.15.0"
   },

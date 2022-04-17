@@ -16,8 +16,6 @@ import {
 } from "@chakra-ui/react";
 import AddBucketButton from "@components/ui/AddBucketButton";
 import Navbar from "@components/ui/Navbar";
-import { faEllipsisV, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
 import { sendEvent } from "@util/firebase";
 import { PROVIDERS } from "@util/globals";
@@ -30,6 +28,7 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { DotsVertical, X } from "tabler-icons-react";
 
 const Dashboard = () => {
 	const router = useRouter();
@@ -123,13 +122,13 @@ const Dashboard = () => {
 											<MenuButton
 												as={IconButton}
 												aria-label="Options"
-												icon={<FontAwesomeIcon icon={faEllipsisV} />}
+												icon={<DotsVertical />}
 												variant="link"
 												onClick={(e) => e.stopPropagation()}
 											/>
 											<MenuList>
 												<MenuItem
-													icon={<FontAwesomeIcon icon={faTrash} />}
+													icon={<X />}
 													onClick={async (e) => {
 														e.stopPropagation();
 														await deleteBucket(

@@ -1,5 +1,5 @@
 import {
-	Button,
+	IconButton,
 	Modal,
 	ModalCloseButton,
 	ModalContent,
@@ -10,8 +10,6 @@ import {
 	useClipboard,
 	useDisclosure
 } from "@chakra-ui/react";
-import { faCopy, faDownload, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
 import { download } from "@util/helpers";
@@ -23,6 +21,7 @@ import prettyBytes from "pretty-bytes";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import useSWRImmutable from "swr/immutable";
+import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 import FileIcon from "./FileIcon";
 import FilePreview from "./FilePreview";
@@ -99,26 +98,35 @@ const File: React.FC<Props> = ({ file }) => {
 				</Td>
 				<Td minW="110px">{data && prettyBytes(parseInt(data.size) || 0)}</Td>
 				<Td textAlign="center">
-					<Button onClick={handleClick} isLoading={!data} variant="outline" colorScheme="blue">
-						<FontAwesomeIcon icon={faCopy} />
-					</Button>
+					<IconButton
+						aria-label="Copy file URL"
+						icon={<Copy />}
+						onClick={handleClick}
+						isLoading={!data}
+						variant="outline"
+						colorScheme="blue"
+					/>
 				</Td>
 				<Td textAlign="center">
-					<Button
+					<IconButton
+						aria-label="Download file"
+						icon={<FileDownload />}
 						isLoading={!data}
 						variant="outline"
 						colorScheme="blue"
 						onClick={() =>
 							download(file.name, `${file_url}?alt=media&token=${data?.downloadTokens}`)
 						}
-					>
-						<FontAwesomeIcon icon={faDownload} />
-					</Button>
+					/>
 				</Td>
 				<Td textAlign="center">
-					<Button onClick={() => setIsOpen(true)} variant="outline" colorScheme="red">
-						<FontAwesomeIcon icon={faTrash} />
-					</Button>
+					<IconButton
+						aria-label="Delete file"
+						icon={<FileMinus />}
+						onClick={() => setIsOpen(true)}
+						variant="outline"
+						colorScheme="red"
+					/>
 					<DeleteAlert
 						isOpen={isOpen}
 						onClose={() => setIsOpen(false)}

@@ -1,17 +1,11 @@
 import { Flex, MenuItem, MenuList, Text, useColorModeValue } from "@chakra-ui/react";
 import { deleteObject, getStorage, listAll, ref, StorageReference } from "@firebase/storage";
-import {
-	faExternalLinkAlt,
-	faFolderOpen,
-	faPlus,
-	faTrash
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
 import { ContextMenu } from "chakra-ui-contextmenu";
 import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
+import { ExternalLink, FolderMinus, Plus, Folder as FolderIcon } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
@@ -54,19 +48,16 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 		<ContextMenu<HTMLDivElement>
 			renderMenu={() => (
 				<MenuList>
-					<MenuItem
-						icon={<FontAwesomeIcon icon={faPlus} />}
-						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-					>
+					<MenuItem icon={<Plus />} onClick={() => router.push(`${router.asPath}/${folder.name}`)}>
 						Open
 					</MenuItem>
 					<MenuItem
-						icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
+						icon={<ExternalLink />}
 						onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
 					>
 						Open in new tab
 					</MenuItem>
-					<MenuItem icon={<FontAwesomeIcon icon={faTrash} />} onClick={() => setIsOpen(true)}>
+					<MenuItem icon={<FolderMinus />} onClick={() => setIsOpen(true)}>
 						Delete Folder (and its contents)
 					</MenuItem>
 				</MenuList>
@@ -114,11 +105,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 						pb="2"
 						ref={reactRef}
 					>
-						<FontAwesomeIcon
-							icon={faFolderOpen}
-							size="3x"
-							color={useColorModeValue("#2D3748", "white")}
-						/>
+						<FolderIcon size={72} strokeWidth="1px" color={useColorModeValue("#2D3748", "white")} />
 						<Text isTruncated={true} as="p" fontSize="xs" align="center" px="2" maxW="105px">
 							{folder.name}
 						</Text>

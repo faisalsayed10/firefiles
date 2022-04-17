@@ -14,8 +14,6 @@ import {
 	Tr,
 	useColorMode
 } from "@chakra-ui/react";
-import { faDownload, faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
@@ -27,6 +25,7 @@ import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { ExternalLink, FileDownload } from "tabler-icons-react";
 import { Player } from "video-react";
 
 const CodeEditor: React.ComponentType<TextareaCodeEditorProps> = dynamic(
@@ -168,13 +167,13 @@ const Error = ({ file, url }) => {
 			</Text>
 			<ButtonGroup>
 				<Button
-					leftIcon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
+					leftIcon={<ExternalLink />}
 					onClick={() => window.open(url, "_blank")}
 				>
 					Open in new tab
 				</Button>
 				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
+					leftIcon={<FileDownload />}
 					onClick={() => download(file.name, url)}
 				>
 					Download It
@@ -193,7 +192,7 @@ const NoPreview = ({ file, url, setShowRaw }) => {
 			<ButtonGroup>
 				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
 				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
+					leftIcon={<FileDownload />}
 					onClick={() => download(file.name, url)}
 				>
 					Download It
@@ -221,7 +220,7 @@ const GoogleDocsViewer = ({ file, url }) => {
 					Open with Google Docs Viewer
 				</Button>
 				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
+					leftIcon={<FileDownload />}
 					onClick={() => download(file.name, url)}
 				>
 					Download It
