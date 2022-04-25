@@ -19,7 +19,7 @@ import "@uiw/react-markdown-preview/markdown.css";
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
 import "@uiw/react-textarea-code-editor/dist.css";
 import { download } from "@util/helpers";
-import { StorageReference } from "firebase/storage";
+import { BucketFile } from "@util/types";
 import dynamic from "next/dynamic";
 import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
@@ -39,12 +39,11 @@ const MarkdownPreview: React.ComponentType<MarkdownPreviewProps> = dynamic(
 );
 
 type Props = {
-	mimetype: string;
 	url: string;
-	file: StorageReference;
+	file: BucketFile;
 };
 
-const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
+const FilePreview: React.FC<Props> = ({ url, file }) => {
 	const [isError, setIsError] = useState(false);
 	const [showRaw, setShowRaw] = useState(false);
 	const [rawMd, setRawMd] = useState(false);
@@ -67,9 +66,9 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 
 	useEffect(() => {
 		if (
-			mimetype.startsWith("text") ||
-			mimetype === "application/json" ||
-			mimetype === "text/markdown" ||
+			file?.contentType?.startsWith("text") ||
+			file?.contentType === "application/json" ||
+			file?.contentType === "text/markdown" ||
 			extension === "md" ||
 			showRaw
 		) {
@@ -82,20 +81,20 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 
 	if (isError) {
 		return <Error file={file} url={url} />;
-	} else if (mimetype.startsWith("image")) {
+	} else if (file?.contentType?.startsWith("image")) {
 		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
-	} else if (mimetype.startsWith("video")) {
+	} else if (file?.contentType?.startsWith("video")) {
 		return <Box children={<Player playsInline src={url} onError={() => setIsError(true)} />} />;
-	} else if (mimetype.startsWith("audio")) {
+	} else if (file?.contentType?.startsWith("audio")) {
 		return (
 			<Flex p="6" align="center" justify="center">
 				<audio controls onError={() => setIsError(true)}>
-					<source src={url} type={mimetype} />
+					<source src={url} type={file?.contentType} />
 					Your browser does not support playing audio.
 				</audio>
 			</Flex>
 		);
-	} else if (mimetype === "application/pdf") {
+	} else if (file?.contentType === "application/pdf") {
 		return (
 			<iframe
 				src={url}
@@ -105,7 +104,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 				onError={() => setIsError(true)}
 			/>
 		);
-	} else if (mimetype === "text/csv") {
+	} else if (file?.contentType === "text/csv") {
 		return (
 			<ErrorBoundary FallbackComponent={(...props) => <Error url={url} file={file} {...props} />}>
 				<CsvViewer file={file} url={url} />
@@ -113,7 +112,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 		);
 	} else if (/^docx?$|^xlsx?$|^pptx?$/.test(extension)) {
 		return <GoogleDocsViewer file={file} url={url} />;
-	} else if (mimetype === "text/markdown" || extension === "md") {
+	} else if (file?.contentType === "text/markdown" || extension === "md") {
 		return (
 			<Box height="600px">
 				<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
@@ -140,7 +139,11 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 				)}
 			</Box>
 		);
-	} else if (mimetype.startsWith("text") || mimetype === "application/json" || showRaw) {
+	} else if (
+		file?.contentType?.startsWith("text") ||
+		file?.contentType === "application/json" ||
+		showRaw
+	) {
 		return (
 			<Box height="600px">
 				<CodeEditor
@@ -157,7 +160,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 		);
 	}
 
-	return <NoPreview file={file} url={url} setShowRaw={setShowRaw} />;
+	return <NoPreview file={file} setShowRaw={setShowRaw} />;
 };
 
 const Error = ({ file, url }) => {
@@ -176,7 +179,7 @@ const Error = ({ file, url }) => {
 				<Button leftIcon={<ExternalLink />} onClick={() => window.open(url, "_blank")}>
 					Open in new tab
 				</Button>
-				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -184,7 +187,7 @@ const Error = ({ file, url }) => {
 	);
 };
 
-const NoPreview = ({ file, url, setShowRaw }) => {
+const NoPreview = ({ file, setShowRaw }) => {
 	return (
 		<Flex flexDir="column" align="center" justify="center" p="6">
 			<Text as="h1" fontSize="2xl" mb="4" align="center">
@@ -192,7 +195,7 @@ const NoPreview = ({ file, url, setShowRaw }) => {
 			</Text>
 			<ButtonGroup>
 				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
-				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -217,7 +220,7 @@ const GoogleDocsViewer = ({ file, url }) => {
 				>
 					Open with Google Docs Viewer
 				</Button>
-				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
 					Download It
 				</Button>
 			</ButtonGroup>

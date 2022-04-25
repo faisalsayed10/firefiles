@@ -1,48 +1,26 @@
 import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
-import { deleteObject, getStorage, listAll, ref, StorageReference } from "@firebase/storage";
-import useFirebase from "@hooks/useFirebase";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
 import { sendEvent } from "@util/firebase";
-import router, { useRouter } from "next/router";
+import { BucketFolder, BucketType } from "@util/types";
+import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
-import { ExternalLink, FolderMinus, Plus, Folder as FolderIcon } from "tabler-icons-react";
+import { ExternalLink, Folder as FolderIcon, FolderMinus, Plus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
-	folder: StorageReference;
+	folder: BucketFolder;
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-const deleteLocalFolder = (folder: StorageReference) => {
-	const id = router.asPath.split("/")[2];
-	const localFolders = localStorage.getItem(`local_folders_${id}`);
-	if (localFolders) {
-		const folders = JSON.parse(localFolders);
-		const filtered = folders.filter((f) => !f.fullPath.includes(folder.fullPath));
-		localStorage.setItem(`local_folders_${id}`, JSON.stringify(filtered));
-	}
-};
-
-const recursiveDelete = async (folders: StorageReference[], files: StorageReference[]) => {
-	for (const file of files) {
-		deleteObject(file);
-	}
-	if (!folders || folders.length < 1) {
-		return;
-	} else {
-		for (const folder of folders) {
-			const subFolders = await listAll(folder);
-			return recursiveDelete(subFolders.prefixes, subFolders.items);
-		}
-	}
-};
 
 const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const onClose = () => setIsOpen(false);
 	const router = useRouter();
 	const cancelRef = useRef();
-	const { app, removeFolder } = useFirebase();
+	const { keys } = useKeys();
+	const { removeFolder } = useBucket(BucketType[keys.type]);
 
 	const optionProps = {
 		p: 2,
@@ -58,17 +36,9 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 				isOpen={isOpen}
 				onClick={async () => {
 					try {
-						if (!app) return;
-						const storage = getStorage(app);
-
 						setIsFolderDeleting(true);
 						onClose();
-						const currentRef = ref(storage, decodeURIComponent(folder.fullPath) + "/");
-						const res = await listAll(currentRef);
-
-						removeFolder(folder);
-						deleteLocalFolder(folder);
-						recursiveDelete(res.prefixes, res.items);
+						await removeFolder(folder);
 						sendEvent("folder_delete", {});
 					} catch (err) {
 						console.error(err);

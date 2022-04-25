@@ -2,8 +2,9 @@ import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
-import useFirebase from "@hooks/useFirebase";
-import { CurrentlyUploading } from "@util/types";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
+import { BucketType, CurrentlyUploading } from "@util/types";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
@@ -29,7 +30,8 @@ const Dashboard = () => {
 	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { app, appUser, currentFolder, files, folders, loading } = useFirebase();
+	const { keys } = useKeys();
+	const { currentFolder, files, folders, loading } = useBucket(BucketType[keys.type]);
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
@@ -57,7 +59,6 @@ const Dashboard = () => {
 						setDraggedFilesToUpload(files);
 						setIsDragging(false);
 					}}
-					disabled={!app || !appUser}
 					noClick
 					onDragOver={() => setIsDragging(true)}
 					onDragLeave={() => setIsDragging(false)}

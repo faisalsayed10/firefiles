@@ -1,19 +1,17 @@
 import { Box, Flex, Image, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import { download } from "@util/helpers";
-import { StorageReference } from "firebase/storage";
+import { BucketFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
 import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
 
 interface Props {
-	file: StorageReference;
-	data: any;
+	file: BucketFile;
 	onPreviewOpen: () => void;
 	copyFile: () => void;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	file_url: string;
 	id: string;
 }
 
@@ -40,14 +38,8 @@ const FileGrid: React.FC<Props> = (props) => {
 				overflow="hidden"
 			>
 				<Box w="100%" h="100px" overflow="hidden" onClick={props.onPreviewOpen}>
-					{props.data?.contentType.startsWith("image") ? (
-						<Image
-							src={`${props.file_url}?alt=media&token=${props.data?.downloadTokens}`}
-							alt={props.file.name}
-							w="full"
-							h="full"
-							objectFit="cover"
-						/>
+					{props.file?.contentType?.startsWith("image") ? (
+						<Image src={props.file.url} alt={props.file.name} w="full" h="full" objectFit="cover" />
 					) : (
 						<Box display="flex" alignItems="center" justifyContent="center" h="full">
 							<FileIcon extension={props.file.name.split(".").pop()} id={props.id} bigIcon={true} />
@@ -68,9 +60,9 @@ const FileGrid: React.FC<Props> = (props) => {
 					</Text>
 					<OptionsPopover
 						header={props.file.name}
-						footer={`Size: ${props.data && prettyBytes(parseInt(props.data.size) || 0)}`}
+						footer={`Size: ${props.file.size && prettyBytes(parseInt(props.file.size) || 0)}`}
 					>
-						{!props.data ? (
+						{!props.file ? (
 							<Spinner />
 						) : (
 							<Flex alignItems="stretch" flexDirection="column">
@@ -78,15 +70,7 @@ const FileGrid: React.FC<Props> = (props) => {
 									<Copy />
 									<Text ml="2">Share</Text>
 								</Flex>
-								<Flex
-									{...optionProps}
-									onClick={() =>
-										download(
-											props.file.name,
-											`${props.file_url}?alt=media&token=${props.data?.downloadTokens}`
-										)
-									}
-								>
+								<Flex {...optionProps} onClick={() => download(props.file)}>
 									<FileDownload />
 									<Text ml="2">Download</Text>
 								</Flex>

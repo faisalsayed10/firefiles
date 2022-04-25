@@ -1,10 +1,10 @@
 import { Box, Table, Th, Tr } from "@chakra-ui/react";
-import { StorageReference } from "firebase/storage";
+import { BucketFile } from "@util/types";
 import React from "react";
 import File from "./File";
 
 interface Props {
-	files: StorageReference[];
+	files: BucketFile[];
 }
 
 const FilesTable: React.FC<Props> = ({ files }) => {

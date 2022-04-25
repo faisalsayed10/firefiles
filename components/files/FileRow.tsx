@@ -1,18 +1,16 @@
 import { IconButton, Td, Tr } from "@chakra-ui/react";
 import { download } from "@util/helpers";
-import { StorageReference } from "firebase/storage";
+import { BucketFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
 import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
 
 interface Props {
-	file: StorageReference;
-	data: any;
+	file: BucketFile;
 	onPreviewOpen: () => void;
 	copyFile: () => void;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	file_url: string;
 	id: string;
 }
 
@@ -33,13 +31,13 @@ const FileRow: React.FC<Props> = (props) => {
 			>
 				{props.file.name}
 			</Td>
-			<Td minW="110px">{props.data && prettyBytes(parseInt(props.data.size) || 0)}</Td>
+			<Td minW="110px">{props.file.size && prettyBytes(parseInt(props.file.size) || 0)}</Td>
 			<Td textAlign="center">
 				<IconButton
 					aria-label="Copy file URL"
 					icon={<Copy />}
 					onClick={props.copyFile}
-					isLoading={!props.data}
+					isLoading={!props.file.url}
 					variant="outline"
 					colorScheme="blue"
 				/>
@@ -48,15 +46,10 @@ const FileRow: React.FC<Props> = (props) => {
 				<IconButton
 					aria-label="Download file"
 					icon={<FileDownload />}
-					isLoading={!props.data}
+					isLoading={!props.file.url}
 					variant="outline"
 					colorScheme="blue"
-					onClick={() =>
-						download(
-							props.file.name,
-							`${props.file_url}?alt=media&token=${props.data?.downloadTokens}`
-						)
-					}
+					onClick={() => download(props.file)}
 				/>
 			</Td>
 			<Td textAlign="center">

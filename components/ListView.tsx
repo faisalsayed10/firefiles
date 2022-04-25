@@ -4,16 +4,16 @@ import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
 import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
-import { StorageReference } from "firebase/storage";
+import { BucketFile, BucketFolder } from "@util/types";
 import React from "react";
 import { LayoutGrid } from "tabler-icons-react";
 
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
 	loading: boolean;
-	currentFolder: StorageReference;
-	folders: StorageReference[];
-	files: StorageReference[];
+	currentFolder: BucketFolder;
+	folders: BucketFolder[];
+	files: BucketFile[];
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 };
 

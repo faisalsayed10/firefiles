@@ -1,6 +1,6 @@
 import { Box, Flex, Grid, IconButton, Skeleton, Text } from "@chakra-ui/react";
 import Folder from "@components/folders/Folder";
-import { StorageReference } from "firebase/storage";
+import { BucketFile, BucketFolder } from "@util/types";
 import React from "react";
 import { LayoutList } from "tabler-icons-react";
 import File from "./files/File";
@@ -9,9 +9,9 @@ import AddFolderButton from "./folders/AddFolderButton";
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
 	loading: boolean;
-	currentFolder: StorageReference;
-	folders: StorageReference[];
-	files: StorageReference[];
+	currentFolder: BucketFolder;
+	folders: BucketFolder[];
+	files: BucketFile[];
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 };
 

@@ -13,25 +13,25 @@ import {
 	useColorModeValue,
 	useDisclosure,
 } from "@chakra-ui/react";
-import { StorageReference } from "@firebase/storage";
-import useFirebase from "@hooks/useFirebase";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
 import { sendEvent } from "@util/firebase";
-import { useRouter } from "next/router";
+import { BucketFolder, BucketType } from "@util/types";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FolderPlus } from "tabler-icons-react";
 
 interface Props {
-	currentFolder: StorageReference;
+	currentFolder: BucketFolder;
 }
 
 const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
-	const router = useRouter();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<HTMLInputElement>();
-	const { addFolder } = useFirebase();
+	const { keys } = useKeys();
+	const { addFolder } = useBucket(BucketType[keys.type]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -45,27 +45,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 
 		if (currentFolder === null) return;
 
-		const path =
-			currentFolder.fullPath !== ""
-				? decodeURIComponent(currentFolder.fullPath) + "/" + name
-				: name;
-
-		const newFolder = {
-			name,
-			fullPath: path,
-			root: null,
-			bucket: null,
-			storage: null,
-			parent: null,
-		};
-
-		addFolder(newFolder);
-
-		const id = router.asPath.split("/")[2];
-		const localFolders = localStorage.getItem(`local_folders_${id}`);
-		const folders: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
-		localStorage.setItem(`local_folders_${id}`, JSON.stringify([...folders, newFolder]));
-
+		addFolder(name);
 		toast.success("Folder Created Successfully.");
 		sendEvent("folder_create", {});
 
