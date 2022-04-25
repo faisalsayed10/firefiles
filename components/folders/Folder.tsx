@@ -1,41 +1,16 @@
-import {
-	Flex,
-	MenuItem,
-	Box,
-	MenuList,
-	Text,
-	useColorModeValue,
-	Popover,
-	Button,
-	PopoverArrow,
-	PopoverBody,
-	PopoverCloseButton,
-	PopoverContent,
-	PopoverFooter,
-	PopoverHeader,
-	PopoverTrigger,
-	Portal,
-} from "@chakra-ui/react";
+import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
+import OptionsPopover from "@components/popups/OptionsPopover";
 import { deleteObject, getStorage, listAll, ref, StorageReference } from "@firebase/storage";
-import {
-	faExternalLinkAlt,
-	faFolderOpen,
-	faPlus,
-	faEllipsisH,
-	faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
-import { ContextMenu } from "chakra-ui-contextmenu";
 import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
+import { ExternalLink, Folder as FolderIcon, FolderMinus, Plus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
 	folder: StorageReference;
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
-	bigIcon?: boolean;
 }
 
 const deleteLocalFolder = (folder: StorageReference) => {
@@ -62,12 +37,18 @@ const recursiveDelete = async (folders: StorageReference[], files: StorageRefere
 	}
 };
 
-const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, bigIcon = false }) => {
+const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const onClose = () => setIsOpen(false);
 	const router = useRouter();
 	const cancelRef = useRef();
 	const { app, removeFolder } = useFirebase();
+
+	const optionProps = {
+		p: 2,
+		cursor: "pointer",
+		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
+	};
 
 	return (
 		<>
@@ -97,121 +78,55 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting, bigIcon = false 
 				}}
 			/>
 			<Flex
+				cursor="pointer"
 				direction="column"
 				align="center"
-				justify="space-between"
+				borderRadius="lg"
 				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
 				w="100%"
-				h="100%"
+				h="140px"
+				borderWidth="1px"
+				transition="ease-in-out 0.1s"
+				className="hoverAnim"
 			>
-				<Flex
-					ml="1"
-					textAlign="center"
-					justify="center"
-					alignItems="center"
-					objectFit="cover"
-					h="100%"
-					w="100%"
-					cursor="pointer"
+				<FolderIcon
 					onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-				>
-					<FontAwesomeIcon
-						icon={faFolderOpen}
-						size={bigIcon ? "3x" : "3x"}
-						color={useColorModeValue("#2D3748", "white")}
-					/>
-				</Flex>
-				<Flex p="2" w="100%" justify="space-between" alignItems="center">
+					style={{ flex: 1, strokeWidth: "1px", color: useColorModeValue("#2D3748", "white") }}
+					size={72}
+				/>
+				<Flex p="2" w="full" justify="space-between" alignItems="center">
 					<Text
+						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
+						flex="1"
 						isTruncated={true}
 						as="p"
 						fontSize="xs"
-						align="center"
+						align="left"
 						px="2"
-						maxW="105px"
-						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
 					>
 						{folder.name}
 					</Text>
-					<Popover>
-						<PopoverTrigger>
-							<Box as="button">
-								<FontAwesomeIcon icon={faEllipsisH} />
-							</Box>
-						</PopoverTrigger>
-						<Portal>
-							<PopoverContent w="250px">
-								<PopoverArrow />
-								<PopoverHeader>
-									<Text fontSize="sm" maxW="150px" fontStyle="bold" isTruncated={true}>
-										{folder.name}
-									</Text>
-								</PopoverHeader>
-								<PopoverCloseButton mt="0.5" />
-								<PopoverBody my="-2" mx="-3">
-									<Flex alignItems="start" flexDirection="column">
-										<Box
-											as="button"
-											py="2"
-											px="4"
-											w="100%"
-											textAlign="left"
-											onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-											_hover={{
-												backgroundColor: "gray.600",
-											}}
-										>
-											<FontAwesomeIcon
-												style={{
-													marginRight: "10px",
-												}}
-												icon={faPlus}
-											/>
-											Open
-										</Box>
-										<Box
-											as="button"
-											py="2"
-											px="4"
-											w="100%"
-											textAlign="left"
-											onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
-											_hover={{
-												backgroundColor: "gray.600",
-											}}
-										>
-											<FontAwesomeIcon
-												style={{
-													marginRight: "10px",
-												}}
-												icon={faExternalLinkAlt}
-											/>
-											Open in new tab
-										</Box>
-										<Box
-											as="button"
-											py="2"
-											px="4"
-											w="100%"
-											textAlign="left"
-											onClick={() => setIsOpen(true)}
-											_hover={{
-												backgroundColor: "gray.600",
-											}}
-										>
-											<FontAwesomeIcon
-												style={{
-													marginRight: "10px",
-												}}
-												icon={faTrash}
-											/>
-											Delete Folder
-										</Box>
-									</Flex>
-								</PopoverBody>
-							</PopoverContent>
-						</Portal>
-					</Popover>
+					<OptionsPopover header={folder.name}>
+						<Flex alignItems="stretch" flexDirection="column">
+							<Flex {...optionProps} onClick={() => router.push(`${router.asPath}/${folder.name}`)}>
+								<Plus />
+								<Text ml="2">Open</Text>
+							</Flex>
+							<MenuDivider />
+							<Flex
+								{...optionProps}
+								onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
+							>
+								<ExternalLink />
+								<Text ml="2">Open in new tab</Text>
+							</Flex>
+							<MenuDivider />
+							<Flex {...optionProps} onClick={() => setIsOpen(true)}>
+								<FolderMinus />
+								<Text ml="2">Delete Folder</Text>
+							</Flex>
+						</Flex>
+					</OptionsPopover>
 				</Flex>
 			</Flex>
 		</>

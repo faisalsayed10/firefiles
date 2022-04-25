@@ -1,4 +1,5 @@
 import { auth, firestore } from "@util/firebase-admin";
+import { beforeCreatingDoc } from "@util/helpers";
 import { AES, enc } from "crypto-js";
 import { nanoid } from "nanoid";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -28,6 +29,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			// CREATE
 		} else if (req.method === "POST") {
 			const { data, name, type } = req.body;
+			if (!data || !name || !type) return res.status(400).json({ error: "Invalid request." });
+			const { success, error } = await beforeCreatingDoc(req, res, req.body);
+
+			if (!success) return res.status(400).json({ error });
+
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
 			await firestore.collection("buckets").doc(nanoid()).set({ keys, name, type, userId: uid });
 
@@ -64,10 +70,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			const id = req.query.id as string;
 			const data = req.body;
 
-			if (!id)
-				return res.status(400).json({
-					error: "Token / Bucket ID not found.",
-				});
+			if (!id || !data) return res.status(400).json({ error: "Data / Bucket ID not found." });
 
 			const snapshot = await firestore.collection("buckets").doc(id).get();
 			if (!snapshot.exists || snapshot.data().userId !== uid)

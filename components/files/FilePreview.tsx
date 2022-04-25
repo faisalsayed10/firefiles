@@ -14,8 +14,6 @@ import {
 	Tr,
 	useColorMode,
 } from "@chakra-ui/react";
-import { faDownload, faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
@@ -27,7 +25,8 @@ import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { LoadingSpinner, Player } from "video-react";
+import { ExternalLink, FileDownload } from "tabler-icons-react";
+import { Player } from "video-react";
 
 const CodeEditor: React.ComponentType<TextareaCodeEditorProps> = dynamic(
 	() => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
@@ -86,13 +85,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 	} else if (mimetype.startsWith("image")) {
 		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
 	} else if (mimetype.startsWith("video")) {
-		return (
-			<Box>
-				<Player playsInline src={url} onError={() => setIsError(true)}>
-					<LoadingSpinner />
-				</Player>
-			</Box>
-		);
+		return <Box children={<Player playsInline src={url} onError={() => setIsError(true)} />} />;
 	} else if (mimetype.startsWith("audio")) {
 		return (
 			<Flex p="6" align="center" justify="center">
@@ -180,16 +173,10 @@ const Error = ({ file, url }) => {
 				</Link>
 			</Text>
 			<ButtonGroup>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
-					onClick={() => window.open(url, "_blank")}
-				>
+				<Button leftIcon={<ExternalLink />} onClick={() => window.open(url, "_blank")}>
 					Open in new tab
 				</Button>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
-					onClick={() => download(file.name, url)}
-				>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -205,10 +192,7 @@ const NoPreview = ({ file, url, setShowRaw }) => {
 			</Text>
 			<ButtonGroup>
 				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
-					onClick={() => download(file.name, url)}
-				>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -233,10 +217,7 @@ const GoogleDocsViewer = ({ file, url }) => {
 				>
 					Open with Google Docs Viewer
 				</Button>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
-					onClick={() => download(file.name, url)}
-				>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
 					Download It
 				</Button>
 			</ButtonGroup>

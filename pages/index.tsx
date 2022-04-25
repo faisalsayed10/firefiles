@@ -6,14 +6,16 @@ import {
 	Grid,
 	IconButton,
 	Image,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
 	Skeleton,
 	Tag,
 	Text,
 } from "@chakra-ui/react";
 import AddBucketButton from "@components/ui/AddBucketButton";
 import Navbar from "@components/ui/Navbar";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
 import { sendEvent } from "@util/firebase";
 import { PROVIDERS } from "@util/globals";
@@ -26,6 +28,7 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { DotsVertical, X } from "tabler-icons-react";
 
 const Dashboard = () => {
 	const router = useRouter();
@@ -110,38 +113,50 @@ const Dashboard = () => {
 							data?.map((bucket) => (
 								<Flex
 									key={bucket.id}
-									transition="ease-in-out 0.1s"
 									align="center"
-									pos="relative"
+									flexDir="column"
 									cursor="pointer"
-									className="hoverAnim"
 									onClick={() => router.push(`/buckets/${bucket.id}`)}
 								>
 									<Image
 										m="0 auto"
+										transition="ease-in-out 0.1s"
+										className="hoverAnim"
 										src={PROVIDERS.filter((p) => p.id === bucket.type)[0].logo}
 										h="80px"
 									/>
-									<IconButton
-										colorScheme="red"
-										pos="absolute"
-										bottom="2"
-										right="0"
-										variant="link"
-										aria-label="delete bucket"
-										icon={<FontAwesomeIcon icon={faTrash} />}
-										onClick={async (e) => {
-											e.stopPropagation();
-											await deleteBucket(
-												BucketType[bucket.type],
-												await currentUser.getIdToken(),
-												bucket.id
-											);
+									<Flex w="full" justify="space-between">
+										<Text isTruncated w="90%" align="center">
+											{bucket.name}
+										</Text>
+										<Menu isLazy>
+											<MenuButton
+												as={IconButton}
+												aria-label="Options"
+												icon={<DotsVertical />}
+												variant="link"
+												onClick={(e) => e.stopPropagation()}
+											/>
+											<MenuList>
+												<MenuItem
+													icon={<X />}
+													onClick={async (e) => {
+														e.stopPropagation();
+														await deleteBucket(
+															BucketType[bucket.type],
+															await currentUser.getIdToken(),
+															bucket.id
+														);
 
-											mutate(data.filter((b) => b.id !== bucket.id));
-											sendEvent("bucket_delete", {});
-										}}
-									/>
+														mutate(data.filter((b) => b.id !== bucket.id));
+														sendEvent("bucket_delete", {});
+													}}
+												>
+													Delete Bucket
+												</MenuItem>
+											</MenuList>
+										</Menu>
+									</Flex>
 								</Flex>
 							))
 						)}

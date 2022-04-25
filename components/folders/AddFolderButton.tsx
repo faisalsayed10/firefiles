@@ -14,13 +14,12 @@ import {
 	useDisclosure,
 } from "@chakra-ui/react";
 import { StorageReference } from "@firebase/storage";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { FolderPlus } from "tabler-icons-react";
 
 interface Props {
 	currentFolder: StorageReference;
@@ -82,17 +81,19 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 				direction="column"
 				align="center"
 				justify="center"
-				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
 				transition="ease-in-out 0.1s"
 				cursor="pointer"
 				className="hoverAnim"
 				color={useColorModeValue("#2D3748", "white")}
-				w="110px"
-				h="110px"
+				w="full"
+				h="140px"
+				borderWidth="1px"
+				borderRadius="lg"
+				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
 			>
-				<FontAwesomeIcon icon={faPlus} size="2x" />
+				<FolderPlus size={72} strokeWidth="1px" />
 			</Flex>
-			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose}>
+			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose} autoFocus={false}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Create A Folder</ModalHeader>
@@ -125,3 +126,21 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 };
 
 export default AddFolderButton;
+
+{
+	/* <svg
+	xmlns="http://www.w3.org/2000/svg"
+	class="icon icon-tabler icon-tabler-folder"
+	width="44"
+	height="44"
+	viewBox="0 0 24 24"
+	stroke-width="1.5"
+	stroke="#2c3e50"
+	fill="none"
+	stroke-linecap="round"
+	stroke-linejoin="round"
+>
+	<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+	<path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" />
+</svg>; */
+}

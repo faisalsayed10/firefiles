@@ -3,6 +3,7 @@ import {
 	Button,
 	Divider,
 	Flex,
+	IconButton,
 	Menu,
 	MenuButton,
 	MenuItem,
@@ -10,20 +11,11 @@ import {
 	Tooltip,
 	useColorMode,
 } from "@chakra-ui/react";
-import {
-	faArrowCircleLeft,
-	faChevronDown,
-	faDonate,
-	faFile,
-	faMoon,
-	faSignOutAlt,
-	faSun,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
 import { onLogout } from "@util/helpers";
 import { useRouter } from "next/router";
 import React from "react";
+import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
 
 export default function Navbar() {
 	const { colorMode, toggleColorMode } = useColorMode();
@@ -43,7 +35,7 @@ export default function Navbar() {
 				{router.route !== "/" ? (
 					<Button
 						variant="link"
-						leftIcon={<FontAwesomeIcon icon={faArrowCircleLeft} />}
+						leftIcon={<ArrowNarrowLeft />}
 						fontWeight="bold"
 						onClick={() => router.push("/")}
 					>
@@ -52,28 +44,23 @@ export default function Navbar() {
 				) : null}
 				<Box mb="2">
 					<TooltipButton
-						icon={<FontAwesomeIcon icon={colorMode === "light" ? faMoon : faSun} />}
+						icon={colorMode === "light" ? <Moon /> : <Sun />}
 						label="Toggle dark mode"
 						onClick={toggleColorMode}
 					/>
 					<Menu>
-						<MenuButton
-							h="50"
-							as={Button}
-							variant="ghost"
-							rightIcon={<FontAwesomeIcon icon={faChevronDown} />}
-						>
+						<MenuButton h="50" as={Button} variant="ghost" rightIcon={<ChevronDown />}>
 							Actions
 						</MenuButton>
 						<MenuList>
 							<MenuItem
-								icon={<FontAwesomeIcon icon={faFile} />}
+								icon={<File />}
 								onClick={() => window.open("https://firefiles.vercel.app/docs", "_blank")}
 							>
 								View Documentation
 							</MenuItem>
 							<MenuItem
-								icon={<FontAwesomeIcon icon={faDonate} />}
+								icon={<Coin />}
 								onClick={() => {
 									const url = "https://github.com/faisalsayed10/firefiles#sponsor-this-project";
 									window.open(url, "_blank");
@@ -82,7 +69,7 @@ export default function Navbar() {
 								Donate Us
 							</MenuItem>
 							<MenuItem
-								icon={<FontAwesomeIcon icon={faSignOutAlt} />}
+								icon={<Logout />}
 								onClick={async () => {
 									await onLogout();
 									await logout();
@@ -101,15 +88,15 @@ export default function Navbar() {
 
 const TooltipButton = ({ label, onClick, icon }) => (
 	<Tooltip label={label} hasArrow>
-		<Button
+		<IconButton
+			aria-label="icon button"
 			w="50px"
 			h="50px"
 			variant="outline"
 			_focus={{ outline: "none" }}
 			mr="2"
 			onClick={onClick}
-		>
-			{icon}
-		</Button>
+			icon={icon}
+		/>
 	</Tooltip>
 );

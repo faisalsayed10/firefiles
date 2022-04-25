@@ -1,9 +1,8 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, useColorMode } from "@chakra-ui/react";
 import { StorageReference } from "@firebase/storage";
-import { faChevronRight, faHome } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import React from "react";
+import { ChevronRight, Home } from "tabler-icons-react";
 
 interface Props {
 	currentFolder: StorageReference;
@@ -16,14 +15,14 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 	return (
 		<Breadcrumb
 			// @ts-ignore
-			overflowX="scroll !important"
+			overflowX="auto"
 			fontWeight="medium"
 			whiteSpace="nowrap"
 			isTruncated={true}
 			width="100%"
 			px={["2", "6", "8"]}
 			my={2}
-			separator={<FontAwesomeIcon icon={faChevronRight} />}
+			separator={<ChevronRight />}
 			fontSize="lg"
 		>
 			<BreadcrumbItem p="3px" maxW="175px" isCurrentPage>
@@ -36,7 +35,7 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 						router.push(router.asPath.replace(currentFolder.fullPath.replace(" ", "%20"), ""))
 					}
 				>
-					<FontAwesomeIcon icon={faHome} />
+					<Home />
 				</BreadcrumbLink>
 			</BreadcrumbItem>
 			{currentFolder?.name !== "" &&

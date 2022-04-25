@@ -1,9 +1,8 @@
 import { Box, Flex, IconButton, Progress, Text } from "@chakra-ui/react";
-import { faMinusSquare, faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CurrentlyUploading } from "@util/types";
 import React from "react";
 import toast from "react-hot-toast";
+import { PlayerPause, PlayerPlay, X } from "tabler-icons-react";
 
 type Props = {
 	file: CurrentlyUploading;
@@ -27,7 +26,7 @@ const UploadProgress: React.FC<Props> = ({ file, setUploadingFiles }) => {
 				variant="link"
 				isDisabled={file.state === "error"}
 				aria-label="pause"
-				icon={<FontAwesomeIcon icon={file.state === "running" ? faPause : faPlay} />}
+				icon={file.state === "running" ? <PlayerPause /> : <PlayerPlay />}
 			/>
 			<IconButton
 				onClick={() => {
@@ -37,7 +36,7 @@ const UploadProgress: React.FC<Props> = ({ file, setUploadingFiles }) => {
 				}}
 				variant="link"
 				aria-label="cancel"
-				icon={<FontAwesomeIcon icon={faMinusSquare} />}
+				icon={<X />}
 			/>
 		</Flex>
 	);

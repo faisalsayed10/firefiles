@@ -1,6 +1,4 @@
-import { Button, chakra, Input, useColorModeValue } from "@chakra-ui/react";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconButton, Input, useColorModeValue } from "@chakra-ui/react";
 import useFirebase, { ROOT_FOLDER } from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
 import { CurrentlyUploading } from "@util/types";
@@ -8,6 +6,7 @@ import { getStorage, ref, StorageReference, uploadBytesResumable } from "firebas
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { FileUpload } from "tabler-icons-react";
 
 interface Props {
 	currentFolder: StorageReference;
@@ -121,14 +120,14 @@ const UploadFileButton: React.FC<Props> = ({
 				key={nanoid()}
 				multiple
 			/>
-			<Button
+			<IconButton
 				disabled={
 					uploadingFiles.filter((uploadingFile) => !uploadingFile.error).length > 0 ||
 					!app ||
 					!appUser
 				}
 				pos="fixed"
-				p="6"
+				p="4"
 				borderRadius="50%"
 				w="60px"
 				h="60px"
@@ -137,18 +136,14 @@ const UploadFileButton: React.FC<Props> = ({
 				variant="outline"
 				bgColor={useColorModeValue("white", "#1a202c")}
 				_focus={{ outline: "none" }}
-				className="upload-hover"
-				transition="all 0.2s"
+				_hover={{ opacity: 1 }}
 				boxShadow="4.2px 4px 6.5px -1.7px rgba(0, 0, 0, 0.4)"
 				colorScheme="green"
 				aria-label="upload file"
 				onClick={() => fileInput.current.click()}
 			>
-				<FontAwesomeIcon icon={faUpload} />
-				<chakra.span transition="all 0.2s" display="none" className="upload-text">
-					Upload File
-				</chakra.span>
-			</Button>
+				<FileUpload size="42px" />
+			</IconButton>
 		</>
 	);
 };

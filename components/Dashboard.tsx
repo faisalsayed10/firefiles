@@ -1,31 +1,15 @@
-import {
-	Box,
-	Button,
-	Center,
-	Divider,
-	Flex,
-	Grid,
-	Skeleton,
-	Spacer,
-	Text,
-	useColorMode,
-} from "@chakra-ui/react";
-import FilesEmptyState from "@components/files/FilesEmptyState";
-import FilesTable from "@components/files/FilesTable";
-import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
+import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
-import AddFolderButton from "@components/folders/AddFolderButton";
-import Folder from "@components/folders/Folder";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
-import { faGripHorizontal, faList } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
 import { CurrentlyUploading } from "@util/types";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
+import GridView from "./GridView";
+import ListView from "./ListView";
 
 const baseStyle = {
 	outline: "none",
@@ -48,7 +32,18 @@ const Dashboard = () => {
 	const { app, appUser, currentFolder, files, folders, loading } = useFirebase();
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
-	const [gridOn, setGridOn] = useState(false);
+	const [gridView, setGridView] = useState(false);
+
+	useEffect(() => {
+		const storedView = localStorage.getItem("grid_view");
+		if (storedView) {
+			setGridView(storedView === "true");
+		}
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem("grid_view", gridView.toString());
+	}, [gridView]);
 
 	return (
 		<>
@@ -96,82 +91,24 @@ const Dashboard = () => {
 							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
 							<Divider />
-							{!gridOn && (
-								<>
-									{" "}
-									{loading ? (
-										<Grid
-											templateColumns="repeat(auto-fill, minmax(120px, 1fr))"
-											gap={6}
-											my="6"
-											mx="4"
-										>
-											<Skeleton h="110px" w="110px" borderRadius="3px" />
-											<Skeleton h="110px" w="110px" borderRadius="3px" />
-											<Skeleton h="110px" w="110px" borderRadius="3px" />
-											<Skeleton h="110px" w="110px" borderRadius="3px" />
-										</Grid>
-									) : (
-										<Grid
-											templateColumns="repeat(auto-fill, minmax(120px, 1fr))"
-											gap={6}
-											my="6"
-											mx="4"
-										>
-											{folders?.map((f) => (
-												<Box w="110px" h="110px" m="0 auto" key={f.name}>
-													<Folder setIsFolderDeleting={setIsFolderDeleting} folder={f} />
-												</Box>
-											))}
-											<Box m="0 auto">
-												<AddFolderButton currentFolder={currentFolder} />
-											</Box>
-										</Grid>
-									)}{" "}
-								</>
-							)}
-							<Divider />
-							<Flex width="100%" align="center">
-								<Box>
-									<Text fontSize="3xl" fontWeight="600" m="4">
-										Your Files
-									</Text>
-								</Box>
-								<Spacer />
-								<Box m="4">
-									<Button onClick={() => setGridOn(!gridOn)}>
-										{gridOn ? (
-											<>
-												<FontAwesomeIcon
-													style={{
-														marginRight: "6px",
-													}}
-													icon={faList}
-												/>
-												{` `}
-												List View
-											</>
-										) : (
-											<>
-												<FontAwesomeIcon
-													style={{
-														marginRight: "6px",
-													}}
-													icon={faGripHorizontal}
-												/>
-												{` `}
-												Grid View
-											</>
-										)}
-									</Button>
-								</Box>
-							</Flex>
-							{files === null || loading ? (
-								<FilesTableSkeleton />
-							) : files.length === 0 && !gridOn ? (
-								<FilesEmptyState />
+							{!gridView ? (
+								<ListView
+									loading={loading}
+									currentFolder={currentFolder}
+									files={files}
+									folders={folders}
+									setGridView={setGridView}
+									setIsFolderDeleting={setIsFolderDeleting}
+								/>
 							) : (
-								<FilesTable childFolders={folders} childFiles={files} gridOn={gridOn} />
+								<GridView
+									loading={loading}
+									currentFolder={currentFolder}
+									files={files}
+									folders={folders}
+									setGridView={setGridView}
+									setIsFolderDeleting={setIsFolderDeleting}
+								/>
 							)}
 						</Box>
 					)}
