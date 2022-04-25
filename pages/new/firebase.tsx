@@ -1,12 +1,12 @@
 import {
-  Button,
-  Container,
-  Flex,
-  Heading,
-  IconButton,
-  Link,
-  Text,
-  Textarea
+	Button,
+	Container,
+	Flex,
+	Heading,
+	IconButton,
+	Link,
+	Text,
+	Textarea,
 } from "@chakra-ui/react";
 import VideoAccordion from "@components/ui/VideoAccordion";
 import useUser from "@hooks/useUser";
@@ -41,7 +41,14 @@ const NewFirebase = () => {
 			if (!currentUser) throw new Error("You need to login to perform this action!");
 
 			const data = toObject(raw);
-			if (!data || !data.apiKey || !data.projectId || !data.appId || !data.authDomain || !data.storageBucket)
+			if (
+				!data ||
+				!data.apiKey ||
+				!data.projectId ||
+				!data.appId ||
+				!data.authDomain ||
+				!data.storageBucket
+			)
 				throw new Error("One or more fields are missing!");
 
 			const promise = axios.post(
@@ -49,7 +56,7 @@ const NewFirebase = () => {
 				{
 					data,
 					name: data.projectId,
-					type: "firebase"
+					type: "firebase",
 				},
 				{ headers: { token: await currentUser.getIdToken() } }
 			);
@@ -57,7 +64,7 @@ const NewFirebase = () => {
 			toast.promise(promise, {
 				loading: "Creating bucket...",
 				success: "Bucket created successfully.",
-				error: "An error occurred while creating the bucket."
+				error: "An error occurred while creating the bucket.",
 			});
 
 			promise.then(() => {
@@ -110,7 +117,7 @@ const NewFirebase = () => {
 					<Button
 						type="submit"
 						isLoading={loading}
-            loadingText="Creating"
+						loadingText="Creating"
 						colorScheme="green"
 						variant="solid"
 					>

@@ -7,7 +7,7 @@ import {
 	IconButton,
 	Image,
 	SimpleGrid,
-	Text
+	Text,
 } from "@chakra-ui/react";
 import { PROVIDERS } from "@util/globals";
 import { useRouter } from "next/router";

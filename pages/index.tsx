@@ -126,7 +126,9 @@ const Dashboard = () => {
 										h="80px"
 									/>
 									<Flex w="full" justify="space-between">
-										<Text isTruncated w="90%" align="center">{bucket.name}</Text>
+										<Text isTruncated w="90%" align="center">
+											{bucket.name}
+										</Text>
 										<Menu isLazy>
 											<MenuButton
 												as={IconButton}

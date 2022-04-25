@@ -4,18 +4,18 @@ import {
 	PutBucketCorsCommand,
 	PutBucketCorsCommandInput,
 	PutPublicAccessBlockCommand,
-	S3Client
+	S3Client,
 } from "@aws-sdk/client-s3";
 import axios from "axios";
 import { deleteApp, getApps } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import { NextApiRequest, NextApiResponse } from "next";
-import { BucketType } from "./types";
+import { BucketFile, BucketType } from "./types";
 
 export const deleteBucket = async (type: BucketType, token: string, id: string) => {
 	if (window.confirm("Are you sure you want to delete this bucket?")) {
 		await axios.delete(`/api/bucket?id=${id}`, {
-			headers: { token }
+			headers: { token },
 		});
 
 		switch (type) {
@@ -48,9 +48,9 @@ export const onLogout = async () => {
 	});
 };
 
-export const download = async (name: string, url: string) => {
+export const download = async (file: BucketFile) => {
 	try {
-		const res = await fetch(url);
+		const res = await fetch(file.url);
 		const blob = await res.blob();
 		const reader = new FileReader();
 		await new Promise((resolve, reject) => {
@@ -65,12 +65,12 @@ export const download = async (name: string, url: string) => {
 
 		const a = document.createElement("a");
 		a.href = base64;
-		a.download = name;
+		a.download = file.name;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
 	} catch (err) {
-		window.open(url, "_blank");
+		window.open(file.url, "_blank");
 	}
 };
 
@@ -87,8 +87,8 @@ export const createNewBucket = async (
 				BlockPublicAcls: true,
 				BlockPublicPolicy: true,
 				IgnorePublicAcls: true,
-				RestrictPublicBuckets: true
-			}
+				RestrictPublicBuckets: true,
+			},
 		})
 	);
 	await client.send(new PutBucketCorsCommand(corsOptions));
@@ -104,7 +104,10 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 			const client = new S3Client({
 				region: data.region,
 				maxAttempts: 1,
-				credentials: { accessKeyId: data.accessKey, secretAccessKey: data.secretKey }
+				credentials: {
+					accessKeyId: data.accessKey,
+					secretAccessKey: data.secretKey,
+				},
 			});
 
 			const corsOptions = {
@@ -114,10 +117,10 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 						{
 							AllowedHeaders: ["*"],
 							AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-							AllowedOrigins: [req.headers.host]
-						}
-					]
-				}
+							AllowedOrigins: [req.headers.host],
+						},
+					],
+				},
 			};
 
 			try {

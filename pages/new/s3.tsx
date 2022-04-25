@@ -9,7 +9,7 @@ import {
 	IconButton,
 	Input,
 	Select,
-	Text
+	Text,
 } from "@chakra-ui/react";
 import AWSRegionSelect from "@components/ui/AWSRegionSelect";
 import useUser from "@hooks/useUser";
@@ -45,7 +45,7 @@ const NewS3 = () => {
 			const { data } = await axios.post<ListBucketsCommandOutput>("/api/s3/list-buckets", {
 				accessKey,
 				secretKey,
-				region
+				region,
 			});
 
 			setBuckets(data.Buckets);
