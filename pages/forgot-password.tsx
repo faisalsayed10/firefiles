@@ -7,7 +7,7 @@ import {
 	FormControl,
 	Input,
 	Link,
-	Text
+	Text,
 } from "@chakra-ui/react";
 import CenterContainer from "@components/ui/CenterContainer";
 import useUser from "@hooks/useUser";

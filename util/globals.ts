@@ -2,7 +2,7 @@ export const PROVIDERS = [
 	{
 		id: "firebase",
 		name: "Firebase",
-		logo: "/firebase.svg"
+		logo: "/firebase.svg",
 	},
 	{
 		id: "s3",
@@ -13,26 +13,26 @@ export const PROVIDERS = [
 		id: "minio",
 		name: "Min.io",
 		logo: "/minio.png",
-		isComingSoon: true
+		isComingSoon: true,
 	},
 	{
 		id: "backblaze",
 		name: "Backblaze",
 		logo: "/backblaze.png",
-		isComingSoon: true
+		isComingSoon: true,
 	},
 	{
 		id: "deta",
 		name: "Deta",
 		logo: "/deta.png",
-		isComingSoon: true
+		isComingSoon: true,
 	},
 	{
 		id: "git",
 		name: "Git",
 		logo: "/git.png",
-		isComingSoon: true
-	}
+		isComingSoon: true,
+	},
 ];
 
 export const FILE_TYPES = [
@@ -439,5 +439,5 @@ export const FILE_TYPES = [
 	"yml",
 	"z",
 	"zip",
-	"zsh"
+	"zsh",
 ];

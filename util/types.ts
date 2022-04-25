@@ -18,7 +18,7 @@ export enum BucketType {
 	minio,
 	backblaze,
 	deta,
-	git
+	git,
 }
 
 export type Bucket = {

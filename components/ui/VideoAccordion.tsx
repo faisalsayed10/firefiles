@@ -4,7 +4,7 @@ import {
 	AccordionIcon,
 	AccordionItem,
 	AccordionPanel,
-	Text
+	Text,
 } from "@chakra-ui/react";
 import React from "react";
 import { Player } from "video-react";

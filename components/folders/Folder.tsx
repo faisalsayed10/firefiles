@@ -1,8 +1,8 @@
-import { Flex, MenuItem, MenuList, Text, useColorModeValue } from "@chakra-ui/react";
+import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
+import OptionsPopover from "@components/popups/OptionsPopover";
 import { deleteObject, getStorage, listAll, ref, StorageReference } from "@firebase/storage";
 import useFirebase from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
-import { ContextMenu } from "chakra-ui-contextmenu";
 import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { ExternalLink, FolderMinus, Plus, Folder as FolderIcon } from "tabler-icons-react";
@@ -44,75 +44,92 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 	const cancelRef = useRef();
 	const { app, removeFolder } = useFirebase();
 
+	const optionProps = {
+		p: 2,
+		cursor: "pointer",
+		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
+	};
+
 	return (
-		<ContextMenu<HTMLDivElement>
-			renderMenu={() => (
-				<MenuList>
-					<MenuItem icon={<Plus />} onClick={() => router.push(`${router.asPath}/${folder.name}`)}>
-						Open
-					</MenuItem>
-					<MenuItem
-						icon={<ExternalLink />}
-						onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
-					>
-						Open in new tab
-					</MenuItem>
-					<MenuItem icon={<FolderMinus />} onClick={() => setIsOpen(true)}>
-						Delete Folder (and its contents)
-					</MenuItem>
-				</MenuList>
-			)}
-		>
-			{(reactRef: React.RefObject<HTMLDivElement>) => (
-				<>
-					<DeleteAlert
-						cancelRef={cancelRef}
-						onClose={onClose}
-						isOpen={isOpen}
-						onClick={async () => {
-							try {
-								if (!app) return;
-								const storage = getStorage(app);
+		<>
+			<DeleteAlert
+				cancelRef={cancelRef}
+				onClose={onClose}
+				isOpen={isOpen}
+				onClick={async () => {
+					try {
+						if (!app) return;
+						const storage = getStorage(app);
 
-								setIsFolderDeleting(true);
-								onClose();
-								const currentRef = ref(storage, decodeURIComponent(folder.fullPath) + "/");
-								const res = await listAll(currentRef);
+						setIsFolderDeleting(true);
+						onClose();
+						const currentRef = ref(storage, decodeURIComponent(folder.fullPath) + "/");
+						const res = await listAll(currentRef);
 
-								removeFolder(folder);
-								deleteLocalFolder(folder);
-								recursiveDelete(res.prefixes, res.items);
-								sendEvent("folder_delete", {});
-							} catch (err) {
-								console.error(err);
-							} finally {
-								setIsFolderDeleting(false);
-							}
-						}}
-					/>
-					<Flex
+						removeFolder(folder);
+						deleteLocalFolder(folder);
+						recursiveDelete(res.prefixes, res.items);
+						sendEvent("folder_delete", {});
+					} catch (err) {
+						console.error(err);
+					} finally {
+						setIsFolderDeleting(false);
+					}
+				}}
+			/>
+			<Flex
+				cursor="pointer"
+				direction="column"
+				align="center"
+				borderRadius="lg"
+				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+				w="100%"
+				h="140px"
+				borderWidth="1px"
+				transition="ease-in-out 0.1s"
+				className="hoverAnim"
+			>
+				<FolderIcon
+					onClick={() => router.push(`${router.asPath}/${folder.name}`)}
+					style={{ flex: 1, strokeWidth: "1px", color: useColorModeValue("#2D3748", "white") }}
+					size={72}
+				/>
+				<Flex p="2" w="full" justify="space-between" alignItems="center">
+					<Text
 						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-						direction="column"
-						align="center"
-						justify="space-between"
-						boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
-						transition="ease-in-out 0.1s"
-						cursor="pointer"
-						className="hoverAnim"
-						w="110px"
-						h="110px"
-						pt="4"
-						pb="2"
-						ref={reactRef}
+						flex="1"
+						isTruncated={true}
+						as="p"
+						fontSize="xs"
+						align="left"
+						px="2"
 					>
-						<FolderIcon size={72} strokeWidth="1px" color={useColorModeValue("#2D3748", "white")} />
-						<Text isTruncated={true} as="p" fontSize="xs" align="center" px="2" maxW="105px">
-							{folder.name}
-						</Text>
-					</Flex>
-				</>
-			)}
-		</ContextMenu>
+						{folder.name}
+					</Text>
+					<OptionsPopover header={folder.name}>
+						<Flex alignItems="stretch" flexDirection="column">
+							<Flex {...optionProps} onClick={() => router.push(`${router.asPath}/${folder.name}`)}>
+								<Plus />
+								<Text ml="2">Open</Text>
+							</Flex>
+							<MenuDivider />
+							<Flex
+								{...optionProps}
+								onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
+							>
+								<ExternalLink />
+								<Text ml="2">Open in new tab</Text>
+							</Flex>
+							<MenuDivider />
+							<Flex {...optionProps} onClick={() => setIsOpen(true)}>
+								<FolderMinus />
+								<Text ml="2">Delete Folder</Text>
+							</Flex>
+						</Flex>
+					</OptionsPopover>
+				</Flex>
+			</Flex>
+		</>
 	);
 };
 

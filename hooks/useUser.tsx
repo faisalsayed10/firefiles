@@ -6,7 +6,7 @@ import {
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
-	User
+	User,
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -71,12 +71,16 @@ export function AuthProvider({ children }) {
 			if (!user) {
 				setCurrentUser(null);
 				nookies.destroy(null, "token");
-				nookies.set(undefined, "token", "", { path: "/" });
+				nookies.set(undefined, "token", "", {
+					path: "/",
+				});
 			} else {
 				const token = await user.getIdToken();
 				setCurrentUser(user);
 				nookies.destroy(null, "token");
-				nookies.set(undefined, "token", token, { path: "/" });
+				nookies.set(undefined, "token", token, {
+					path: "/",
+				});
 			}
 			setLoading(false);
 		});
@@ -85,7 +89,16 @@ export function AuthProvider({ children }) {
 	}, []);
 
 	return (
-		<AuthContext.Provider value={{ currentUser, login, logout, signup, reset, loading }}>
+		<AuthContext.Provider
+			value={{
+				currentUser,
+				login,
+				logout,
+				signup,
+				reset,
+				loading,
+			}}
+		>
 			{children}
 		</AuthContext.Provider>
 	);

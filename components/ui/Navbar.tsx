@@ -9,7 +9,7 @@ import {
 	MenuItem,
 	MenuList,
 	Tooltip,
-	useColorMode
+	useColorMode,
 } from "@chakra-ui/react";
 import useUser from "@hooks/useUser";
 import { onLogout } from "@util/helpers";

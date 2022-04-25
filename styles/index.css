@@ -3,6 +3,8 @@
 body {
 	margin: 0;
 	border-top: 5px solid #0af5f4;
+	width: 100%;
+	overflow-x: hidden;
 }
 
 html {
@@ -19,4 +21,8 @@ a:hover {
 
 .hoverAnim:hover {
 	transform: scale(1.05);
+}
+
+.fiv-size-2xl {
+	font-size: 6em;
 }

@@ -12,7 +12,7 @@ import {
 	MenuList,
 	Skeleton,
 	Tag,
-	Text
+	Text,
 } from "@chakra-ui/react";
 import AddBucketButton from "@components/ui/AddBucketButton";
 import Navbar from "@components/ui/Navbar";
@@ -34,7 +34,13 @@ const Dashboard = () => {
 	const router = useRouter();
 	const { currentUser, loading: authLoading } = useUser();
 	const fetcher = async (key?: string) =>
-		axios.get(key, { headers: { token: await currentUser.getIdToken() } }).then(({ data }) => data);
+		axios
+			.get(key, {
+				headers: {
+					token: await currentUser.getIdToken(),
+				},
+			})
+			.then(({ data }) => data);
 	const { data, error, isValidating, mutate } = useSWR<Bucket[]>(
 		currentUser ? `/api/get-buckets` : null,
 		fetcher,
@@ -60,7 +66,10 @@ const Dashboard = () => {
 				<Navbar />
 				<Flex my="4" flexDir={["column", "row", "row", "row"]} mx={["4", "8", "12"]}>
 					<Image
-						src={gravatar.url(currentUser?.email, { s: "110", protocol: "https" })}
+						src={gravatar.url(currentUser?.email, {
+							s: "110",
+							protocol: "https",
+						})}
 						maxW="110px"
 						maxH="110px"
 						ml="4"

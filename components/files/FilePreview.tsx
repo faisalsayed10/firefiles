@@ -12,7 +12,7 @@ import {
 	Th,
 	Thead,
 	Tr,
-	useColorMode
+	useColorMode,
 } from "@chakra-ui/react";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -60,7 +60,7 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 			fontSize: 13,
 			backgroundColor: colorMode === "light" ? "#FFFFFF" : "#2D3748",
 			overflowY: "auto",
-			fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace"
+			fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
 		}),
 		[colorMode]
 	);
@@ -123,7 +123,11 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 					<MarkdownPreview
 						source={text}
 						disallowedElements={["script"]}
-						style={{ height: "90%", overflowY: "auto", padding: 15 }}
+						style={{
+							height: "90%",
+							overflowY: "auto",
+							padding: 15,
+						}}
 					/>
 				) : (
 					<CodeEditor
@@ -144,7 +148,10 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 					disabled
 					language={extension}
 					padding={15}
-					style={{ ...codeEditorStyles, marginTop: 40 }}
+					style={{
+						...codeEditorStyles,
+						marginTop: 40,
+					}}
 				/>
 			</Box>
 		);
@@ -166,16 +173,10 @@ const Error = ({ file, url }) => {
 				</Link>
 			</Text>
 			<ButtonGroup>
-				<Button
-					leftIcon={<ExternalLink />}
-					onClick={() => window.open(url, "_blank")}
-				>
+				<Button leftIcon={<ExternalLink />} onClick={() => window.open(url, "_blank")}>
 					Open in new tab
 				</Button>
-				<Button
-					leftIcon={<FileDownload />}
-					onClick={() => download(file.name, url)}
-				>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -191,10 +192,7 @@ const NoPreview = ({ file, url, setShowRaw }) => {
 			</Text>
 			<ButtonGroup>
 				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
-				<Button
-					leftIcon={<FileDownload />}
-					onClick={() => download(file.name, url)}
-				>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -219,10 +217,7 @@ const GoogleDocsViewer = ({ file, url }) => {
 				>
 					Open with Google Docs Viewer
 				</Button>
-				<Button
-					leftIcon={<FileDownload />}
-					onClick={() => download(file.name, url)}
-				>
+				<Button leftIcon={<FileDownload />} onClick={() => download(file.name, url)}>
 					Download It
 				</Button>
 			</ButtonGroup>
@@ -246,11 +241,18 @@ const CsvViewer = ({ file, url }) => {
 
 	useEffect(() => {
 		if (!rawFile) return;
-		Papa.parse(rawFile, { header: true, dynamicTyping: true, complete: handleDataChange });
+		Papa.parse(rawFile, {
+			header: true,
+			dynamicTyping: true,
+			complete: handleDataChange,
+		});
 	}, [rawFile]);
 
 	const makeColumns = (rawColumns) =>
-		rawColumns.map((column) => ({ Header: column, accessor: column }));
+		rawColumns.map((column) => ({
+			Header: column,
+			accessor: column,
+		}));
 
 	const handleDataChange = (file) => {
 		file.data.pop();

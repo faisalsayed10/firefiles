@@ -25,7 +25,7 @@ const regions = [
 	{ name: "Europe (Paris)", code: "eu-west-3" },
 	{ name: "Europe (Stockholm)", code: "eu-north-1" },
 	{ name: "Middle East (Bahrain)", code: "me-south-1" },
-	{ name: "South America (São Paulo)", code: "sa-east-1" }
+	{ name: "South America (São Paulo)", code: "sa-east-1" },
 ];
 
 type Props = {

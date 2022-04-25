@@ -21,7 +21,7 @@ const UploadFileButton: React.FC<Props> = ({
 	filesToUpload,
 	setFilesToUpload,
 	uploadingFiles,
-	setUploadingFiles
+	setUploadingFiles,
 }) => {
 	const { app, appUser, addFile } = useFirebase();
 	const fileInput = useRef<HTMLInputElement>();
@@ -55,7 +55,14 @@ const UploadFileButton: React.FC<Props> = ({
 
 			setUploadingFiles((prev) =>
 				prev.concat([
-					{ id, name: files[i].name, task: uploadTask, state: "running", progress: 0, error: false }
+					{
+						id,
+						name: files[i].name,
+						task: uploadTask,
+						state: "running",
+						progress: 0,
+						error: false,
+					},
 				])
 			);
 
@@ -68,7 +75,7 @@ const UploadFileButton: React.FC<Props> = ({
 								return {
 									...uploadFile,
 									state: snapshot.state,
-									progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+									progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
 								};
 							}
 
@@ -80,7 +87,10 @@ const UploadFileButton: React.FC<Props> = ({
 					setUploadingFiles((prevUploadingFiles) => {
 						return prevUploadingFiles.map((uploadFile) => {
 							if (uploadFile.id === id) {
-								return { ...uploadFile, error: true };
+								return {
+									...uploadFile,
+									error: true,
+								};
 							}
 							return uploadFile;
 						});

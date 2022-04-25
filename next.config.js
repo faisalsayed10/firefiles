@@ -5,10 +5,10 @@ module.exports = removeImports({
 		return [
 			{
 				source: "/buckets/:id/:folderId*",
-				destination: "/buckets/:id"
-			}
+				destination: "/buckets/:id",
+			},
 		];
 	},
 	images: { domains: ["s.gravatar.com"] },
-	experimental: { esmExternals: true }
+	experimental: { esmExternals: true },
 });

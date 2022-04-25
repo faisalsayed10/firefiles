@@ -53,7 +53,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 		const cookies = nookies.get(ctx);
 		const id = ctx.params.id;
 		const { data } = await axios.get(`${url}/api/bucket?id=${id}`, {
-			headers: { token: cookies.token }
+			headers: { token: cookies.token },
 		});
 
 		return { props: { data } };
@@ -61,9 +61,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 		return {
 			redirect: {
 				permanent: false,
-				destination: "/"
+				destination: "/",
 			},
-			props: {} as never
+			props: {} as never,
 		};
 	}
 };
