@@ -1,4 +1,15 @@
-import { Box, Center, Divider, Grid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
+import {
+	Box,
+	Button,
+	Center,
+	Divider,
+	Flex,
+	Grid,
+	Skeleton,
+	Spacer,
+	Text,
+	useColorMode,
+} from "@chakra-ui/react";
 import FilesEmptyState from "@components/files/FilesEmptyState";
 import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
@@ -7,6 +18,8 @@ import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
+import { faGripHorizontal, faList } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useFirebase from "@hooks/useFirebase";
 import { CurrentlyUploading } from "@util/types";
 import React, { useMemo, useState } from "react";
@@ -35,6 +48,7 @@ const Dashboard = () => {
 	const { app, appUser, currentFolder, files, folders, loading } = useFirebase();
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
+	const [gridOn, setGridOn] = useState(false);
 
 	return (
 		<>
@@ -54,7 +68,12 @@ const Dashboard = () => {
 					onDragLeave={() => setIsDragging(false)}
 				>
 					{({ getRootProps, getInputProps }) => (
-						<Box {...getRootProps({ style })} minH="93vh">
+						<Box
+							{...getRootProps({
+								style,
+							})}
+							minH="93vh"
+						>
 							<input {...getInputProps()} />
 							<Text
 								hidden={!isDragging}
@@ -77,35 +96,82 @@ const Dashboard = () => {
 							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
 							<Divider />
-							{loading ? (
-								<Grid templateColumns="repeat(auto-fill, minmax(120px, 1fr))" gap={6} my="6" mx="4">
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-								</Grid>
-							) : (
-								<Grid templateColumns="repeat(auto-fill, minmax(120px, 1fr))" gap={6} my="6" mx="4">
-									{folders?.map((f) => (
-										<Box m="0 auto" key={f.name}>
-											<Folder setIsFolderDeleting={setIsFolderDeleting} folder={f} />
-										</Box>
-									))}
-									<Box m="0 auto">
-										<AddFolderButton currentFolder={currentFolder} />
-									</Box>
-								</Grid>
+							{!gridOn && (
+								<>
+									{" "}
+									{loading ? (
+										<Grid
+											templateColumns="repeat(auto-fill, minmax(120px, 1fr))"
+											gap={6}
+											my="6"
+											mx="4"
+										>
+											<Skeleton h="110px" w="110px" borderRadius="3px" />
+											<Skeleton h="110px" w="110px" borderRadius="3px" />
+											<Skeleton h="110px" w="110px" borderRadius="3px" />
+											<Skeleton h="110px" w="110px" borderRadius="3px" />
+										</Grid>
+									) : (
+										<Grid
+											templateColumns="repeat(auto-fill, minmax(120px, 1fr))"
+											gap={6}
+											my="6"
+											mx="4"
+										>
+											{folders?.map((f) => (
+												<Box w="110px" h="110px" m="0 auto" key={f.name}>
+													<Folder setIsFolderDeleting={setIsFolderDeleting} folder={f} />
+												</Box>
+											))}
+											<Box m="0 auto">
+												<AddFolderButton currentFolder={currentFolder} />
+											</Box>
+										</Grid>
+									)}{" "}
+								</>
 							)}
 							<Divider />
-							<Text fontSize="3xl" fontWeight="600" m="4">
-								Your Files
-							</Text>
+							<Flex width="100%" align="center">
+								<Box>
+									<Text fontSize="3xl" fontWeight="600" m="4">
+										Your Files
+									</Text>
+								</Box>
+								<Spacer />
+								<Box m="4">
+									<Button onClick={() => setGridOn(!gridOn)}>
+										{gridOn ? (
+											<>
+												<FontAwesomeIcon
+													style={{
+														marginRight: "6px",
+													}}
+													icon={faList}
+												/>
+												{` `}
+												List View
+											</>
+										) : (
+											<>
+												<FontAwesomeIcon
+													style={{
+														marginRight: "6px",
+													}}
+													icon={faGripHorizontal}
+												/>
+												{` `}
+												Grid View
+											</>
+										)}
+									</Button>
+								</Box>
+							</Flex>
 							{files === null || loading ? (
 								<FilesTableSkeleton />
-							) : files.length === 0 ? (
+							) : files.length === 0 && !gridOn ? (
 								<FilesEmptyState />
 							) : (
-								<FilesTable childFiles={files} />
+								<FilesTable childFolders={folders} childFiles={files} gridOn={gridOn} />
 							)}
 						</Box>
 					)}

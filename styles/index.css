@@ -3,6 +3,8 @@
 body {
 	margin: 0;
 	border-top: 5px solid #0af5f4;
+	width: 100%;
+	overflow-x: hidden;
 }
 
 html {
@@ -40,4 +42,8 @@ a:hover {
 	vertical-align: top;
 	white-space: nowrap;
 	overflow: hidden;
+}
+
+.fiv-size-2xl {
+	font-size: 7.5em;
 }
