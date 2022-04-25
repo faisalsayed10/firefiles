@@ -1,4 +1,5 @@
 import {
+	IconButton,
 	Modal,
 	ModalCloseButton,
 	ModalContent,
@@ -16,6 +17,7 @@ import { nanoid } from "nanoid";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import useSWRImmutable from "swr/immutable";
+import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 import FileGrid from "./FileGrid";
 import FilePreview from "./FilePreview";

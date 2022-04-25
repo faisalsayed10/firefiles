@@ -5,7 +5,7 @@ import useFirebase from "@hooks/useFirebase";
 import { sendEvent } from "@util/firebase";
 import router, { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
-import { ExternalLink, Folder as FolderIcon, FolderMinus, Plus } from "tabler-icons-react";
+import { ExternalLink, FolderMinus, Plus, Folder as FolderIcon } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
