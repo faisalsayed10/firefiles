@@ -28,3 +28,26 @@ export type Bucket = {
 	type: string;
 	userId: string;
 };
+
+export type BucketFile = {
+	name: string;
+	url?: string;
+	parent: string;
+	fullPath: string;
+	bucketName?: string;
+	bucketUrl?: string;
+	size?: string;
+	contentType?: string;
+	createdAt?: string;
+	updatedAt?: string;
+};
+
+export type BucketFolder = {
+	name: string;
+	parent: string;
+	fullPath: string;
+	bucketName?: string;
+	bucketUrl?: string;
+	createdAt?: string;
+	updatedAt?: string;
+};
