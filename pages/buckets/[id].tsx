@@ -1,5 +1,6 @@
 import Dashboard from "@components/Dashboard";
 import { FirebaseProvider } from "@hooks/useFirebase";
+import { KeysProvider } from "@hooks/useKeys";
 import useUser from "@hooks/useUser";
 import { Bucket } from "@util/types";
 import axios from "axios";
@@ -36,9 +37,11 @@ const BucketPage: React.FC<Props> = ({ data }) => {
 				<title>Firefiles - Your Files</title>
 				<meta charSet="utf-8" />
 			</Head>
-			<FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
-				<Dashboard />
-			</FirebaseProvider>
+			<KeysProvider data={data}>
+				<FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+					<Dashboard />
+				</FirebaseProvider>
+			</KeysProvider>
 		</>
 	);
 };
