@@ -17,7 +17,7 @@ type Props = {
 
 const GridView: React.FC<Props> = (props) => {
 	return (
-		<Box mx="4">
+		<Box mx="4" mb="6">
 			<Flex align="center" justify="space-between" my="4">
 				<Text fontSize="3xl" fontWeight="600">
 					Your Files

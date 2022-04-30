@@ -1,65 +1,48 @@
 import {
-	IconButton,
 	Modal,
 	ModalCloseButton,
 	ModalContent,
 	ModalOverlay,
 	Text,
-	useClipboard,
-	useDisclosure,
+	useDisclosure
 } from "@chakra-ui/react";
-import useFirebase from "@hooks/useFirebase";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
 import { sendEvent } from "@util/firebase";
-import axios from "axios";
-import { User } from "firebase/auth";
-import { deleteObject, getStorage, ref, StorageReference } from "firebase/storage";
+import { BucketFile, BucketType } from "@util/types";
+import copy from "copy-to-clipboard";
 import { nanoid } from "nanoid";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
-import useSWRImmutable from "swr/immutable";
-import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 import FileGrid from "./FileGrid";
 import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
 
 interface Props {
-	file: StorageReference;
-	gridView?: boolean;
+	file: BucketFile;
+	gridView: boolean;
 }
-
-const firebase_url = `https://firebasestorage.googleapis.com/v0/b`;
-const metaFetcher = async (url: string, user: User) =>
-	axios
-		.get(url, { headers: { Authorization: `Firebase ${await user.getIdToken()}` } })
-		.then(({ data }) => data);
 
 const File: React.FC<Props> = ({ file, gridView }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { app, appUser, removeFile } = useFirebase();
-	const file_url = `${firebase_url}/${file.bucket}/o/${encodeURIComponent(file.fullPath)}`;
+	const { keys } = useKeys();
+	const { removeFile } = useBucket(BucketType[keys.type]);
 	const [id] = useState(nanoid());
-	const { data } = useSWRImmutable(file ? file.fullPath : null, () =>
-		metaFetcher(file_url, appUser)
-	);
-	const { onCopy } = useClipboard(`${file_url}?alt=media&token=${data?.downloadTokens}`);
 	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 	const cancelRef = useRef();
 
 	const copyFile = () => {
-		onCopy();
+		copy(file.url);
 		toast.success("File URL copied to clipboard!");
 		sendEvent("file_share", {});
 	};
 
 	const deleteFile = async () => {
 		try {
-			if (!app) return;
-			const storage = getStorage(app);
+			const success = await removeFile(file);
+			if (!success) return;
 
-			const reference = ref(storage, `${file?.parent.fullPath}/${file.name}`);
-			deleteObject(reference).catch((_) => {});
-			removeFile(reference);
 			setIsOpen(false);
 			toast.success("File deleted successfully!");
 			sendEvent("file_delete", {});
@@ -82,9 +65,7 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 			{gridView ? (
 				<FileGrid
 					copyFile={copyFile}
-					data={data}
 					file={file}
-					file_url={file_url}
 					id={id}
 					onPreviewOpen={onPreviewOpen}
 					setIsOpen={setIsOpen}
@@ -92,9 +73,7 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 			) : (
 				<FileRow
 					copyFile={copyFile}
-					data={data}
 					file={file}
-					file_url={file_url}
 					id={id}
 					onPreviewOpen={onPreviewOpen}
 					setIsOpen={setIsOpen}
@@ -111,11 +90,7 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 				<ModalOverlay />
 				<ModalContent p="0" maxH="700px">
 					<ModalCloseButton _focus={{ outline: "none", border: "none" }} />
-					<FilePreview
-						mimetype={data?.contentType}
-						url={`${file_url}?alt=media&token=${data?.downloadTokens}`}
-						file={file}
-					/>
+					<FilePreview url={file.url} file={file} />
 				</ModalContent>
 			</Modal>
 		</>

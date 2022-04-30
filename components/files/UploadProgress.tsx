@@ -1,15 +1,19 @@
 import { Box, Flex, IconButton, Progress, Text } from "@chakra-ui/react";
-import { CurrentlyUploading } from "@util/types";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
+import { BucketType, UploadingFile } from "@util/types";
 import React from "react";
 import toast from "react-hot-toast";
 import { PlayerPause, PlayerPlay, X } from "tabler-icons-react";
 
 type Props = {
-	file: CurrentlyUploading;
-	setUploadingFiles: React.Dispatch<React.SetStateAction<CurrentlyUploading[]>>;
+	file: UploadingFile;
 };
 
-const UploadProgress: React.FC<Props> = ({ file, setUploadingFiles }) => {
+const UploadProgress: React.FC<Props> = ({ file }) => {
+	const { keys } = useKeys();
+	const { setUploadingFiles } = useBucket(BucketType[keys.type]);
+
 	return (
 		<Flex align="baseline">
 			<Box my="4" flex="1">

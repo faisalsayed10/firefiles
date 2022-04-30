@@ -1,5 +1,5 @@
 import { sendEvent } from "@util/firebase";
-import { Bucket, BucketFile, BucketFolder, Config } from "@util/types";
+import { Bucket, BucketFile, BucketFolder, Config, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
@@ -7,20 +7,23 @@ import {
 	getAuth,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
-	User,
+	User
 } from "firebase/auth";
 import {
 	deleteObject,
 	FirebaseStorage,
+	getDownloadURL,
 	getStorage,
 	list,
 	listAll,
 	ref,
 	StorageReference,
+	uploadBytesResumable
 } from "firebase/storage";
 import { nanoid } from "nanoid";
 import router from "next/router";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
 
@@ -41,6 +44,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	const [currentFolder, setCurrentFolder] = useState<BucketFolder>(null);
 	const [folders, setFolders] = useState<BucketFolder[]>(null);
 	const [files, setFiles] = useState<BucketFile[]>(null);
+	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
 
 	const addFolder = (name: string) => {
@@ -82,12 +86,89 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		recursiveDelete(storage, res.prefixes, res.items);
 	};
 
-	const addFile = (file: BucketFile) => {
-		setFiles((files) => [...files, file]);
+	const addFile = async (toUpload: File[] | FileList) => {
+		if (!app) return;
+
+		for (let i = 0; i < toUpload.length; i++) {
+			const id = nanoid();
+			if (/[#\$\[\]\*/]/.test(toUpload[i].name)) {
+				toast.error("File name cannot contain special characters (#$[]*/).");
+				return;
+			}
+
+			const filePath =
+				currentFolder === ROOT_FOLDER
+					? toUpload[i].name
+					: `${decodeURIComponent(currentFolder.fullPath)}/${toUpload[i].name}`;
+
+			const fileRef = ref(getStorage(app), filePath);
+			const uploadTask = uploadBytesResumable(fileRef, toUpload[i]);
+
+			setUploadingFiles((prev) =>
+				prev.concat([
+					{
+						id,
+						name: toUpload[i].name,
+						task: uploadTask,
+						state: "running",
+						progress: 0,
+						error: false,
+					},
+				])
+			);
+
+			uploadTask.on(
+				"state_changed",
+				(snapshot) => {
+					setUploadingFiles((prevUploadingFiles) => {
+						return prevUploadingFiles.map((uploadFile) => {
+							if (uploadFile.id === id)
+								return {
+									...uploadFile,
+									state: snapshot.state,
+									progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+								};
+
+							return uploadFile;
+						});
+					});
+				},
+				() => {
+					setUploadingFiles((prevUploadingFiles) => {
+						return prevUploadingFiles.map((uploadFile) => {
+							if (uploadFile.id === id) return { ...uploadFile, error: true };
+							return uploadFile;
+						});
+					});
+				},
+				async () => {
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+					);
+
+					const newFile: BucketFile = {
+						fullPath: filePath,
+						name: toUpload[i].name,
+						size: toUpload[i].size.toString(),
+						createdAt: new Date().toISOString(),
+						parent: currentFolder.fullPath,
+						contentType: toUpload[i].type,
+						bucketName: uploadTask.snapshot.metadata.bucket,
+						url: await getDownloadURL(fileRef),
+					};
+					setFiles((files) => [...files, newFile]);
+					toast.success("File uploaded successfully.");
+				}
+			);
+		}
+		sendEvent("file_upload", { count: files.length });
 	};
 
-	const removeFile = (file: BucketFile) => {
+	const removeFile = async (file: BucketFile) => {
+		if (!app) return false;
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
+		deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => {});
+		return true;
 	};
 
 	const getFileMetadata = async (file: BucketFile, i: number) => {
@@ -114,7 +195,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	};
 
 	useEffect(() => {
-		if (!appUser || !files || !allFilesFetched) return;
+		if (!appUser || !files || !allFilesFetched.current) return;
 
 		for (let i = 0; i < files.length; i++) {
 			getFileMetadata(files[i], i);
@@ -249,6 +330,8 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				currentFolder,
 				files,
 				folders,
+				uploadingFiles,
+				setUploadingFiles,
 				addFile,
 				addFolder,
 				removeFile,

@@ -1,7 +1,7 @@
 import { FirebaseOptions } from "firebase/app";
 import { UploadTask } from "firebase/storage";
 
-export type CurrentlyUploading = {
+export type UploadingFile = {
 	id: string;
 	name: string;
 	progress: number;

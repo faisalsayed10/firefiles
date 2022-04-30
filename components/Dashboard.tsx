@@ -4,7 +4,7 @@ import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { BucketType, CurrentlyUploading } from "@util/types";
+import { BucketType } from "@util/types";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
@@ -27,11 +27,12 @@ const activeStyle = {
 
 const Dashboard = () => {
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
-	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
 	const { keys } = useKeys();
-	const { currentFolder, files, folders, loading } = useBucket(BucketType[keys.type]);
+	const { currentFolder, files, folders, loading, uploadingFiles } = useBucket(
+		BucketType[keys.type]
+	);
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
@@ -117,9 +118,6 @@ const Dashboard = () => {
 				<UploadFileButton
 					filesToUpload={draggedFilesToUpload}
 					setFilesToUpload={setDraggedFilesToUpload}
-					currentFolder={currentFolder}
-					uploadingFiles={uploadingFiles}
-					setUploadingFiles={setUploadingFiles}
 				/>
 			</LoadingOverlay>
 			{uploadingFiles.length > 0 && (
@@ -133,8 +131,8 @@ const Dashboard = () => {
 						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
 						backgroundColor={colorMode === "dark" ? "gray.700" : "white"}
 					>
-						{uploadingFiles.map((file) => (
-							<UploadProgress key={file.id} file={file} setUploadingFiles={setUploadingFiles} />
+						{uploadingFiles.map((uploading) => (
+							<UploadProgress key={uploading.id} file={uploading} />
 						))}
 					</Box>
 				</Center>

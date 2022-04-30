@@ -1,18 +1,18 @@
-import { BucketFile, BucketFolder, BucketType } from "@util/types";
+import { BucketFile, BucketFolder, BucketType, UploadingFile } from "@util/types";
 import useFirebase from "./useFirebase";
 import useS3 from "./useS3";
 
 export type ContextValue = {
-	// app: FirebaseApp;
-	// appUser: User;
 	loading: boolean;
 	currentFolder: BucketFolder;
 	folders: BucketFolder[];
 	files: BucketFile[];
+	uploadingFiles: UploadingFile[];
+	setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>;
 	addFolder: (name: string) => void;
 	removeFolder: (folder: BucketFolder) => Promise<void>;
-	addFile: (file: BucketFile) => void;
-	removeFile: (file: BucketFile) => void;
+	addFile: (files: File[] | FileList) => Promise<void>;
+	removeFile: (file: BucketFile) => Promise<boolean>;
 };
 
 export const ROOT_FOLDER: BucketFolder = {
