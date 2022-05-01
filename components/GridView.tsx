@@ -57,6 +57,7 @@ const GridView: React.FC<Props> = (props) => {
 					]}
 					gap={6}
 				>
+					<AddFolderButton key="firefiles-add-folder-btn" currentFolder={props.currentFolder} />
 					{props.folders?.length > 0 &&
 						props.folders?.map((folder) => (
 							<Folder
@@ -65,7 +66,6 @@ const GridView: React.FC<Props> = (props) => {
 								folder={folder}
 							/>
 						))}
-					<AddFolderButton key="firefiles-add-folder-btn" currentFolder={props.currentFolder} />
 					{props.files?.length > 0 &&
 						props.files?.map((file) => <File key={file.name} file={file} gridView={true} />)}
 				</Grid>

@@ -50,8 +50,8 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	const addFolder = (name: string) => {
 		const path =
 			currentFolder.fullPath !== ""
-				? decodeURIComponent(currentFolder.fullPath) + "/" + name
-				: name;
+				? decodeURIComponent(currentFolder.fullPath) + name + "/"
+				: name + "/";
 
 		const newFolder: BucketFolder = {
 			name,
@@ -229,6 +229,8 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	useEffect(() => {
 		if (!currentUser || !app || !appUser) return;
 		const storage = getStorage(app);
+		setFiles(null);
+		setFolders(null);
 
 		if (fullPath === "" || !fullPath) {
 			setCurrentFolder(ROOT_FOLDER);
@@ -249,72 +251,69 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	useEffect(() => {
 		if (!currentUser || !app || !appUser || !currentFolder) return;
 		const storage = getStorage(app);
-		setFiles(null);
-		setFolders(null);
 		setLoading(true);
 		allFilesFetched.current = false;
 
 		(async () => {
 			try {
-				if (files != null) return;
-				const reference = ref(storage, currentFolder.fullPath);
-				let results = await list(reference, { maxResults: 100 });
+				if (!files) {
+					const reference = ref(storage, currentFolder.fullPath);
+					let results = await list(reference, { maxResults: 100 });
 
-				for (let i = 0; i < results.items.length; i++) {
-					const bucketFile = {
-						fullPath: results.items[i].fullPath,
-						name: results.items[i].name,
-						bucketName: results.items[i].bucket,
-						parent: results.items[i].parent.fullPath + "/",
-					};
-					setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
-				}
-
-				while (results.nextPageToken) {
-					const more = await list(reference, {
-						maxResults: 100,
-						pageToken: results.nextPageToken,
-					});
-
-					results = {
-						nextPageToken: more.nextPageToken,
-						items: [...results.items, ...more.items],
-						prefixes: [...results.prefixes, ...more.prefixes],
-					};
-
-					for (let i = 0; i < more.items.length; i++) {
+					for (let i = 0; i < results.items.length; i++) {
 						const bucketFile = {
-							fullPath: more.items[i].fullPath,
-							name: more.items[i].name,
-							bucketName: more.items[i].bucket,
-							parent: more.items[i].parent.fullPath + "/",
+							fullPath: results.items[i].fullPath,
+							name: results.items[i].name,
+							bucketName: results.items[i].bucket,
+							parent: results.items[i].parent.fullPath + "/",
 						};
-						setFiles((files) => [...files, bucketFile]);
+						setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
 					}
-				}
 
-				allFilesFetched.current = true;
+					while (results.nextPageToken) {
+						const more = await list(reference, {
+							maxResults: 100,
+							pageToken: results.nextPageToken,
+						});
 
-				const localFolders = localStorage.getItem(`local_folders_${data.id}`);
-				let localFoldersArray: BucketFolder[] = localFolders ? JSON.parse(localFolders) : [];
-				localFoldersArray = localFoldersArray.filter((folder) => {
-					const parentPath = folder.fullPath.split("/").shift() + "/";
-					return (
-						parentPath === currentFolder.fullPath &&
-						!results.prefixes.find((prefix) => prefix.name === folder.name)
+						results = {
+							nextPageToken: more.nextPageToken,
+							items: [...results.items, ...more.items],
+							prefixes: [...results.prefixes, ...more.prefixes],
+						};
+
+						for (let i = 0; i < more.items.length; i++) {
+							const bucketFile = {
+								fullPath: more.items[i].fullPath,
+								name: more.items[i].name,
+								bucketName: more.items[i].bucket,
+								parent: more.items[i].parent.fullPath + "/",
+							};
+							setFiles((files) => [...files, bucketFile]);
+						}
+					}
+
+					allFilesFetched.current = true;
+
+					const localFolders = localStorage.getItem(`local_folders_${data.id}`);
+					let localFoldersArray: BucketFolder[] = localFolders ? JSON.parse(localFolders) : [];
+					localFoldersArray = localFoldersArray.filter(
+						(folder) =>
+							folder.parent === currentFolder.fullPath &&
+							!results.prefixes.find((prefix) => prefix.name === folder.name)
 					);
-				});
 
-				setFolders(localFoldersArray);
+					setFolders(localFoldersArray);
 
-				for (let i = 0; i < results.prefixes.length; i++) {
-					const bucketFolder = {
-						fullPath: results.prefixes[i].fullPath + "/",
-						name: results.prefixes[i].name,
-						bucketName: results.prefixes[i].bucket,
-						parent: results.prefixes[i].parent.fullPath + "/",
-					};
-					setFolders((folders) => [...folders, bucketFolder]);
+					for (let i = 0; i < results.prefixes.length; i++) {
+						const bucketFolder = {
+							fullPath: results.prefixes[i].fullPath + "/",
+							name: results.prefixes[i].name,
+							bucketName: results.prefixes[i].bucket,
+							parent: results.prefixes[i].parent.fullPath + "/",
+						};
+						setFolders((folders) => [...folders, bucketFolder]);
+					}
 				}
 			} catch (err) {
 				console.error(err);

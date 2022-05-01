@@ -32,39 +32,45 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 					_hover={{ textDecor: "none" }}
 					textColor={colorMode === "light" ? "#2D3748" : "white"}
 					onClick={() =>
-						router.push(router.asPath.replace(currentFolder.fullPath.replace(" ", "%20"), ""))
+						router.push(
+							router.asPath.replace(currentFolder.fullPath.slice(0, -1).replace(" ", "%20"), "")
+						)
 					}
 				>
 					<Home />
 				</BreadcrumbLink>
 			</BreadcrumbItem>
 			{currentFolder?.name !== "" &&
-				currentFolder?.fullPath.split("/").map((path, i) => {
-					return (
-						<BreadcrumbItem key={path || i} maxW="175px" p="3px">
-							<BreadcrumbLink
-								display="inline-block"
-								textColor={colorMode === "light" ? "#2D3748" : "white"}
-								isTruncated={true}
-								color="rgb(0, 119, 255)"
-								onClick={() => {
-									const route =
-										currentFolder.fullPath.substring(0, currentFolder.fullPath.indexOf(path)) +
-										path;
+				currentFolder?.fullPath
+					.slice(0, -1)
+					.split("/")
+					.map((path, i) => {
+						return (
+							<BreadcrumbItem key={path || i} maxW="175px" p="3px">
+								<BreadcrumbLink
+									display="inline-block"
+									textColor={colorMode === "light" ? "#2D3748" : "white"}
+									isTruncated={true}
+									color="rgb(0, 119, 255)"
+									onClick={() => {
+										const route =
+											currentFolder.fullPath
+												.slice(0, -1)
+												.substring(0, currentFolder.fullPath.slice(0, -1).indexOf(path)) + path;
 
-									router.push(
-										`${router.asPath.replace(
-											currentFolder.fullPath.replace(" ", "%20"),
-											""
-										)}${route}`
-									);
-								}}
-							>
-								{decodeURIComponent(path)}
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-					);
-				})}
+										router.push(
+											`${router.asPath.replace(
+												currentFolder.fullPath.slice(0, -1).replace(" ", "%20"),
+												""
+											)}${route}`
+										);
+									}}
+								>
+									{decodeURIComponent(path)}
+								</BreadcrumbLink>
+							</BreadcrumbItem>
+						);
+					})}
 		</Breadcrumb>
 	);
 };
