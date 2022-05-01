@@ -1,9 +1,15 @@
-import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
+import {
+	DeleteObjectCommand,
+	GetObjectCommand,
+	ListObjectsV2Command,
+	S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Bucket, BucketFile, BucketFolder, UploadingFile } from "@util/types";
+import mime from "mime-types";
 import { createContext, useContext, useEffect, useState } from "react";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
-import mime from "mime-types";
 
 const S3Context = createContext<ContextValue>(null);
 export default () => useContext(S3Context);
@@ -33,6 +39,8 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			fullPath: path,
 			parent: currentFolder.fullPath,
 			createdAt: new Date().toISOString(),
+			bucketName: data.keys.Bucket,
+			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
 		};
 
 		setFolders((folders) => [...folders, newFolder]);
@@ -50,7 +58,14 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	};
 
 	const removeFile = async (file: BucketFile) => {
+		const s3Client = new S3Client({
+			region: data.keys.region,
+			maxAttempts: 1,
+			credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
+		});
+
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
+		await s3Client.send(new DeleteObjectCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }));
 		return true;
 	};
 
@@ -69,6 +84,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			name: fullPath.split("/").pop(),
 			bucketName: data.keys.Bucket,
 			parent: fullPath.split("/").shift() + "/",
+			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
 		});
 	}, [fullPath, currentUser]);
 
@@ -94,21 +110,26 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 						})
 					);
 
-					// console.log(results);
-
 					if (results.Contents) {
-						for (let i = 0; i < results.Contents.length; i++) {
+						results.Contents.forEach(async (result) => {
 							const bucketFile: BucketFile = {
-								fullPath: results.Contents[i].Key,
-								name: results.Contents[i].Key.split("/").pop(),
-								bucketName: results.Name,
+								fullPath: result.Key,
+								name: result.Key.split("/").pop(),
 								parent: currentFolder.fullPath,
-								createdAt: results.Contents[i].LastModified.toISOString(),
-								size: results.Contents[i].Size.toString(),
-								contentType: mime.lookup(results.Contents[i].Key) || "",
+								createdAt: result.LastModified.toISOString(),
+								size: result.Size.toString(),
+								contentType: mime.lookup(result.Key) || "",
+								bucketName: results.Name,
+								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								url: await getSignedUrl(
+									s3Client,
+									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
+									{ expiresIn: 3600 }
+								),
 							};
+
 							setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
-						}
+						});
 					}
 
 					const localFolders = localStorage.getItem(`local_folders_${data.id}`);
@@ -128,6 +149,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								name: results.CommonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
 								bucketName: results.Name,
 								parent: currentFolder.fullPath,
+								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
 							};
 							setFolders((folders) => [...folders, bucketFolder]);
 						}
@@ -144,18 +166,24 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 							})
 						);
 
-						for (let i = 0; i < results.Contents.length; i++) {
+						results.Contents.forEach(async (result) => {
 							const bucketFile: BucketFile = {
-								fullPath: results.Contents[i].Key,
-								name: results.Contents[i].Key.split("/").pop(),
-								bucketName: results.Name,
+								fullPath: result.Key,
+								name: result.Key.split("/").pop(),
 								parent: currentFolder.fullPath,
-								createdAt: results.Contents[i].LastModified.toISOString(),
-								size: results.Contents[i].Size.toString(),
-								contentType: mime.lookup(results.Contents[i].Key) || "",
+								createdAt: result.LastModified.toISOString(),
+								size: result.Size.toString(),
+								contentType: mime.lookup(result.Key) || "",
+								bucketName: results.Name,
+								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								url: await getSignedUrl(
+									s3Client,
+									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
+									{ expiresIn: 3600 }
+								),
 							};
 							setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
-						}
+						});
 					}
 				}
 			} catch (err) {
