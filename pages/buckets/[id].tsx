@@ -1,6 +1,7 @@
 import Dashboard from "@components/Dashboard";
 import { FirebaseProvider } from "@hooks/useFirebase";
 import { KeysProvider } from "@hooks/useKeys";
+import { S3Provider } from "@hooks/useS3";
 import useUser from "@hooks/useUser";
 import { Bucket } from "@util/types";
 import axios from "axios";
@@ -38,9 +39,15 @@ const BucketPage: React.FC<Props> = ({ data }) => {
 				<meta charSet="utf-8" />
 			</Head>
 			<KeysProvider data={data}>
-				<FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
-					<Dashboard />
-				</FirebaseProvider>
+				{data.type === "firebase" ? (
+					<FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+						<Dashboard />
+					</FirebaseProvider>
+				) : data.type === "s3" ? (
+					<S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
+						<Dashboard />
+					</S3Provider>
+				) : null}
 			</KeysProvider>
 		</>
 	);
