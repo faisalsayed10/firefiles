@@ -2,9 +2,11 @@ import {
 	Box,
 	Button,
 	ButtonGroup,
+	Center,
 	Flex,
 	Image,
 	Link,
+	Spinner,
 	Table,
 	Tbody,
 	Td,
@@ -84,7 +86,11 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 	} else if (file?.contentType?.startsWith("image")) {
 		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
 	} else if (file?.contentType?.startsWith("video")) {
-		return <Box children={<Player playsInline src={url} onError={() => setIsError(true)} />} />;
+		return (
+			<Box
+				children={<Player fluid={false} playsInline src={url} onError={() => setIsError(true)} />}
+			/>
+		);
 	} else if (file?.contentType?.startsWith("audio")) {
 		return (
 			<Flex p="6" align="center" justify="center">
@@ -101,6 +107,7 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 				height={700}
 				width="100%"
 				title={file.name}
+				style={{ minWidth: 500 }}
 				onError={() => setIsError(true)}
 			/>
 		);
@@ -265,26 +272,30 @@ const CsvViewer = ({ file, url }) => {
 
 	return (
 		<Box maxH="700px" overflowY="auto" overflowX="auto">
-			<Table variant="striped" size="sm">
-				<Thead>
-					<Tr>
-						<Th>#</Th>
-						{columns.map((column) => (
-							<Th key={column.Header}>{column.Header}</Th>
-						))}
-					</Tr>
-				</Thead>
-				<Tbody>
-					{data.map((row, i) => (
-						<Tr key={row.id}>
-							<Td>{i + 1}</Td>
+			{columns.length > 0 ? (
+				<Table variant="striped" size="sm">
+					<Thead>
+						<Tr>
 							{columns.map((column) => (
-								<Td key={column.accessor}>{row[column.accessor]}</Td>
+								<Th key={column.Header}>{column.Header}</Th>
 							))}
 						</Tr>
-					))}
-				</Tbody>
-			</Table>
+					</Thead>
+					<Tbody>
+						{data.map((row, i) => (
+							<Tr key={row.id}>
+								{columns.map((column) => (
+									<Td key={column.accessor}>{row[column.accessor]}</Td>
+								))}
+							</Tr>
+						))}
+					</Tbody>
+				</Table>
+			) : (
+				<Center m="10">
+					<Spinner size="xl" />
+				</Center>
+			)}
 		</Box>
 	);
 };

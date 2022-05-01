@@ -89,7 +89,7 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
 				<ModalOverlay />
 				<ModalContent p="0" maxH="700px">
-					<ModalCloseButton _focus={{ outline: "none", border: "none" }} />
+					<ModalCloseButton _focus={{ outline: "none", border: "none" }} zIndex="100" />
 					<FilePreview url={file.url} file={file} />
 				</ModalContent>
 			</Modal>

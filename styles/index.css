@@ -26,3 +26,9 @@ a:hover {
 .fiv-size-2xl {
 	font-size: 6em;
 }
+
+.video-react {
+	max-height: 600px;
+	max-width: 576px;
+	overflow: hidden;
+}
