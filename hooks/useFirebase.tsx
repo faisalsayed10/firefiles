@@ -7,7 +7,7 @@ import {
 	getAuth,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
-	User
+	User,
 } from "firebase/auth";
 import {
 	deleteObject,
@@ -18,7 +18,7 @@ import {
 	listAll,
 	ref,
 	StorageReference,
-	uploadBytesResumable
+	uploadBytesResumable,
 } from "firebase/storage";
 import { nanoid } from "nanoid";
 import router from "next/router";
@@ -181,7 +181,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		});
 
 		setFiles((files) => [
-			...files.slice(0, i),
+			...(files || []).slice(0, i),
 			{
 				...file,
 				contentType: data.contentType,
@@ -190,12 +190,12 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				updatedAt: data.updated,
 				url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
 			},
-			...files.slice(i + 1),
+			...(files || []).slice(i + 1),
 		]);
 	};
 
 	useEffect(() => {
-		if (!appUser || !files || !allFilesFetched.current) return;
+		if (!appUser || !files || !allFilesFetched || !allFilesFetched.current) return;
 
 		for (let i = 0; i < files.length; i++) {
 			getFileMetadata(files[i], i);
@@ -236,9 +236,9 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		}
 
 		const currFolder: BucketFolder = {
-			fullPath,
+			fullPath: fullPath + "/",
 			name: ref(storage, fullPath).name,
-			parent: ref(storage, fullPath).parent.fullPath,
+			parent: ref(storage, fullPath).parent.fullPath + "/",
 			bucketName: ref(storage, fullPath).bucket,
 		};
 
@@ -247,16 +247,17 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 
 	// get files and folders
 	useEffect(() => {
-		if (!currentUser || !app || !appUser) return;
+		if (!currentUser || !app || !appUser || !currentFolder) return;
 		const storage = getStorage(app);
+		setFiles(null);
+		setFolders(null);
 		setLoading(true);
 		allFilesFetched.current = false;
-		setFiles([]);
-		setFolders([]);
 
 		(async () => {
 			try {
-				const reference = ref(storage, fullPath);
+				if (files != null) return;
+				const reference = ref(storage, currentFolder.fullPath);
 				let results = await list(reference, { maxResults: 100 });
 
 				for (let i = 0; i < results.items.length; i++) {
@@ -264,9 +265,9 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 						fullPath: results.items[i].fullPath,
 						name: results.items[i].name,
 						bucketName: results.items[i].bucket,
-						parent: results.items[i].parent.fullPath,
+						parent: results.items[i].parent.fullPath + "/",
 					};
-					setFiles((files) => [...files, bucketFile]);
+					setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
 				}
 
 				while (results.nextPageToken) {
@@ -286,7 +287,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 							fullPath: more.items[i].fullPath,
 							name: more.items[i].name,
 							bucketName: more.items[i].bucket,
-							parent: more.items[i].parent.fullPath,
+							parent: more.items[i].parent.fullPath + "/",
 						};
 						setFiles((files) => [...files, bucketFile]);
 					}
@@ -297,9 +298,9 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				const localFolders = localStorage.getItem(`local_folders_${data.id}`);
 				let localFoldersArray: BucketFolder[] = localFolders ? JSON.parse(localFolders) : [];
 				localFoldersArray = localFoldersArray.filter((folder) => {
-					const parentPath = folder.fullPath.split("/").slice(0, -1).join("/");
+					const parentPath = folder.fullPath.split("/").shift() + "/";
 					return (
-						parentPath === fullPath &&
+						parentPath === currentFolder.fullPath &&
 						!results.prefixes.find((prefix) => prefix.name === folder.name)
 					);
 				});
@@ -308,10 +309,10 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 
 				for (let i = 0; i < results.prefixes.length; i++) {
 					const bucketFolder = {
-						fullPath: results.prefixes[i].fullPath,
+						fullPath: results.prefixes[i].fullPath + "/",
 						name: results.prefixes[i].name,
 						bucketName: results.prefixes[i].bucket,
-						parent: results.prefixes[i].parent.fullPath,
+						parent: results.prefixes[i].parent.fullPath + "/",
 					};
 					setFolders((folders) => [...folders, bucketFolder]);
 				}
@@ -321,7 +322,11 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 
 			setLoading(false);
 		})();
-	}, [fullPath, currentUser, app, appUser]);
+
+		return () => {
+			allFilesFetched.current = false;
+		};
+	}, [currentFolder, currentUser, app, appUser]);
 
 	return (
 		<FirebaseContext.Provider
