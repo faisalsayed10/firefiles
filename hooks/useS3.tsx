@@ -1,13 +1,19 @@
 import {
 	DeleteObjectCommand,
+	DeleteObjectsCommand,
 	GetObjectCommand,
 	ListObjectsV2Command,
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { sendEvent } from "@util/firebase";
+import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/s3-helpers";
 import { Bucket, BucketFile, BucketFolder, UploadingFile } from "@util/types";
+import Evaporate from "evaporate";
 import mime from "mime-types";
+import { nanoid } from "nanoid";
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
 
@@ -72,13 +78,113 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		await emptyS3Directory(s3Client, folder.bucketName, folder.fullPath);
 	};
 
-	const removeFile = async (file: BucketFile) => {
-		const s3Client = new S3Client({
-			region: data.keys.region,
-			maxAttempts: 1,
-			credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
+	const addFile = async (filesToUpload: File[] | FileList) => {
+		const evaporate = await Evaporate.create({
+			bucket: data.keys.Bucket,
+			awsRegion: data.keys.region,
+			aws_key: data.keys.accessKey,
+			computeContentMd5: true,
+			cryptoMd5Method,
+			cryptoHexEncodedHash256,
+			customAuthMethod: (_, __, stringToSign) => signRequest(stringToSign, data.keys.secretKey),
+			logging: false,
 		});
 
+		Array.from(filesToUpload).forEach(async (toUpload) => {
+			const id = nanoid();
+			if (/[#\$\[\]\*/]/.test(toUpload.name)) {
+				toast.error("File name cannot contain special characters (#$[]*/).");
+				return;
+			}
+
+			const filePath =
+				currentFolder === ROOT_FOLDER
+					? toUpload.name
+					: `${decodeURIComponent(currentFolder.fullPath)}${toUpload.name}`;
+
+			evaporate.add({
+				name: filePath,
+				file: toUpload,
+				contentType: mime.lookup(toUpload.name) || "application/octet-stream",
+				uploadInitiated: () => {
+					setUploadingFiles((prev) =>
+						prev.concat([
+							{
+								id,
+								name: toUpload.name,
+								key: `${data.keys.Bucket}/${filePath}`,
+								task: evaporate,
+								state: "running",
+								progress: 0,
+								error: false,
+							},
+						])
+					);
+				},
+				progress: (_, stats) => {
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.map((uploadFile) => {
+							return uploadFile.id === id
+								? {
+										...uploadFile,
+										state: "running",
+										progress: Math.round((stats.totalUploaded / stats.fileSize) * 100),
+								  }
+								: uploadFile;
+						})
+					);
+				},
+				paused: () => {
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.map((uploadFile) => {
+							return uploadFile.id === id ? { ...uploadFile, state: "paused" } : uploadFile;
+						})
+					);
+				},
+				resumed: () => {
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.map((uploadFile) => {
+							return uploadFile.id === id ? { ...uploadFile, state: "running" } : uploadFile;
+						})
+					);
+				},
+				error: (_) => {
+					setUploadingFiles((prevUploadingFiles) => {
+						return prevUploadingFiles.map((uploadFile) => {
+							if (uploadFile.id === id) return { ...uploadFile, error: true };
+							return uploadFile;
+						});
+					});
+				},
+				complete: async (_xhr, file_key, _) => {
+					setUploadingFiles((prevUploadingFiles) =>
+						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+					);
+					const newFile: BucketFile = {
+						fullPath: filePath,
+						name: toUpload.name,
+						parent: currentFolder.fullPath,
+						size: toUpload.size.toString(),
+						createdAt: new Date().toISOString(),
+						contentType: mime.lookup(toUpload.name) || "application/octet-stream",
+						bucketName: data.keys.Bucket,
+						bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
+						url: await getSignedUrl(
+							s3Client,
+							new GetObjectCommand({ Bucket: data.keys.Bucket, Key: file_key }),
+							{ expiresIn: 3600 }
+						),
+					};
+					setFiles((files) => (files ? [...files, newFile] : [newFile]));
+					toast.success("File uploaded successfully.");
+				},
+			});
+		});
+
+		sendEvent("file_upload", { count: filesToUpload?.length });
+	};
+
+	const removeFile = async (file: BucketFile) => {
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
 		await s3Client.send(new DeleteObjectCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }));
 		return true;

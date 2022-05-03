@@ -15,7 +15,7 @@ const UploadProgress: React.FC<Props> = ({ file }) => {
 	const { setUploadingFiles } = useBucket(BucketType[keys.type]);
 
 	return (
-		<Flex align="baseline">
+		<Flex align="center">
 			<Box my="4" flex="1">
 				<Text fontSize="md">{`Uploading ${file.name} (${file.progress}%)`}</Text>
 				<Progress
@@ -26,7 +26,11 @@ const UploadProgress: React.FC<Props> = ({ file }) => {
 				/>
 			</Box>
 			<IconButton
-				onClick={() => (file.state === "running" ? file.task.pause() : file.task.resume())}
+				onClick={() => {
+					file.state === "running"
+						? file.task.pause(file.key, { force: true })
+						: file.task.resume(file.key);
+				}}
 				variant="link"
 				isDisabled={file.state === "error"}
 				aria-label="pause"
@@ -34,7 +38,7 @@ const UploadProgress: React.FC<Props> = ({ file }) => {
 			/>
 			<IconButton
 				onClick={() => {
-					file.task.cancel();
+					file.task.cancel(file.key);
 					setUploadingFiles((prev) => prev.filter((f) => f.id !== file.id));
 					toast.error("File upload cancelled.");
 				}}
