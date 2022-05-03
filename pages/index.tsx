@@ -4,16 +4,13 @@ import {
 	Divider,
 	Flex,
 	Grid,
-	IconButton,
 	Image,
-	Menu,
-	MenuButton,
-	MenuItem,
-	MenuList,
 	Skeleton,
 	Tag,
 	Text,
+	useColorModeValue,
 } from "@chakra-ui/react";
+import OptionsPopover from "@components/popups/OptionsPopover";
 import AddBucketButton from "@components/ui/AddBucketButton";
 import Navbar from "@components/ui/Navbar";
 import useUser from "@hooks/useUser";
@@ -28,7 +25,7 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { DotsVertical, X } from "tabler-icons-react";
+import { X } from "tabler-icons-react";
 
 const Dashboard = () => {
 	const router = useRouter();
@@ -46,6 +43,12 @@ const Dashboard = () => {
 		fetcher,
 		{ revalidateOnFocus: false, errorRetryCount: 1 }
 	);
+
+	const optionProps = {
+		p: 2,
+		cursor: "pointer",
+		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
+	};
 
 	useEffect(() => {
 		if (authLoading) return;
@@ -101,45 +104,68 @@ const Dashboard = () => {
 					<Text as="h1" fontSize="3xl" fontWeight="600" my="3">
 						Your Buckets
 					</Text>
-					<Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={6}>
+					<Grid
+						templateColumns={[
+							"repeat(2, 1fr)",
+							"repeat(3, 1fr)",
+							"repeat(4, 1fr)",
+							"repeat(6, 1fr)",
+							"repeat(7, 1fr)",
+							"repeat(8, 1fr)",
+						]}
+						gap={6}
+					>
 						{!data && isValidating ? (
 							<>
-								<Skeleton borderRadius="3px" />
-								<Skeleton borderRadius="3px" />
-								<Skeleton borderRadius="3px" />
-								<Skeleton borderRadius="3px" />
+								<Skeleton h="140px" w="full" borderRadius="lg" />
+								<Skeleton h="140px" w="full" borderRadius="lg" />
+								<Skeleton h="140px" w="full" borderRadius="lg" />
+								<Skeleton h="140px" w="full" borderRadius="lg" />
 							</>
 						) : (
 							data?.map((bucket) => (
 								<Flex
 									key={bucket.id}
-									align="center"
-									flexDir="column"
 									cursor="pointer"
-									onClick={() => router.push(`/buckets/${bucket.id}`)}
+									direction="column"
+									align="center"
+									borderRadius="lg"
+									boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+									w="100%"
+									h="140px"
+									borderWidth="1px"
+									transition="ease-in-out 0.1s"
+									className="hoverAnim"
 								>
-									<Image
-										m="0 auto"
-										transition="ease-in-out 0.1s"
-										className="hoverAnim"
-										src={PROVIDERS.filter((p) => p.id === bucket.type)[0].logo}
-										h="80px"
-									/>
-									<Flex w="full" justify="space-between">
-										<Text isTruncated w="90%" align="center">
+									<Box
+										flex={1}
+										onClick={() => router.push(`/buckets/${bucket.id}`)}
+										w="full"
+										mt="2"
+									>
+										<Image
+											src={PROVIDERS.filter((p) => p.id === bucket.type)[0].logo}
+											style={{ color: useColorModeValue("#2D3748", "white") }}
+											maxW="90px"
+											m="auto"
+										/>
+									</Box>
+									<Flex p="2" w="full" justify="space-between" alignItems="center">
+										<Text
+											onClick={() => router.push(`/buckets/${bucket.id}`)}
+											flex="1"
+											isTruncated={true}
+											as="p"
+											fontSize="sm"
+											align="left"
+											px="2"
+										>
 											{bucket.name}
 										</Text>
-										<Menu isLazy>
-											<MenuButton
-												as={IconButton}
-												aria-label="Options"
-												icon={<DotsVertical />}
-												variant="link"
-												onClick={(e) => e.stopPropagation()}
-											/>
-											<MenuList>
-												<MenuItem
-													icon={<X />}
+										<OptionsPopover header={bucket.name}>
+											<Flex alignItems="stretch" flexDirection="column">
+												<Flex
+													{...optionProps}
 													onClick={async (e) => {
 														e.stopPropagation();
 														await deleteBucket(
@@ -152,10 +178,11 @@ const Dashboard = () => {
 														sendEvent("bucket_delete", {});
 													}}
 												>
-													Delete Bucket
-												</MenuItem>
-											</MenuList>
-										</Menu>
+													<X />
+													<Text ml="2">Delete Bucket</Text>
+												</Flex>
+											</Flex>
+										</OptionsPopover>
 									</Flex>
 								</Flex>
 							))
