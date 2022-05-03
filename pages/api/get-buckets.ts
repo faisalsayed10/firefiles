@@ -10,9 +10,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		const snapshot = await firestore.collection("buckets").where("userId", "==", uid).get();
 		let buckets = [];
 
-		snapshot.forEach((doc) => {
-			buckets.push({ id: doc.id, ...doc.data() });
-		});
+		for (let i = 0; i < snapshot.docs.length; i++) {
+			buckets.push({ id: snapshot.docs[i].id, ...snapshot.docs[i].data() });
+		}
 
 		return res.status(200).json(buckets);
 	} catch (err) {

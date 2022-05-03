@@ -1,5 +1,5 @@
 import { auth, firestore } from "@util/firebase-admin";
-import { beforeCreatingDoc } from "@util/helpers";
+import { beforeCreatingDoc } from "@util/s3-helpers";
 import { AES, enc } from "crypto-js";
 import { nanoid } from "nanoid";
 import { NextApiRequest, NextApiResponse } from "next";

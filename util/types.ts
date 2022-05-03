@@ -4,9 +4,14 @@ import { UploadTask } from "firebase/storage";
 export type UploadingFile = {
 	id: string;
 	name: string;
+	key?: string;
 	progress: number;
 	error: boolean;
-	task: UploadTask;
+	task: {
+		cancel: (key?: string) => void;
+		pause: (key?: string) => void;
+		resume: (key?: string) => void;
+	};
 	state: string;
 };
 

@@ -1,15 +1,6 @@
-import {
-	CreateBucketCommand,
-	GetBucketCorsCommand,
-	PutBucketCorsCommand,
-	PutBucketCorsCommandInput,
-	PutPublicAccessBlockCommand,
-	S3Client,
-} from "@aws-sdk/client-s3";
 import axios from "axios";
 import { deleteApp, getApps } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import { NextApiRequest, NextApiResponse } from "next";
 import { BucketFile, BucketType } from "./types";
 
 export const deleteBucket = async (type: BucketType, token: string, id: string) => {
@@ -71,86 +62,5 @@ export const download = async (file: BucketFile) => {
 		document.body.removeChild(a);
 	} catch (err) {
 		window.open(file.url, "_blank");
-	}
-};
-
-export const createNewBucket = async (
-	client: S3Client,
-	Bucket: string,
-	corsOptions: PutBucketCorsCommandInput
-) => {
-	await client.send(new CreateBucketCommand({ Bucket, ObjectOwnership: "BucketOwnerEnforced" }));
-	await client.send(
-		new PutPublicAccessBlockCommand({
-			Bucket,
-			PublicAccessBlockConfiguration: {
-				BlockPublicAcls: true,
-				BlockPublicPolicy: true,
-				IgnorePublicAcls: true,
-				RestrictPublicBuckets: true,
-			},
-		})
-	);
-	await client.send(new PutBucketCorsCommand(corsOptions));
-};
-
-export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiResponse, body: any) => {
-	const { data, name, type } = body;
-
-	switch (type) {
-		case "firebase":
-			break;
-		case "s3":
-			const client = new S3Client({
-				region: data.region,
-				maxAttempts: 1,
-				credentials: {
-					accessKeyId: data.accessKey,
-					secretAccessKey: data.secretKey,
-				},
-			});
-
-			const origin =
-				(req.headers["x-forwarded-proto"] || req.headers.referer?.split("://")[0]
-					? "https"
-					: "http") +
-				"://" +
-				req.headers.host;
-
-			const corsOptions = {
-				Bucket: data.Bucket,
-				CORSConfiguration: {
-					CORSRules: [
-						{
-							AllowedHeaders: ["*"],
-							AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-							AllowedOrigins: [origin],
-						},
-					],
-				},
-			};
-
-			try {
-				await client.send(new GetBucketCorsCommand({ Bucket: data.Bucket })); // Get CORS
-				await client.send(new PutBucketCorsCommand(corsOptions)); // Update CORS anyway
-				return { success: true, error: null };
-			} catch (err) {
-				if (err.name === "InvalidBucketName" || err.name === "NoSuchBucket") {
-					await createNewBucket(client, data.Bucket, corsOptions); // Bucket doesn't exist, so created a new bucket
-					return { success: true, error: null };
-				} else if (err.name === "NoSuchCORSConfiguration") {
-					try {
-						await client.send(new PutBucketCorsCommand(corsOptions));
-						return { success: true, error: null };
-					} catch (e) {
-						return { success: false, error: e.message };
-					}
-				}
-
-				console.error(err);
-				return { success: false, error: err.message };
-			}
-		default:
-			break;
 	}
 };

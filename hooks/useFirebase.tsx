@@ -161,7 +161,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				}
 			);
 		}
-		sendEvent("file_upload", { count: files.length });
+		sendEvent("file_upload", { count: toUpload.length });
 	};
 
 	const removeFile = async (file: BucketFile) => {
