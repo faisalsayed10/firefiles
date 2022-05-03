@@ -20,6 +20,13 @@ type Props = {
 };
 
 export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
+	const [s3Client, setS3Client] = useState<S3Client>(
+		new S3Client({
+			region: data.keys.region,
+			maxAttempts: 1,
+			credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
+		})
+	);
 	const [loading, setLoading] = useState(false);
 	const { currentUser } = useUser();
 
@@ -50,11 +57,19 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	};
 
 	const removeFolder = async (folder: BucketFolder) => {
+		// remove from local state
 		setFolders((folders) => folders.filter((f) => f.fullPath !== folder.fullPath));
-	};
 
-	const addFile = async (files: File[] | FileList) => {
-		// setFiles((files) => [...files, file]);
+		// delete from localStorage
+		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
+		if (localFolders) {
+			const folders = JSON.parse(localFolders);
+			const filtered = folders.filter((f) => !f.fullPath.includes(folder.fullPath));
+			localStorage.setItem(`local_folders_${data.id}`, JSON.stringify(filtered));
+		}
+
+		// recursively delete children
+		await emptyS3Directory(s3Client, folder.bucketName, folder.fullPath);
 	};
 
 	const removeFile = async (file: BucketFile) => {
@@ -69,6 +84,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		return true;
 	};
 
+	// set currentFolder
 	useEffect(() => {
 		if (!currentUser) return;
 		setFiles(null);
@@ -96,12 +112,6 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		(async () => {
 			try {
 				if (!files) {
-					const s3Client = new S3Client({
-						region: data.keys.region,
-						maxAttempts: 1,
-						credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
-					});
-
 					let results = await s3Client.send(
 						new ListObjectsV2Command({
 							Bucket: data.keys.Bucket,
@@ -137,7 +147,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 					localFoldersArray = localFoldersArray.filter(
 						(folder) =>
 							folder.parent === currentFolder.fullPath &&
-							!results.CommonPrefixes.find((prefix) => prefix.Prefix === folder.fullPath)
+							!results.CommonPrefixes?.find((prefix) => prefix.Prefix === folder.fullPath)
 					);
 
 					setFolders(localFoldersArray);
@@ -213,3 +223,25 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		</S3Context.Provider>
 	);
 };
+
+async function emptyS3Directory(client: S3Client, Bucket: string, Prefix: string) {
+	const listParams = { Bucket, Prefix };
+	const listedObjects = await client.send(new ListObjectsV2Command(listParams));
+
+	if (listedObjects.CommonPrefixes?.length > 0) {
+		for (let i = 0; i < listedObjects.CommonPrefixes.length; i++) {
+			await emptyS3Directory(client, Bucket, listedObjects.CommonPrefixes[i].Prefix);
+		}
+	}
+
+	if (listedObjects.Contents?.length === 0) return;
+
+	const deleteParams = { Bucket, Delete: { Objects: [] } };
+
+	for (let i = 0; i < listedObjects.Contents.length; i++) {
+		deleteParams.Delete.Objects.push({ Key: listedObjects.Contents[i].Key });
+	}
+
+	await client.send(new DeleteObjectsCommand(deleteParams));
+	if (listedObjects.IsTruncated) await emptyS3Directory(client, Bucket, Prefix);
+}
