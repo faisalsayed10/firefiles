@@ -8,9 +8,9 @@ export type UploadingFile = {
 	progress: number;
 	error: boolean;
 	task: {
-		cancel: (key?: string) => void;
-		pause: (key?: string) => void;
-		resume: (key?: string) => void;
+		cancel: (...args) => void;
+		pause: (...args) => void;
+		resume: (...args) => void;
 	};
 	state: string;
 };

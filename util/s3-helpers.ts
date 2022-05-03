@@ -63,6 +63,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 							AllowedHeaders: ["*"],
 							AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
 							AllowedOrigins: [origin],
+							ExposeHeaders: ["ETag"],
 						},
 					],
 				},

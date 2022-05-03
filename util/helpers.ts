@@ -1,6 +1,7 @@
 import axios from "axios";
 import { deleteApp, getApps } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
+import toast from "react-hot-toast";
 import { BucketFile, BucketType } from "./types";
 
 export const deleteBucket = async (type: BucketType, token: string, id: string) => {
@@ -41,6 +42,9 @@ export const onLogout = async () => {
 
 export const download = async (file: BucketFile) => {
 	try {
+		toast.loading("Starting download...", { duration: 3000 });
+		if (parseInt(file.size) > 10000000) return window.open(file.url, "_blank");
+
 		const res = await fetch(file.url);
 		const blob = await res.blob();
 		const reader = new FileReader();
@@ -59,7 +63,7 @@ export const download = async (file: BucketFile) => {
 		a.download = file.name;
 		document.body.appendChild(a);
 		a.click();
-		document.body.removeChild(a);
+		setTimeout(() => document.body.removeChild(a), 0);
 	} catch (err) {
 		window.open(file.url, "_blank");
 	}
