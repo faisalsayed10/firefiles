@@ -86,29 +86,34 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		recursiveDelete(storage, res.prefixes, res.items);
 	};
 
-	const addFile = async (toUpload: File[] | FileList) => {
+	const addFile = async (filesToUpload: File[] | FileList) => {
 		if (!app) return;
 
-		for (let i = 0; i < toUpload.length; i++) {
+		for (let i = 0; i < filesToUpload.length; i++) {
 			const id = nanoid();
-			if (/[#\$\[\]\*/]/.test(toUpload[i].name)) {
+			if (/[#\$\[\]\*/]/.test(filesToUpload[i].name)) {
 				toast.error("File name cannot contain special characters (#$[]*/).");
+				return;
+			}
+
+			if (files.filter((f) => f.name === filesToUpload[i].name).length > 0) {
+				toast.error("File with same name already exists.");
 				return;
 			}
 
 			const filePath =
 				currentFolder === ROOT_FOLDER
-					? toUpload[i].name
-					: `${decodeURIComponent(currentFolder.fullPath)}/${toUpload[i].name}`;
+					? filesToUpload[i].name
+					: `${decodeURIComponent(currentFolder.fullPath)}/${filesToUpload[i].name}`;
 
 			const fileRef = ref(getStorage(app), filePath);
-			const uploadTask = uploadBytesResumable(fileRef, toUpload[i]);
+			const uploadTask = uploadBytesResumable(fileRef, filesToUpload[i]);
 
 			setUploadingFiles((prev) =>
 				prev.concat([
 					{
 						id,
-						name: toUpload[i].name,
+						name: filesToUpload[i].name,
 						task: uploadTask,
 						state: "running",
 						progress: 0,
@@ -148,11 +153,11 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 
 					const newFile: BucketFile = {
 						fullPath: filePath,
-						name: toUpload[i].name,
-						size: toUpload[i].size.toString(),
+						name: filesToUpload[i].name,
+						size: filesToUpload[i].size.toString(),
 						createdAt: new Date().toISOString(),
 						parent: currentFolder.fullPath,
-						contentType: toUpload[i].type,
+						contentType: filesToUpload[i].type,
 						bucketName: uploadTask.snapshot.metadata.bucket,
 						url: await getDownloadURL(fileRef),
 					};
@@ -161,7 +166,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				}
 			);
 		}
-		sendEvent("file_upload", { count: toUpload.length });
+		sendEvent("file_upload", { count: filesToUpload.length });
 	};
 
 	const removeFile = async (file: BucketFile) => {
