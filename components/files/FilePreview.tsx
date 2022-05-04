@@ -50,6 +50,7 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 	const [showRaw, setShowRaw] = useState(false);
 	const [rawMd, setRawMd] = useState(false);
 	const [text, setText] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const extension = file.name.split(".").pop();
 	const { colorMode } = useColorMode();
@@ -74,10 +75,12 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 			extension === "md" ||
 			showRaw
 		) {
+			setLoading(true);
 			fetch(url)
 				.then((res) => res.text())
 				.then((text) => setText(text))
-				.catch((err) => setIsError(true));
+				.catch(() => setIsError(true))
+				.finally(() => setLoading(false));
 		}
 	}, [showRaw]);
 
@@ -121,30 +124,38 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 		return <GoogleDocsViewer file={file} url={url} />;
 	} else if (file?.contentType === "text/markdown" || extension === "md") {
 		return (
-			<Box height="600px">
-				<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
-					{!rawMd ? "View Raw" : "View Parsed"}
-				</Button>
-				{!rawMd ? (
-					<MarkdownPreview
-						source={text}
-						disallowedElements={["script"]}
-						style={{
-							height: "90%",
-							overflowY: "auto",
-							padding: 15,
-						}}
-					/>
+			<>
+				{loading || !text ? (
+					<Center m="20">
+						<Spinner size="xl" />
+					</Center>
 				) : (
-					<CodeEditor
-						value={text}
-						disabled
-						language={extension}
-						padding={15}
-						style={codeEditorStyles}
-					/>
+					<Box height="600px">
+						<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
+							{!rawMd ? "View Raw" : "View Parsed"}
+						</Button>
+						{!rawMd ? (
+							<MarkdownPreview
+								source={text}
+								disallowedElements={["script"]}
+								style={{
+									height: "90%",
+									overflowY: "auto",
+									padding: 15,
+								}}
+							/>
+						) : (
+							<CodeEditor
+								value={text}
+								disabled
+								language={extension}
+								padding={15}
+								style={codeEditorStyles}
+							/>
+						)}
+					</Box>
 				)}
-			</Box>
+			</>
 		);
 	} else if (
 		file?.contentType?.startsWith("text") ||
@@ -152,18 +163,26 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 		showRaw
 	) {
 		return (
-			<Box height="600px">
-				<CodeEditor
-					value={text}
-					disabled
-					language={extension}
-					padding={15}
-					style={{
-						...codeEditorStyles,
-						marginTop: 40,
-					}}
-				/>
-			</Box>
+			<>
+				{loading || !text ? (
+					<Center m="20">
+						<Spinner size="xl" />
+					</Center>
+				) : (
+					<Box height="600px">
+						<CodeEditor
+							value={text}
+							disabled
+							language={extension}
+							padding={15}
+							style={{
+								...codeEditorStyles,
+								marginTop: 40,
+							}}
+						/>
+					</Box>
+				)}
+			</>
 		);
 	}
 
@@ -187,7 +206,7 @@ const Error = ({ file, url }) => {
 					Open in new tab
 				</Button>
 				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
-					Download It
+					Download
 				</Button>
 			</ButtonGroup>
 		</Flex>
@@ -203,7 +222,7 @@ const NoPreview = ({ file, setShowRaw }) => {
 			<ButtonGroup>
 				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
 				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
-					Download It
+					Download
 				</Button>
 			</ButtonGroup>
 		</Flex>
@@ -228,7 +247,7 @@ const GoogleDocsViewer = ({ file, url }) => {
 					Open with Google Docs Viewer
 				</Button>
 				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
-					Download It
+					Download
 				</Button>
 			</ButtonGroup>
 		</Flex>
@@ -251,18 +270,11 @@ const CsvViewer = ({ file, url }) => {
 
 	useEffect(() => {
 		if (!rawFile) return;
-		Papa.parse(rawFile, {
-			header: true,
-			dynamicTyping: true,
-			complete: handleDataChange,
-		});
+		Papa.parse(rawFile, { header: true, dynamicTyping: true, complete: handleDataChange });
 	}, [rawFile]);
 
 	const makeColumns = (rawColumns) =>
-		rawColumns.map((column) => ({
-			Header: column,
-			accessor: column,
-		}));
+		rawColumns.map((column) => ({ Header: column, accessor: column }));
 
 	const handleDataChange = (file) => {
 		file.data.pop();
@@ -273,11 +285,11 @@ const CsvViewer = ({ file, url }) => {
 	return (
 		<Box maxH="700px" overflowY="auto" overflowX="auto">
 			{columns.length > 0 ? (
-				<Table variant="striped" size="sm">
+				<Table variant="simple" size="sm">
 					<Thead>
 						<Tr>
 							{columns.map((column) => (
-								<Th key={column.Header}>{column.Header}</Th>
+								<Th key={column.Header}>{column.Header.replaceAll("\"", "")}</Th>
 							))}
 						</Tr>
 					</Thead>
@@ -292,7 +304,7 @@ const CsvViewer = ({ file, url }) => {
 					</Tbody>
 				</Table>
 			) : (
-				<Center m="10">
+				<Center m="20">
 					<Spinner size="xl" />
 				</Center>
 			)}
