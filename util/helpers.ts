@@ -45,25 +45,17 @@ export const download = async (file: BucketFile) => {
 		toast.loading("Starting download...", { duration: 3000 });
 		if (parseInt(file.size) > 10000000) return window.open(file.url, "_blank");
 
-		const res = await fetch(file.url);
-		const blob = await res.blob();
-		const reader = new FileReader();
-		await new Promise((resolve, reject) => {
-			reader.onload = resolve;
-			reader.onerror = reject;
-			reader.readAsDataURL(blob);
-		});
-		const base64 = (reader.result as string).replace(
-			/^data:.+;base64,/,
-			"data:application/octet-stream;base64,"
-		);
-
+		const response = await axios.get(file.url, { responseType: "blob" });
+		const url = window.URL.createObjectURL(new Blob([response.data]));
 		const a = document.createElement("a");
-		a.href = base64;
+		a.href = url;
 		a.download = file.name;
 		document.body.appendChild(a);
 		a.click();
-		setTimeout(() => document.body.removeChild(a), 0);
+		setTimeout(() => {
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+		}, 0);
 	} catch (err) {
 		window.open(file.url, "_blank");
 	}

@@ -31,13 +31,7 @@ const Dashboard = () => {
 	const router = useRouter();
 	const { currentUser, loading: authLoading } = useUser();
 	const fetcher = async (key?: string) =>
-		axios
-			.get(key, {
-				headers: {
-					token: await currentUser.getIdToken(),
-				},
-			})
-			.then(({ data }) => data);
+		axios.get(key, { headers: { token: await currentUser.getIdToken() } }).then(({ data }) => data);
 	const { data, error, isValidating, mutate } = useSWR<Bucket[]>(
 		currentUser ? `/api/get-buckets` : null,
 		fetcher,
@@ -145,7 +139,6 @@ const Dashboard = () => {
 									>
 										<Image
 											src={PROVIDERS.filter((p) => p.id === bucket.type)[0].logo}
-											style={{ color: useColorModeValue("#2D3748", "white") }}
 											maxW="90px"
 											m="auto"
 										/>

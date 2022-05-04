@@ -11,7 +11,6 @@ import Crypto from "crypto-js";
 import MD5 from "js-md5";
 import { sha256 as SHA256 } from "js-sha256";
 
-
 export const createNewBucket = async (
 	client: S3Client,
 	Bucket: string,

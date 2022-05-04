@@ -4,7 +4,7 @@ import {
 	ModalContent,
 	ModalOverlay,
 	Text,
-	useDisclosure
+	useDisclosure,
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
@@ -88,7 +88,7 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 			/>
 			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
 				<ModalOverlay />
-				<ModalContent p="0" maxH="700px">
+				<ModalContent p="0" w="auto" maxH="700px">
 					<ModalCloseButton _focus={{ outline: "none", border: "none" }} zIndex="100" />
 					<FilePreview url={file.url} file={file} />
 				</ModalContent>
