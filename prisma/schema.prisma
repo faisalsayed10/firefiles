@@ -1,0 +1,39 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id           String      @id @unique @default(uuid())
+  lastSignedIn DateTime    @map("last_signed_in")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  email        String      @unique
+  password     String
+  salt         String
+  verified     Boolean     @default(false)
+  plan         PricingPlan @default(FREE)
+  drives       Drive[]
+}
+
+model Drive {
+  id        String   @id @unique @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  name      String
+  keys      String   @db.LongText
+  type      String
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+enum PricingPlan {
+  FREE
+  PERSONAL
+  PREMIUM
+  TEAM
+}

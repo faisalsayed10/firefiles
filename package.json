@@ -13,6 +13,7 @@
 		"@chakra-ui/react": "^1.7.2",
 		"@emotion/react": "^11",
 		"@emotion/styled": "^11",
+		"@prisma/client": "^3.13.0",
 		"@react-hook/media-query": "^1.1.1",
 		"@uiw/react-markdown-preview": "^3.4.7",
 		"@uiw/react-textarea-code-editor": "^1.4.15",
