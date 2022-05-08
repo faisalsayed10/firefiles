@@ -14,7 +14,6 @@ import OptionsPopover from "@components/popups/OptionsPopover";
 import AddBucketButton from "@components/ui/AddBucketButton";
 import Navbar from "@components/ui/Navbar";
 import useUser from "@hooks/useUser";
-import { sendEvent } from "@util/firebase";
 import { PROVIDERS } from "@util/globals";
 import { deleteBucket } from "@util/helpers";
 import { Bucket, BucketType } from "@util/types";
@@ -168,7 +167,6 @@ const Dashboard = () => {
 														);
 
 														mutate(data.filter((b) => b.id !== bucket.id));
-														sendEvent("bucket_delete", {});
 													}}
 												>
 													<X />

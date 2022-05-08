@@ -1,4 +1,3 @@
-import { sendEvent } from "@util/firebase";
 import { Bucket, BucketFile, BucketFolder, Config, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
@@ -166,7 +165,6 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				}
 			);
 		}
-		sendEvent("file_upload", { count: filesToUpload.length });
 	};
 
 	const removeFile = async (file: BucketFile) => {
@@ -400,7 +398,6 @@ const loginTheirUser = async (app: FirebaseApp, user: User, data: Bucket) => {
 				await createUserWithEmailAndPassword(auth, email, password).then(() => setLoggedIn());
 			} else {
 				router.push("/error?message=" + err.message);
-				sendEvent("bucket_error", { type: data.type, message: err.message });
 			}
 		});
 

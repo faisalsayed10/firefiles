@@ -6,7 +6,6 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { sendEvent } from "@util/firebase";
 import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/s3-helpers";
 import { Bucket, BucketFile, BucketFolder, UploadingFile } from "@util/types";
 import Evaporate from "evaporate";
@@ -185,8 +184,6 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 				},
 			});
 		});
-
-		sendEvent("file_upload", { count: filesToUpload?.length });
 	};
 
 	const removeFile = async (file: BucketFile) => {

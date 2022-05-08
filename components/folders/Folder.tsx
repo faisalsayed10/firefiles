@@ -2,7 +2,6 @@ import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { sendEvent } from "@util/firebase";
 import { BucketFolder, BucketType } from "@util/types";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
@@ -39,7 +38,6 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 						setIsFolderDeleting(true);
 						onClose();
 						await removeFolder(folder);
-						sendEvent("folder_delete", {});
 					} catch (err) {
 						console.error(err);
 					} finally {

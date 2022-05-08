@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 import VideoAccordion from "@components/ui/VideoAccordion";
 import useUser from "@hooks/useUser";
-import { sendEvent } from "@util/firebase";
 import axios from "axios";
 import toObject from "convert-to-object";
 import { useRouter } from "next/router";
@@ -67,14 +66,10 @@ const NewFirebase = () => {
 				error: "An error occurred while creating the bucket.",
 			});
 
-			promise.then(() => {
-				sendEvent("bucket_create", { type: "firebase" });
-				router.push("/");
-			});
+			promise.then(() => router.push("/"));
 		} catch (err) {
 			console.error(err);
 			toast.error(err.message);
-			sendEvent("bucket_create_error", { message: err.message });
 		}
 
 		setLoading(false);

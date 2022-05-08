@@ -8,7 +8,6 @@ import {
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { sendEvent } from "@util/firebase";
 import { BucketFile, BucketType } from "@util/types";
 import copy from "copy-to-clipboard";
 import { nanoid } from "nanoid";
@@ -35,7 +34,6 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 	const copyFile = () => {
 		copy(file.url);
 		toast.success("File URL copied to clipboard!");
-		sendEvent("file_share", {});
 	};
 
 	const deleteFile = async () => {
@@ -45,7 +43,6 @@ const File: React.FC<Props> = ({ file, gridView }) => {
 
 			setIsOpen(false);
 			toast.success("File deleted successfully!");
-			sendEvent("file_delete", {});
 		} catch (err) {
 			setIsOpen(false);
 			console.error(err);

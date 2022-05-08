@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { sendEvent } from "@util/firebase";
 import { BucketFolder, BucketType } from "@util/types";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -47,7 +46,6 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 
 		addFolder(name);
 		toast.success("Folder Created Successfully.");
-		sendEvent("folder_create", {});
 
 		setName("");
 		setLoading(false);

@@ -13,7 +13,6 @@ import {
 } from "@chakra-ui/react";
 import AWSRegionSelect from "@components/ui/AWSRegionSelect";
 import useUser from "@hooks/useUser";
-import { sendEvent } from "@util/firebase";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -52,7 +51,6 @@ const NewS3 = () => {
 		} catch (err) {
 			console.error(err);
 			toast.error(err?.response?.data?.error || err.message);
-			sendEvent("bucket_create_error", { message: err.message });
 		}
 
 		setLoading(false);
@@ -83,11 +81,9 @@ const NewS3 = () => {
 
 			toast.success("Bucket created successfully!");
 			router.push("/");
-			sendEvent("bucket_create", { type: "s3" });
 		} catch (err) {
 			console.error(err);
 			toast.error(err?.response?.data?.error || err.message);
-			sendEvent("bucket_create_error", { message: err.message });
 		}
 
 		setLoading(false);
