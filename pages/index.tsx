@@ -17,7 +17,6 @@ import useUser from "@hooks/useUser";
 import { PROVIDERS } from "@util/globals";
 import { deleteBucket } from "@util/helpers";
 import { Bucket, BucketType } from "@util/types";
-import axios from "axios";
 import gravatar from "gravatar";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -29,11 +28,8 @@ import { X } from "tabler-icons-react";
 const Dashboard = () => {
 	const router = useRouter();
 	const { currentUser, loading: authLoading } = useUser();
-	const fetcher = async (key?: string) =>
-		axios.get(key, { headers: { token: await currentUser.getIdToken() } }).then(({ data }) => data);
 	const { data, error, isValidating, mutate } = useSWR<Bucket[]>(
 		currentUser ? `/api/get-buckets` : null,
-		fetcher,
 		{ revalidateOnFocus: false, errorRetryCount: 1 }
 	);
 

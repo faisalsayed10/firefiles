@@ -6,7 +6,7 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/s3-helpers";
+import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/helpers/s3-helpers";
 import { Bucket, BucketFile, BucketFolder, UploadingFile } from "@util/types";
 import Evaporate from "evaporate";
 import mime from "mime-types";
