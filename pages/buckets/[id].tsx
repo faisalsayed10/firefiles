@@ -3,34 +3,28 @@ import { FirebaseProvider } from "@hooks/useFirebase";
 import { KeysProvider } from "@hooks/useKeys";
 import { S3Provider } from "@hooks/useS3";
 import useUser from "@hooks/useUser";
-import { Bucket } from "@util/types";
-import axios from "axios";
-import { GetServerSidePropsContext } from "next";
+import { Drive } from "@prisma/client";
+import { prisma } from "@util/prisma";
+import { sessionOptions } from "@util/session";
+import { AES, enc } from "crypto-js";
+import { withIronSessionSsr } from "iron-session/next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import nookies from "nookies";
 import React, { useEffect, useState } from "react";
 
 type Props = {
-	data: Bucket;
+	data: Drive;
 };
 
 const BucketPage: React.FC<Props> = ({ data }) => {
 	const router = useRouter();
 	const [folderPath, setFolderPath] = useState("");
-	const { currentUser, loading } = useUser();
+	const { user } = useUser({ redirectTo: "/login" });
 
 	useEffect(() => {
 		const pathArray = router.asPath.split("/buckets/")[1].split("/");
 		setFolderPath(pathArray.slice(1).join("/"));
 	}, [router.asPath]);
-
-	useEffect(() => {
-		if (loading) return;
-		if (!currentUser) {
-			router.push("/login");
-		}
-	}, [currentUser, loading]);
 
 	return (
 		<>
@@ -53,29 +47,22 @@ const BucketPage: React.FC<Props> = ({ data }) => {
 	);
 };
 
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }) => {
 	try {
-		const url =
-			process.env.NODE_ENV !== "production"
-				? "http://localhost:3000"
-				: "https://usefirefiles.vercel.app";
+		const user = req.session.user;
+		const id = params.id as string;
+		if (!user?.email) throw new Error("User not logged in");
 
-		const cookies = nookies.get(ctx);
-		const id = ctx.params.id;
-		const { data } = await axios.get(`${url}/api/bucket?id=${id}`, {
-			headers: { token: cookies.token },
-		});
+		const drive = await prisma.drive.findFirst({ where: { id, userId: user.id } });
+		if (!drive?.keys) throw new Error("Drive not found");
 
-		return { props: { data } };
+		drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
+		drive.createdAt = drive.createdAt.toString() as any;
+
+		return { props: { data: drive } };
 	} catch (err) {
-		return {
-			redirect: {
-				permanent: false,
-				destination: "/",
-			},
-			props: {} as never,
-		};
+		return { redirect: { permanent: false, destination: "/" }, props: {} };
 	}
-};
+}, sessionOptions);
 
 export default BucketPage;

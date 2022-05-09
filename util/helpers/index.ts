@@ -4,11 +4,9 @@ import { getAuth, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { BucketFile, BucketType } from "../types";
 
-export const deleteBucket = async (type: BucketType, token: string, id: string) => {
+export const deleteBucket = async (type: BucketType, id: string) => {
 	if (window.confirm("Are you sure you want to delete this bucket?")) {
-		await axios.delete(`/api/bucket?id=${id}`, {
-			headers: { token },
-		});
+		await axios.delete(`/api/bucket?id=${id}`);
 
 		switch (type) {
 			case BucketType.firebase:

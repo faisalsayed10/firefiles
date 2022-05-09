@@ -8,7 +8,7 @@ import {
 	Skeleton,
 	Tag,
 	Text,
-	useColorModeValue,
+	useColorModeValue
 } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import AddBucketButton from "@components/ui/AddBucketButton";
@@ -20,33 +20,20 @@ import { Bucket, BucketType } from "@util/types";
 import gravatar from "gravatar";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
-import toast from "react-hot-toast";
+import React from "react";
 import useSWR from "swr";
 import { X } from "tabler-icons-react";
 
 const Dashboard = () => {
 	const router = useRouter();
-	const { currentUser, loading: authLoading } = useUser();
-	const { data, error, isValidating, mutate } = useSWR<Bucket[]>(
-		currentUser ? `/api/get-buckets` : null,
-		{ revalidateOnFocus: false, errorRetryCount: 1 }
-	);
+	const { user } = useUser({ redirectTo: "/login" });
+	const { data, isValidating, mutate } = useSWR<Bucket[]>(`/api/bucket`);
 
 	const optionProps = {
 		p: 2,
 		cursor: "pointer",
 		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
 	};
-
-	useEffect(() => {
-		if (authLoading) return;
-		if (!currentUser) {
-			router.push("/login");
-		}
-	}, [currentUser, authLoading]);
-
-	if (error) toast.error("An error occurred while fetching buckets");
 
 	return (
 		<>
@@ -58,7 +45,7 @@ const Dashboard = () => {
 				<Navbar />
 				<Flex my="4" flexDir={["column", "row", "row", "row"]} mx={["4", "8", "12"]}>
 					<Image
-						src={gravatar.url(currentUser?.email, {
+						src={gravatar.url(user?.email, {
 							s: "110",
 							protocol: "https",
 						})}
@@ -73,13 +60,13 @@ const Dashboard = () => {
 						</Text>
 						<Flex align="baseline">
 							<Text>
-								<strong>Your Email:</strong> {currentUser?.email}
+								<strong>Your Email:</strong> {user?.email}
 							</Text>
 						</Flex>
 						<Flex align="baseline">
 							<strong>Current Plan: </strong>
 							<Tag variant="solid" colorScheme="purple" ml="1">
-								Free Plan
+								{user?.plan} Plan
 							</Tag>
 							<Button variant="link" ml="1">
 								Upgrade
@@ -95,14 +82,11 @@ const Dashboard = () => {
 					</Text>
 					<Grid
 						templateColumns={[
-							"repeat(2, 1fr)",
-							"repeat(3, 1fr)",
-							"repeat(4, 1fr)",
-							"repeat(6, 1fr)",
-							"repeat(7, 1fr)",
-							"repeat(8, 1fr)",
+							"repeat(auto-fill, minmax(140px, 1fr))",
+							"repeat(auto-fill, minmax(160px, 1fr))",
+							"repeat(auto-fill, minmax(160px, 1fr))",
 						]}
-						gap={6}
+						gap={[2, 6, 6]}
 					>
 						{!data && isValidating ? (
 							<>
@@ -156,12 +140,7 @@ const Dashboard = () => {
 													{...optionProps}
 													onClick={async (e) => {
 														e.stopPropagation();
-														await deleteBucket(
-															BucketType[bucket.type],
-															await currentUser.getIdToken(),
-															bucket.id
-														);
-
+														await deleteBucket(BucketType[bucket.type], bucket.id);
 														mutate(data.filter((b) => b.id !== bucket.id));
 													}}
 												>

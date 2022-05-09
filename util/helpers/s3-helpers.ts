@@ -36,7 +36,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 
 	switch (type) {
 		case "firebase":
-			break;
+			return { success: true };
 		case "s3":
 			const client = new S3Client({
 				region: data.region,

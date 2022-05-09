@@ -13,7 +13,7 @@ const KeysContext = createContext<ContextValue>(null);
 export default () => useContext(KeysContext);
 
 export const KeysProvider: React.FC<Props> = ({ data, children }) => {
-	const [keys, setKeys] = useState(data);
+	const [keys] = useState(data);
 
 	return <KeysContext.Provider value={{ keys }}>{children}</KeysContext.Provider>;
 };

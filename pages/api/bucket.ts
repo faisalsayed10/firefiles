@@ -1,31 +1,19 @@
-import { auth, firestore } from "@util/firebase-admin";
-import { beforeCreatingDoc } from "@util/s3-helpers";
-import { AES, enc } from "crypto-js";
-import { nanoid } from "nanoid";
+import { beforeCreatingDoc } from "@util/helpers/s3-helpers";
+import { prisma } from "@util/prisma";
+import { sessionOptions } from "@util/session";
+import { AES } from "crypto-js";
+import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
-		const token = req.headers.token as string;
-		if (!token) return res.status(400).json({ error: "Token not found." });
-		const { uid } = await auth.verifyIdToken(token);
+		const user = req.session.user;
+		if (!user?.email) return res.status(403).json({ error: "You are not logged in." });
 
 		// READ
 		if (req.method === "GET") {
-			const id = req.query.id as string;
-			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
-
-			const snapshot = await firestore.collection("buckets").doc(id).get();
-			if (!snapshot.exists || snapshot.data().userId !== uid)
-				return res.status(404).json({ error: "Bucket not found." });
-
-			const { keys, name, type, userId } = snapshot.data();
-			const decrypted = AES.decrypt(keys, process.env.CIPHER_KEY).toString(enc.Utf8);
-
-			return res
-				.status(200)
-				.json({ id: snapshot.id, keys: JSON.parse(decrypted), name, type, userId });
-
+			const drives = await prisma.drive.findMany({ where: { userId: user.id } });
+			return res.status(200).json(drives);
 			// CREATE
 		} else if (req.method === "POST") {
 			const { data, name, type } = req.body;
@@ -33,56 +21,27 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			const { success, error } = await beforeCreatingDoc(req, res, req.body);
 
 			if (!success) return res.status(400).json({ error });
-
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
-			await firestore.collection("buckets").doc(nanoid()).set({ keys, name, type, userId: uid });
-
-			// CREATE
-		} else if (req.method === "POST") {
-			const { data, name, type } = req.body;
-			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
-			await firestore.collection("buckets").doc(nanoid()).set({ keys, name, type, userId: uid });
-
+			await prisma.drive.create({ data: { keys, name, type, userId: user.id } });
+			return res.status(200).json("ok");
 			// DELETE
 		} else if (req.method === "DELETE") {
 			const id = req.query.id as string;
 			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
-
-			// DELETE
-		} else if (req.method === "DELETE") {
-			const id = req.query.id as string;
-			if (!id)
-				return res.status(400).json({
-					error: "Bucket ID not found.",
-				});
-
-			const snapshot = await firestore.collection("buckets").doc(id).get();
-			if (!snapshot.exists || snapshot.data().userId !== uid)
-				return res.status(404).json({ error: "Bucket not found." });
-
-			// UPDATE
-		} else if (req.method === "PUT") {
-			const id = req.query.id as string;
-			const data = req.body;
-
+			await prisma.drive.deleteMany({ where: { id, userId: user.id } });
+			return res.status(200).json("ok");
 			// UPDATE
 		} else if (req.method === "PUT") {
 			const id = req.query.id as string;
 			const data = req.body;
 
 			if (!id || !data) return res.status(400).json({ error: "Data / Bucket ID not found." });
-
-			const snapshot = await firestore.collection("buckets").doc(id).get();
-			if (!snapshot.exists || snapshot.data().userId !== uid)
-				return res.status(404).json({ error: "Bucket not found." });
-
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
-			await firestore.collection("buckets").doc(id).update({ keys });
-
-			return res.status(200).json("success");
+			await prisma.drive.updateMany({ where: { id, userId: user.id }, data: { keys } });
+			return res.status(200).json("ok");
 		}
 	} catch (err) {
 		console.error(err.message);
 		return res.status(500).json({ error: err.message });
 	}
-};
+}, sessionOptions);

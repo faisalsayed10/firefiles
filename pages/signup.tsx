@@ -1,10 +1,12 @@
 import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from "@chakra-ui/react";
 import CenterContainer from "@components/ui/CenterContainer";
 import useUser from "@hooks/useUser";
+import axios from "axios";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Signup() {
 	const [email, setEmail] = useState("");
@@ -12,28 +14,21 @@ export default function Signup() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { signup, currentUser, loading: authLoading } = useUser();
-	const router = useRouter();
-
-	useEffect(() => {
-		if (loading || authLoading) return;
-		if (currentUser) router.push("/");
-	}, [currentUser, loading, authLoading]);
+	const { user } = useUser({ redirectIfFound: true, redirectTo: "/" });
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
 		if (!password || !confirmPassword || !email) return;
-		if (password !== confirmPassword) {
-			return setError("Passwords do not match");
-		}
+		if (password !== confirmPassword) return setError("Passwords do not match");
 
 		try {
 			setError("");
 			setLoading(true);
-			await signup(email, password);
+			const { data } = await axios.post("/api/auth/signup", { email, password });
+			toast.success(data);
 		} catch (err) {
-			setError(err.message.replace("Firebase: ", ""));
+			setError(err.response.data.error || err.message);
 		}
 		setLoading(false);
 	};
@@ -41,7 +36,7 @@ export default function Signup() {
 	return (
 		<>
 			<Head>
-				<title>firefiles - Signup</title>
+				<title>Firefiles - Signup</title>
 			</Head>
 			<CenterContainer>
 				<Box

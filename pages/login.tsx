@@ -2,23 +2,18 @@ import { Alert, AlertIcon, Box, Button, chakra, FormControl, Input, Text } from 
 import CenterContainer from "@components/ui/CenterContainer";
 import PasswordInput from "@components/ui/PasswordInput";
 import useUser from "@hooks/useUser";
+import { User } from "@prisma/client";
+import axios from "axios";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 export default function Login() {
-	const { login, currentUser, loading: authLoading } = useUser();
+	const { mutateUser } = useUser({ redirectTo: "/", redirectIfFound: true });
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const router = useRouter();
-
-	useEffect(() => {
-		if (loading || authLoading) return;
-		if (currentUser) router.push("/");
-	}, [currentUser, loading, authLoading]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -26,9 +21,10 @@ export default function Login() {
 		try {
 			setError("");
 			setLoading(true);
-			await login(email, password);
+			const { data } = await axios.post<User>("/api/auth/login", { email, password });
+			mutateUser(data);
 		} catch (err) {
-			setError(err.message.replace("Firebase: ", ""));
+			setError(err.response.data.error || err.message);
 		}
 		setLoading(false);
 	};
@@ -36,7 +32,7 @@ export default function Login() {
 	return (
 		<>
 			<Head>
-				<title>firefiles - Login</title>
+				<title>Firefiles - Login</title>
 			</Head>
 			<CenterContainer>
 				<Box

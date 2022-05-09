@@ -33,7 +33,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		})
 	);
 	const [loading, setLoading] = useState(false);
-	const { currentUser } = useUser();
+	const { user } = useUser();
 
 	const [currentFolder, setCurrentFolder] = useState<BucketFolder>(null);
 	const [folders, setFolders] = useState<BucketFolder[]>(null);
@@ -194,7 +194,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 	// set currentFolder
 	useEffect(() => {
-		if (!currentUser) return;
+		if (!user?.email) return;
 		setFiles(null);
 		setFolders(null);
 
@@ -210,11 +210,11 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			parent: fullPath.split("/").shift() + "/",
 			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
 		});
-	}, [fullPath, currentUser]);
+	}, [fullPath, user]);
 
 	// get files and folders
 	useEffect(() => {
-		if (!currentUser || !currentFolder) return;
+		if (!user?.email || !currentFolder) return;
 		setLoading(true);
 
 		(async () => {
@@ -310,7 +310,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 			setLoading(false);
 		})();
-	}, [currentFolder, currentUser]);
+	}, [currentFolder, user]);
 
 	return (
 		<S3Context.Provider

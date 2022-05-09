@@ -21,7 +21,7 @@ import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
 
 const NewS3 = () => {
-	const { currentUser } = useUser();
+	const { user } = useUser();
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
 	const [accessKey, setAccessKey] = useState("");
@@ -36,7 +36,7 @@ const NewS3 = () => {
 		setLoading(true);
 
 		try {
-			if (!currentUser) throw new Error("You need to login to perform this action!");
+			if (!user?.email) throw new Error("You need to login to perform this action!");
 
 			if (!accessKey.trim() || !secretKey.trim() || !region.trim())
 				throw new Error("One or more fields are missing!");
@@ -60,7 +60,7 @@ const NewS3 = () => {
 		setLoading(true);
 
 		try {
-			if (!currentUser) throw new Error("You need to login to perform this action!");
+			if (!user?.email) throw new Error("You need to login to perform this action!");
 
 			if (!accessKey.trim() || !secretKey.trim() || !region.trim())
 				throw new Error("One or more fields are missing!");
@@ -73,11 +73,11 @@ const NewS3 = () => {
 
 			const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-			await axios.post(
-				"/api/bucket",
-				{ data: { accessKey, secretKey, Bucket, region }, name: Bucket, type: "s3" },
-				{ headers: { token: await currentUser.getIdToken() } }
-			);
+			await axios.post("/api/bucket", {
+				data: { accessKey, secretKey, Bucket, region },
+				name: Bucket,
+				type: "s3",
+			});
 
 			toast.success("Bucket created successfully!");
 			router.push("/");

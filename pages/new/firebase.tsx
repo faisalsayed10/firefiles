@@ -28,7 +28,7 @@ const jsonPlaceholder = `{
 
 const NewFirebase = () => {
 	const [raw, setRaw] = useState("");
-	const { currentUser } = useUser();
+	const { user } = useUser();
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
@@ -37,7 +37,7 @@ const NewFirebase = () => {
 		setLoading(true);
 
 		try {
-			if (!currentUser) throw new Error("You need to login to perform this action!");
+			if (!user?.email) throw new Error("You need to login to perform this action!");
 
 			const data = toObject(raw);
 			if (
@@ -50,15 +50,7 @@ const NewFirebase = () => {
 			)
 				throw new Error("One or more fields are missing!");
 
-			const promise = axios.post(
-				"/api/bucket",
-				{
-					data,
-					name: data.projectId,
-					type: "firebase",
-				},
-				{ headers: { token: await currentUser.getIdToken() } }
-			);
+			const promise = axios.post("/api/bucket", { data, name: data.projectId, type: "firebase" });
 
 			toast.promise(promise, {
 				loading: "Creating bucket...",

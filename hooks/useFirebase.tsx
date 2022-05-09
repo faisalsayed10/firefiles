@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { Bucket, BucketFile, BucketFolder, Config, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
@@ -6,7 +7,7 @@ import {
 	getAuth,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
-	User,
+	User as FirebaseUser,
 } from "firebase/auth";
 import {
 	deleteObject,
@@ -36,9 +37,9 @@ type Props = {
 
 export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) => {
 	const [app, setApp] = useState<FirebaseApp>();
-	const [appUser, setAppUser] = useState<User>();
+	const [appUser, setAppUser] = useState<FirebaseUser>();
 	const [loading, setLoading] = useState(true);
-	const { currentUser } = useUser();
+	const { user } = useUser();
 
 	const [currentFolder, setCurrentFolder] = useState<BucketFolder>(null);
 	const [folders, setFolders] = useState<BucketFolder[]>(null);
@@ -216,21 +217,19 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	}, [app]);
 
 	useEffect(() => {
-		if (!currentUser) return;
+		if (!user?.email) return;
 		setLoading(true);
 		const has_initialized = getApps().filter((app) => app.name === data.id).length > 0;
 		(async () => {
-			!has_initialized
-				? await initializeAppAndLogin(data, currentUser, setApp)
-				: setApp(getApp(data.id));
+			!has_initialized ? await initializeAppAndLogin(data, user, setApp) : setApp(getApp(data.id));
 		})();
 
 		// setLoading(false);
-	}, [currentUser]);
+	}, [user]);
 
 	// set currentFolder
 	useEffect(() => {
-		if (!currentUser || !app || !appUser) return;
+		if (!user?.email || !app || !appUser) return;
 		const storage = getStorage(app);
 		setFiles(null);
 		setFolders(null);
@@ -248,11 +247,11 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		};
 
 		setCurrentFolder(currFolder);
-	}, [fullPath, currentUser, app, appUser]);
+	}, [fullPath, user, app, appUser]);
 
 	// get files and folders
 	useEffect(() => {
-		if (!currentUser || !app || !appUser || !currentFolder) return;
+		if (!user?.email || !app || !appUser || !currentFolder) return;
 		const storage = getStorage(app);
 		setLoading(true);
 		allFilesFetched.current = false;
@@ -328,7 +327,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		return () => {
 			allFilesFetched.current = false;
 		};
-	}, [currentFolder, currentUser, app, appUser]);
+	}, [currentFolder, user, app, appUser]);
 
 	return (
 		<FirebaseContext.Provider
@@ -401,11 +400,5 @@ const loginTheirUser = async (app: FirebaseApp, user: User, data: Bucket) => {
 			}
 		});
 
-	if (!config.password) {
-		await axios.put(
-			`/api/bucket?id=${data.id}`,
-			{ ...config, password },
-			{ headers: { token: await user.getIdToken() } }
-		);
-	}
+	if (!config.password) await axios.put(`/api/bucket?id=${data.id}`, { ...config, password });
 };
