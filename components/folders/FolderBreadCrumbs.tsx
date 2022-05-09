@@ -1,11 +1,11 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, useColorMode } from "@chakra-ui/react";
-import { BucketFolder } from "@util/types";
+import { DriveFolder } from "@util/types";
 import { useRouter } from "next/router";
 import React from "react";
 import { ChevronRight, Home } from "tabler-icons-react";
 
 interface Props {
-	currentFolder: BucketFolder;
+	currentFolder: DriveFolder;
 }
 
 const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {

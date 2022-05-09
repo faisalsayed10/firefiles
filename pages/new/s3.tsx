@@ -73,13 +73,13 @@ const NewS3 = () => {
 
 			const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-			await axios.post("/api/bucket", {
+			await axios.post("/api/drive", {
 				data: { accessKey, secretKey, Bucket, region },
 				name: Bucket,
 				type: "s3",
 			});
 
-			toast.success("Bucket created successfully!");
+			toast.success("Drive created successfully!");
 			router.push("/");
 		} catch (err) {
 			console.error(err);

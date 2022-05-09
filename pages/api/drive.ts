@@ -27,7 +27,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 			// DELETE
 		} else if (req.method === "DELETE") {
 			const id = req.query.id as string;
-			if (!id) return res.status(400).json({ error: "Bucket ID not found." });
+			if (!id) return res.status(400).json({ error: "Drive ID not found." });
 			await prisma.drive.deleteMany({ where: { id, userId: user.id } });
 			return res.status(200).json("ok");
 			// UPDATE
@@ -35,7 +35,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 			const id = req.query.id as string;
 			const data = req.body;
 
-			if (!id || !data) return res.status(400).json({ error: "Data / Bucket ID not found." });
+			if (!id || !data) return res.status(400).json({ error: "Data / Drive ID not found." });
 			const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
 			await prisma.drive.updateMany({ where: { id, userId: user.id }, data: { keys } });
 			return res.status(200).json("ok");

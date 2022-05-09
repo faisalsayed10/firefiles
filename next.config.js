@@ -4,8 +4,8 @@ module.exports = removeImports({
 	async rewrites() {
 		return [
 			{
-				source: "/buckets/:id/:folderId*",
-				destination: "/buckets/:id",
+				source: "/drives/:id/:folderId*",
+				destination: "/drives/:id",
 			},
 		];
 	},

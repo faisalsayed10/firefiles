@@ -1,10 +1,10 @@
 import { Box, Table, Th, Tr } from "@chakra-ui/react";
-import { BucketFile } from "@util/types";
+import { DriveFile } from "@util/types";
 import React from "react";
 import File from "./File";
 
 interface Props {
-	files: BucketFile[];
+	files: DriveFile[];
 }
 
 const FilesTable: React.FC<Props> = ({ files }) => {

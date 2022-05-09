@@ -16,7 +16,7 @@ import React, { useState } from "react";
 import Head from "next/head";
 import toast from "react-hot-toast";
 const ForgotPassword = () => {
-	const { reset } = useUser();
+	// const { reset } = useUser();
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ const ForgotPassword = () => {
 		try {
 			setError("");
 			setLoading(true);
-			await reset(email);
+			// await reset(email);
 			toast.success("Check your inbox! :)");
 			setTimeout(() => {
 				router.push("/login");

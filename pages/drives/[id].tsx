@@ -16,13 +16,13 @@ type Props = {
 	data: Drive;
 };
 
-const BucketPage: React.FC<Props> = ({ data }) => {
+const DrivePage: React.FC<Props> = ({ data }) => {
 	const router = useRouter();
 	const [folderPath, setFolderPath] = useState("");
 	const { user } = useUser({ redirectTo: "/login" });
 
 	useEffect(() => {
-		const pathArray = router.asPath.split("/buckets/")[1].split("/");
+		const pathArray = router.asPath.split("/drives/")[1].split("/");
 		setFolderPath(pathArray.slice(1).join("/"));
 	}, [router.asPath]);
 
@@ -65,4 +65,4 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
 	}
 }, sessionOptions);
 
-export default BucketPage;
+export default DrivePage;

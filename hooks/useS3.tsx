@@ -6,8 +6,9 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Drive } from "@prisma/client";
 import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/helpers/s3-helpers";
-import { Bucket, BucketFile, BucketFolder, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, UploadingFile } from "@util/types";
 import Evaporate from "evaporate";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
@@ -20,7 +21,7 @@ const S3Context = createContext<ContextValue>(null);
 export default () => useContext(S3Context);
 
 type Props = {
-	data: Bucket;
+	data: Drive & { keys: any };
 	fullPath?: string;
 };
 
@@ -35,10 +36,10 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	const [loading, setLoading] = useState(false);
 	const { user } = useUser();
 
-	const [currentFolder, setCurrentFolder] = useState<BucketFolder>(null);
-	const [folders, setFolders] = useState<BucketFolder[]>(null);
+	const [currentFolder, setCurrentFolder] = useState<DriveFolder>(null);
+	const [folders, setFolders] = useState<DriveFolder[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-	const [files, setFiles] = useState<BucketFile[]>(null);
+	const [files, setFiles] = useState<DriveFile[]>(null);
 
 	const addFolder = (name: string) => {
 		const path =
@@ -46,7 +47,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 				? decodeURIComponent(currentFolder.fullPath) + name + "/"
 				: name + "/";
 
-		const newFolder: BucketFolder = {
+		const newFolder: DriveFolder = {
 			name,
 			fullPath: path,
 			parent: currentFolder.fullPath,
@@ -57,11 +58,11 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 		setFolders((folders) => [...folders, newFolder]);
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
-		const folders: BucketFolder[] = localFolders ? JSON.parse(localFolders) : [];
+		const folders: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
 		localStorage.setItem(`local_folders_${data.id}`, JSON.stringify([...folders, newFolder]));
 	};
 
-	const removeFolder = async (folder: BucketFolder) => {
+	const removeFolder = async (folder: DriveFolder) => {
 		// remove from local state
 		setFolders((folders) => folders.filter((f) => f.fullPath !== folder.fullPath));
 
@@ -164,7 +165,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 					setUploadingFiles((prevUploadingFiles) =>
 						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
 					);
-					const newFile: BucketFile = {
+					const newFile: DriveFile = {
 						fullPath: filePath,
 						name: toUpload.name,
 						parent: currentFolder.fullPath,
@@ -186,7 +187,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		});
 	};
 
-	const removeFile = async (file: BucketFile) => {
+	const removeFile = async (file: DriveFile) => {
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
 		await s3Client.send(new DeleteObjectCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }));
 		return true;
@@ -230,7 +231,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 					if (results.Contents) {
 						results.Contents.forEach(async (result) => {
-							const bucketFile: BucketFile = {
+							const driveFile: DriveFile = {
 								fullPath: result.Key,
 								name: result.Key.split("/").pop(),
 								parent: currentFolder.fullPath,
@@ -246,12 +247,12 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								),
 							};
 
-							setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
+							setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
 						});
 					}
 
 					const localFolders = localStorage.getItem(`local_folders_${data.id}`);
-					let localFoldersArray: BucketFolder[] = localFolders ? JSON.parse(localFolders) : [];
+					let localFoldersArray: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
 					localFoldersArray = localFoldersArray.filter(
 						(folder) =>
 							folder.parent === currentFolder.fullPath &&
@@ -262,14 +263,14 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 					if (results.CommonPrefixes) {
 						for (let i = 0; i < results.CommonPrefixes.length; i++) {
-							const bucketFolder: BucketFolder = {
+							const driveFolder: DriveFolder = {
 								fullPath: results.CommonPrefixes[i].Prefix,
 								name: results.CommonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
 								bucketName: results.Name,
 								parent: currentFolder.fullPath,
 								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
 							};
-							setFolders((folders) => [...folders, bucketFolder]);
+							setFolders((folders) => [...folders, driveFolder]);
 						}
 					}
 
@@ -285,7 +286,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 						);
 
 						results.Contents.forEach(async (result) => {
-							const bucketFile: BucketFile = {
+							const driveFile: DriveFile = {
 								fullPath: result.Key,
 								name: result.Key.split("/").pop(),
 								parent: currentFolder.fullPath,
@@ -300,7 +301,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 									{ expiresIn: 3600 }
 								),
 							};
-							setFiles((files) => (files ? [...files, bucketFile] : [bucketFile]));
+							setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
 						});
 					}
 				}

@@ -8,15 +8,16 @@ import {
 	Skeleton,
 	Tag,
 	Text,
-	useColorModeValue
+	useColorModeValue,
 } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
-import AddBucketButton from "@components/ui/AddBucketButton";
+import AddDriveButton from "@components/ui/AddDriveButton";
 import Navbar from "@components/ui/Navbar";
 import useUser from "@hooks/useUser";
+import { Drive } from "@prisma/client";
 import { PROVIDERS } from "@util/globals";
-import { deleteBucket } from "@util/helpers";
-import { Bucket, BucketType } from "@util/types";
+import { deleteDrive } from "@util/helpers";
+import { Provider } from "@util/types";
 import gravatar from "gravatar";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -27,7 +28,7 @@ import { X } from "tabler-icons-react";
 const Dashboard = () => {
 	const router = useRouter();
 	const { user } = useUser({ redirectTo: "/login" });
-	const { data, isValidating, mutate } = useSWR<Bucket[]>(`/api/bucket`);
+	const { data, isValidating, mutate } = useSWR<Drive[]>(`/api/drive`);
 
 	const optionProps = {
 		p: 2,
@@ -78,7 +79,7 @@ const Dashboard = () => {
 				<Divider />
 				<Box mx={["4", "8", "12"]}>
 					<Text as="h1" fontSize="3xl" fontWeight="600" my="3">
-						Your Buckets
+						Your Drives
 					</Text>
 					<Grid
 						templateColumns={[
@@ -96,9 +97,9 @@ const Dashboard = () => {
 								<Skeleton h="140px" w="full" borderRadius="lg" />
 							</>
 						) : (
-							data?.map((bucket) => (
+							data?.map((drive) => (
 								<Flex
-									key={bucket.id}
+									key={drive.id}
 									cursor="pointer"
 									direction="column"
 									align="center"
@@ -110,21 +111,16 @@ const Dashboard = () => {
 									transition="ease-in-out 0.1s"
 									className="hoverAnim"
 								>
-									<Box
-										flex={1}
-										onClick={() => router.push(`/buckets/${bucket.id}`)}
-										w="full"
-										mt="2"
-									>
+									<Box flex={1} onClick={() => router.push(`/drives/${drive.id}`)} w="full" mt="2">
 										<Image
-											src={PROVIDERS.filter((p) => p.id === bucket.type)[0].logo}
+											src={PROVIDERS.filter((p) => p.id === drive.type)[0].logo}
 											maxW="90px"
 											m="auto"
 										/>
 									</Box>
 									<Flex p="2" w="full" justify="space-between" alignItems="center">
 										<Text
-											onClick={() => router.push(`/buckets/${bucket.id}`)}
+											onClick={() => router.push(`/drives/${drive.id}`)}
 											flex="1"
 											isTruncated={true}
 											as="p"
@@ -132,20 +128,20 @@ const Dashboard = () => {
 											align="left"
 											px="2"
 										>
-											{bucket.name}
+											{drive.name}
 										</Text>
-										<OptionsPopover header={bucket.name}>
+										<OptionsPopover header={drive.name}>
 											<Flex alignItems="stretch" flexDirection="column">
 												<Flex
 													{...optionProps}
 													onClick={async (e) => {
 														e.stopPropagation();
-														await deleteBucket(BucketType[bucket.type], bucket.id);
-														mutate(data.filter((b) => b.id !== bucket.id));
+														await deleteDrive(Provider[drive.type], drive.id);
+														mutate(data.filter((b) => b.id !== drive.id));
 													}}
 												>
 													<X />
-													<Text ml="2">Delete Bucket</Text>
+													<Text ml="2">Delete Drive</Text>
 												</Flex>
 											</Flex>
 										</OptionsPopover>
@@ -153,7 +149,7 @@ const Dashboard = () => {
 								</Flex>
 							))
 						)}
-						<AddBucketButton />
+						<AddDriveButton />
 					</Grid>
 				</Box>
 			</Flex>

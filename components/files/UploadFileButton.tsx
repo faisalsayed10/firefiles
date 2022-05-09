@@ -1,7 +1,7 @@
 import { IconButton, Input, useColorModeValue } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { BucketType } from "@util/types";
+import { Provider } from "@util/types";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef } from "react";
 import { FileUpload } from "tabler-icons-react";
@@ -12,8 +12,7 @@ interface Props {
 }
 
 const UploadFileButton: React.FC<Props> = ({ filesToUpload, setFilesToUpload }) => {
-	const { keys } = useKeys();
-	const { addFile, loading, uploadingFiles, currentFolder } = useBucket(BucketType[keys.type]);
+	const { addFile, loading, uploadingFiles, currentFolder } = useBucket();
 	const fileInput = useRef<HTMLInputElement>();
 
 	useEffect(() => {

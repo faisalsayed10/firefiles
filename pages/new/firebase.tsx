@@ -50,12 +50,12 @@ const NewFirebase = () => {
 			)
 				throw new Error("One or more fields are missing!");
 
-			const promise = axios.post("/api/bucket", { data, name: data.projectId, type: "firebase" });
+			const promise = axios.post("/api/drive", { data, name: data.projectId, type: "firebase" });
 
 			toast.promise(promise, {
-				loading: "Creating bucket...",
-				success: "Bucket created successfully.",
-				error: "An error occurred while creating the bucket.",
+				loading: "Creating drive...",
+				success: "Drive created successfully.",
+				error: "An error occurred while creating the drive.",
 			});
 
 			promise.then(() => router.push("/"));

@@ -15,13 +15,13 @@ import {
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { BucketFolder, BucketType } from "@util/types";
+import { DriveFolder, Provider } from "@util/types";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FolderPlus } from "tabler-icons-react";
 
 interface Props {
-	currentFolder: BucketFolder;
+	currentFolder: DriveFolder;
 }
 
 const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
@@ -29,8 +29,7 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<HTMLInputElement>();
-	const { keys } = useKeys();
-	const { addFolder } = useBucket(BucketType[keys.type]);
+	const { addFolder } = useBucket();
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();

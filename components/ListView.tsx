@@ -4,16 +4,16 @@ import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
 import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
-import { BucketFile, BucketFolder } from "@util/types";
+import { DriveFile, DriveFolder } from "@util/types";
 import React from "react";
 import { LayoutGrid } from "tabler-icons-react";
 
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
 	loading: boolean;
-	currentFolder: BucketFolder;
-	folders: BucketFolder[];
-	files: BucketFile[];
+	currentFolder: DriveFolder;
+	folders: DriveFolder[];
+	files: DriveFile[];
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 };
 

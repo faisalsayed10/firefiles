@@ -4,7 +4,7 @@ import "node_modules/video-react/dist/video-react.css";
 import React from "react";
 import { Plus } from "tabler-icons-react";
 
-const AddBucketButton = () => {
+const AddDriveButton = () => {
 	const router = useRouter();
 
 	return (
@@ -30,4 +30,4 @@ const AddBucketButton = () => {
 	);
 };
 
-export default AddBucketButton;
+export default AddDriveButton;

@@ -1,14 +1,14 @@
 import { Box, Flex, Image, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import { download } from "@util/helpers";
-import { BucketFile } from "@util/types";
+import { DriveFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
 import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
 
 interface Props {
-	file: BucketFile;
+	file: DriveFile;
 	onPreviewOpen: () => void;
 	copyFile: () => void;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;

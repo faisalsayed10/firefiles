@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { BucketFile, BucketType } from "@util/types";
+import { DriveFile, Provider } from "@util/types";
 import copy from "copy-to-clipboard";
 import { nanoid } from "nanoid";
 import React, { useRef, useState } from "react";
@@ -19,14 +19,13 @@ import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
 
 interface Props {
-	file: BucketFile;
+	file: DriveFile;
 	gridView?: boolean;
 }
 
 const File: React.FC<Props> = ({ file, gridView = false }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { keys } = useKeys();
-	const { removeFile } = useBucket(BucketType[keys.type]);
+	const { removeFile } = useBucket();
 	const [id] = useState(nanoid());
 	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 	const cancelRef = useRef();

@@ -1,13 +1,13 @@
 import { IconButton, Td, Tr } from "@chakra-ui/react";
 import { download } from "@util/helpers";
-import { BucketFile } from "@util/types";
+import { DriveFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
 import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
 
 interface Props {
-	file: BucketFile;
+	file: DriveFile;
 	onPreviewOpen: () => void;
 	copyFile: () => void;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;

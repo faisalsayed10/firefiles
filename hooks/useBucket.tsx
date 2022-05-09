@@ -1,21 +1,22 @@
-import { BucketFile, BucketFolder, BucketType, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
 import useFirebase from "./useFirebase";
+import useKeys from "./useKeys";
 import useS3 from "./useS3";
 
 export type ContextValue = {
 	loading: boolean;
-	currentFolder: BucketFolder;
-	folders: BucketFolder[];
-	files: BucketFile[];
+	currentFolder: DriveFolder;
+	folders: DriveFolder[];
+	files: DriveFile[];
 	uploadingFiles: UploadingFile[];
 	setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>;
 	addFolder: (name: string) => void;
-	removeFolder: (folder: BucketFolder) => Promise<void>;
+	removeFolder: (folder: DriveFolder) => Promise<void>;
 	addFile: (files: File[] | FileList) => Promise<void>;
-	removeFile: (file: BucketFile) => Promise<boolean>;
+	removeFile: (file: DriveFile) => Promise<boolean>;
 };
 
-export const ROOT_FOLDER: BucketFolder = {
+export const ROOT_FOLDER: DriveFolder = {
 	name: "",
 	fullPath: "",
 	parent: null,
@@ -23,10 +24,12 @@ export const ROOT_FOLDER: BucketFolder = {
 	bucketUrl: null,
 };
 
-export default function useBucket(type: BucketType): ContextValue {
-	if (type === BucketType.firebase) {
+export default function useBucket(): ContextValue {
+	const { keys } = useKeys();
+
+	if (Provider[keys.type] === Provider.firebase) {
 		return useFirebase();
-	} else if (type === BucketType.s3) {
+	} else if (Provider[keys.type] === Provider.s3) {
 		return useS3();
 	}
 

@@ -1,5 +1,4 @@
 import { FirebaseOptions } from "firebase/app";
-import { UploadTask } from "firebase/storage";
 
 export type UploadingFile = {
 	id: string;
@@ -17,7 +16,7 @@ export type UploadingFile = {
 
 export type Config = FirebaseOptions & { password?: string };
 
-export enum BucketType {
+export enum Provider {
 	firebase,
 	s3,
 	minio,
@@ -26,15 +25,7 @@ export enum BucketType {
 	git,
 }
 
-export type Bucket = {
-	id: string;
-	keys: any;
-	name: string;
-	type: string;
-	userId: string;
-};
-
-export type BucketFile = {
+export type DriveFile = {
 	name: string;
 	url?: string;
 	parent: string;
@@ -47,7 +38,7 @@ export type BucketFile = {
 	updatedAt?: string;
 };
 
-export type BucketFolder = {
+export type DriveFolder = {
 	name: string;
 	parent: string;
 	fullPath: string;

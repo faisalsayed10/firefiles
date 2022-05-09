@@ -5,7 +5,8 @@
 		"dev": "next",
 		"build": "next build",
 		"start": "next start",
-		"type-check": "tsc"
+		"type-check": "tsc",
+		"lint": "yarn prettier --write ."
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.72.0",

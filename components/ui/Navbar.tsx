@@ -29,7 +29,6 @@ export default function Navbar() {
 				justify={router.route !== "/" ? "space-between" : "end"}
 				px="4"
 				my="3"
-				boxShadow="sm"
 				w="full"
 			>
 				{router.route !== "/" ? (

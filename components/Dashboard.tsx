@@ -4,7 +4,7 @@ import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { BucketType } from "@util/types";
+import { Provider } from "@util/types";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
@@ -29,10 +29,7 @@ const Dashboard = () => {
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { keys } = useKeys();
-	const { currentFolder, files, folders, loading, uploadingFiles } = useBucket(
-		BucketType[keys.type]
-	);
+	const { currentFolder, files, folders, loading, uploadingFiles } = useBucket();
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);

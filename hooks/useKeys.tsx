@@ -1,12 +1,12 @@
-import { Bucket } from "@util/types";
+import { Drive } from "@prisma/client";
 import { createContext, useContext, useState } from "react";
 
 type ContextValue = {
-	keys: Bucket;
+	keys: Drive;
 };
 
 interface Props {
-	data: Bucket;
+	data: Drive;
 }
 
 const KeysContext = createContext<ContextValue>(null);

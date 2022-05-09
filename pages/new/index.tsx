@@ -28,7 +28,7 @@ const New = () => {
 					onClick={() => router.push("/")}
 				/>
 				<Heading as="h3" size="lg">
-					Add a new bucket
+					Add a new drive
 				</Heading>
 			</Flex>
 			<Container display="flex" minH="90vh" alignItems="center">

@@ -11,7 +11,7 @@ function MyApp({ Component, pageProps }) {
 			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
 			<SWRConfig
 				value={{
-					fetcher: url => axios.get(url).then(res => res.data),
+					fetcher: (url) => axios.get(url).then((res) => res.data),
 					errorRetryCount: 1,
 					onError: (err) => console.error(err),
 				}}

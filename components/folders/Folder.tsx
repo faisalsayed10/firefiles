@@ -2,14 +2,14 @@ import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { BucketFolder, BucketType } from "@util/types";
+import { DriveFolder, Provider } from "@util/types";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { ExternalLink, Folder as FolderIcon, FolderMinus, Plus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 
 interface Props {
-	folder: BucketFolder;
+	folder: DriveFolder;
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -18,8 +18,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 	const onClose = () => setIsOpen(false);
 	const router = useRouter();
 	const cancelRef = useRef();
-	const { keys } = useKeys();
-	const { removeFolder } = useBucket(BucketType[keys.type]);
+	const { removeFolder } = useBucket();
 
 	const optionProps = {
 		p: 2,

@@ -21,7 +21,7 @@ import "@uiw/react-markdown-preview/markdown.css";
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
 import "@uiw/react-textarea-code-editor/dist.css";
 import { download } from "@util/helpers";
-import { BucketFile } from "@util/types";
+import { DriveFile } from "@util/types";
 import dynamic from "next/dynamic";
 import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
@@ -42,7 +42,7 @@ const MarkdownPreview: React.ComponentType<MarkdownPreviewProps> = dynamic(
 
 type Props = {
 	url: string;
-	file: BucketFile;
+	file: DriveFile;
 };
 
 const FilePreview: React.FC<Props> = ({ url, file }) => {
@@ -289,7 +289,7 @@ const CsvViewer = ({ file, url }) => {
 					<Thead>
 						<Tr>
 							{columns.map((column) => (
-								<Th key={column.Header}>{column.Header.replaceAll("\"", "")}</Th>
+								<Th key={column.Header}>{column.Header.replaceAll('"', "")}</Th>
 							))}
 						</Tr>
 					</Thead>
