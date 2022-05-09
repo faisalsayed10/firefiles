@@ -23,14 +23,11 @@ const ListView: React.FC<Props> = (props) => {
 			{props.loading ? (
 				<Grid
 					templateColumns={[
-						"repeat(2, 1fr)",
-						"repeat(3, 1fr)",
-						"repeat(4, 1fr)",
-						"repeat(6, 1fr)",
-						"repeat(7, 1fr)",
-						"repeat(8, 1fr)",
+						"repeat(auto-fill, minmax(140px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
 					]}
-					gap={6}
+					gap={[2, 6, 6]}
 					my="6"
 					mx="4"
 				>
@@ -42,14 +39,11 @@ const ListView: React.FC<Props> = (props) => {
 			) : (
 				<Grid
 					templateColumns={[
-						"repeat(2, 1fr)",
-						"repeat(3, 1fr)",
-						"repeat(4, 1fr)",
-						"repeat(6, 1fr)",
-						"repeat(7, 1fr)",
-						"repeat(8, 1fr)",
+						"repeat(auto-fill, minmax(140px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
 					]}
-					gap={6}
+					gap={[2, 6, 6]}
 					my="6"
 					mx="4"
 				>
@@ -68,9 +62,9 @@ const ListView: React.FC<Props> = (props) => {
 					<LayoutGrid />
 				</IconButton>
 			</Flex>
-			{props.files === null || props.loading ? (
+			{props.files === null && props.loading ? (
 				<FilesTableSkeleton />
-			) : props.files.length === 0 ? (
+			) : !props.files || props.files?.length === 0 ? (
 				<FilesEmptyState />
 			) : (
 				<FilesTable files={props.files} />

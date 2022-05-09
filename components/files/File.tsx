@@ -20,10 +20,10 @@ import FileRow from "./FileRow";
 
 interface Props {
 	file: BucketFile;
-	gridView: boolean;
+	gridView?: boolean;
 }
 
-const File: React.FC<Props> = ({ file, gridView }) => {
+const File: React.FC<Props> = ({ file, gridView = false }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const { keys } = useKeys();
 	const { removeFile } = useBucket(BucketType[keys.type]);

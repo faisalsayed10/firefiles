@@ -29,14 +29,11 @@ const GridView: React.FC<Props> = (props) => {
 			{props.loading ? (
 				<Grid
 					templateColumns={[
-						"repeat(2, 1fr)",
-						"repeat(3, 1fr)",
-						"repeat(4, 1fr)",
-						"repeat(6, 1fr)",
-						"repeat(7, 1fr)",
-						"repeat(8, 1fr)",
+						"repeat(auto-fill, minmax(140px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
 					]}
-					gap={6}
+					gap={[2, 6, 6]}
 					my="6"
 					mx="4"
 				>
@@ -48,14 +45,11 @@ const GridView: React.FC<Props> = (props) => {
 			) : (
 				<Grid
 					templateColumns={[
-						"repeat(2, 1fr)",
-						"repeat(3, 1fr)",
-						"repeat(4, 1fr)",
-						"repeat(6, 1fr)",
-						"repeat(7, 1fr)",
-						"repeat(8, 1fr)",
+						"repeat(auto-fill, minmax(140px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
+						"repeat(auto-fill, minmax(160px, 1fr))",
 					]}
-					gap={6}
+					gap={[2, 6, 6]}
 				>
 					<AddFolderButton key="firefiles-add-folder-btn" currentFolder={props.currentFolder} />
 					{props.folders?.length > 0 &&

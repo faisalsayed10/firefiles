@@ -33,7 +33,7 @@ const FileGrid: React.FC<Props> = (props) => {
 				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
 				transition="ease-in-out 0.1s"
 				className="hoverAnim"
-				w="100%"
+				w={["140px", "180px", "180px", "180px"]}
 				h="140px"
 				overflow="hidden"
 			>

@@ -51,7 +51,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 				align="center"
 				borderRadius="lg"
 				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
-				w="100%"
+				w={["140px", "180px", "180px"]}
 				h="140px"
 				borderWidth="1px"
 				transition="ease-in-out 0.1s"
@@ -62,11 +62,12 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 					style={{ flex: 1, strokeWidth: "1px", color: useColorModeValue("#2D3748", "white") }}
 					size={72}
 				/>
-				<Flex p="2" w="full" justify="space-between" alignItems="center">
+				<Flex p="2" w="inherit" justify="space-between" alignItems="center">
 					<Text
 						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
 						flex="1"
 						isTruncated={true}
+						maxW="150px"
 						as="p"
 						fontSize="xs"
 						align="left"

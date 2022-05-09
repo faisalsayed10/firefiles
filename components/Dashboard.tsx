@@ -39,9 +39,7 @@ const Dashboard = () => {
 
 	useEffect(() => {
 		const storedView = localStorage.getItem("grid_view");
-		if (storedView) {
-			setGridView(storedView === "true");
-		}
+		if (storedView) setGridView(storedView === "true");
 	}, []);
 
 	useEffect(() => {
