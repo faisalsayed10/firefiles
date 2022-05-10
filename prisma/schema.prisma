@@ -14,8 +14,6 @@ model User {
   lastSignedIn DateTime    @map("last_signed_in")
   createdAt    DateTime    @default(now()) @map("created_at")
   email        String      @unique
-  password     String
-  salt         String
   verified     Boolean     @default(false)
   plan         PricingPlan @default(FREE)
   drives       Drive[]
