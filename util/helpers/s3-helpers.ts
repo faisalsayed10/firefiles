@@ -47,13 +47,6 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 				},
 			});
 
-			const origin =
-				(req.headers["x-forwarded-proto"] || req.headers.referer?.split("://")[0]
-					? "https"
-					: "http") +
-				"://" +
-				req.headers.host;
-
 			const corsOptions = {
 				Bucket: data.Bucket,
 				CORSConfiguration: {
@@ -61,7 +54,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 						{
 							AllowedHeaders: ["*"],
 							AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-							AllowedOrigins: [origin],
+							AllowedOrigins: [process.env.DEPLOY_URL],
 							ExposeHeaders: ["ETag"],
 						},
 					],

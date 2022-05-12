@@ -19,6 +19,6 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 		console.error(err);
 		res.json({ error: err.message });
 	} finally {
-		res.redirect("http://localhost:3000");
+		res.redirect(process.env.DEPLOY_URL);
 	}
 }, sessionOptions);
