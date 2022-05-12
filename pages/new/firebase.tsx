@@ -8,7 +8,7 @@ import {
 	Text,
 	Textarea,
 } from "@chakra-ui/react";
-import VideoAccordion from "@components/ui/VideoAccordion";
+import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
 import toObject from "convert-to-object";
@@ -100,7 +100,7 @@ const NewFirebase = () => {
 							instructions.
 						</Link>
 					</Text>
-					<VideoAccordion src="/firebase-config-tutorial.mov" />
+					<VideoModal src="/firebase-config-tutorial.mov" />
 					<Button
 						type="submit"
 						isLoading={loading}

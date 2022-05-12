@@ -97,7 +97,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 				return;
 			}
 
-			if (files.filter((f) => f.name === toUpload.name).length > 0) {
+			if (files?.filter((f) => f.name === toUpload.name).length > 0) {
 				toast.error("File with same name already exists.");
 				return;
 			}

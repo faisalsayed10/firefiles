@@ -12,6 +12,7 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import AWSRegionSelect from "@components/ui/AWSRegionSelect";
+import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -68,7 +69,10 @@ const NewS3 = () => {
 			if (selectedBucket === "Not Selected" && !bucketName.trim())
 				throw new Error("Select an existing bucket or enter a new bucket name!");
 
-			if (bucketName.trim().length < 3 || bucketName.trim().length > 63)
+			if (
+				(selectedBucket === "Not Selected" && bucketName.trim().length < 3) ||
+				bucketName.trim().length > 63
+			)
 				throw new Error("Bucket name must be between 3 and 63 characters!");
 
 			const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
@@ -124,7 +128,7 @@ const NewS3 = () => {
 						required
 					/>
 					<AWSRegionSelect value={region} onChange={(e) => setRegion(e.target.value)} />
-					{/* TODO: <VideoAccordion src="/aws-keys-tutorial.mov" /> */}
+					<VideoModal src="/aws-keys-tutorial.mov" />
 					<Button mt="2" type="submit" isLoading={loading} colorScheme="green" variant="solid">
 						Next
 					</Button>

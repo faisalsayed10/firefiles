@@ -96,7 +96,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				return;
 			}
 
-			if (files.filter((f) => f.name === filesToUpload[i].name).length > 0) {
+			if (files?.filter((f) => f.name === filesToUpload[i].name).length > 0) {
 				toast.error("File with same name already exists.");
 				return;
 			}
