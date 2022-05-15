@@ -1,4 +1,4 @@
-# Contributing to Next.js
+# Contributing to Firefiles
 
 - To contribute to our cloud providers, please see [Adding cloud providers](#adding-cloud-providers) below.
 - Before jumping into a PR be sure to search [existing PRs](https://github.com/faisalsayed10/firefiles/pulls) or [issues](https://github.com/faisalsayed10/firefiles/issues) for an open or closed item that relates to your submission.
