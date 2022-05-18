@@ -10,7 +10,7 @@ class MyDocument extends Document {
 		return (
 			<Html>
 				<Head>
-					<link rel="icon" href="/firefiles-logo.png" type="image/png" />
+					<link rel="icon" href="/logo.png" type="image/png" />
 					<meta name="title" content="Firefiles" />
 					<meta
 						name="description"

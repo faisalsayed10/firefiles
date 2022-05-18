@@ -37,7 +37,7 @@ export default function Login() {
 				justify="center"
 				minH="100vh"
 			>
-				<Image src="/firefiles-logo.png" w="100px" />
+				<Image src="/logo.png" w="100px" />
 				<Flex as="form" onSubmit={handleSubmit} align="center" direction="column" py="4">
 					<Heading as="h1" size="2xl" mb="2">
 						Welcome back
