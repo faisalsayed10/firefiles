@@ -161,7 +161,8 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 						});
 					});
 				},
-				complete: async (_xhr, file_key, _) => {
+				complete: async (_xhr, file_key) => {
+					console.log("complete", decodeURIComponent(file_key));
 					setUploadingFiles((prevUploadingFiles) =>
 						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
 					);
@@ -176,7 +177,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 						bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
 						url: await getSignedUrl(
 							s3Client,
-							new GetObjectCommand({ Bucket: data.keys.Bucket, Key: file_key }),
+							new GetObjectCommand({ Bucket: data.keys.Bucket, Key: decodeURIComponent(file_key) }),
 							{ expiresIn: 3600 }
 						),
 					};
