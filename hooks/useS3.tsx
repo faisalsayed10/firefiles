@@ -178,7 +178,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 						url: await getSignedUrl(
 							s3Client,
 							new GetObjectCommand({ Bucket: data.keys.Bucket, Key: decodeURIComponent(file_key) }),
-							{ expiresIn: 3600 }
+							{ expiresIn: 3600 * 24 }
 						),
 					};
 					setFiles((files) => (files ? [...files, newFile] : [newFile]));
@@ -244,7 +244,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								url: await getSignedUrl(
 									s3Client,
 									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
-									{ expiresIn: 3600 }
+									{ expiresIn: 3600 * 24 }
 								),
 							};
 
@@ -299,7 +299,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								url: await getSignedUrl(
 									s3Client,
 									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
-									{ expiresIn: 3600 }
+									{ expiresIn: 3600 * 24 }
 								),
 							};
 							setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
