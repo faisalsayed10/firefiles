@@ -1,6 +1,14 @@
-import { Button, Flex, FormControl, Heading, Image, Input, Text } from "@chakra-ui/react";
+import {
+	Button,
+	Flex,
+	FormControl,
+	Heading,
+	Image,
+	Input,
+	Text,
+	useColorMode,
+} from "@chakra-ui/react";
 import useUser from "@hooks/useUser";
-import { User } from "@prisma/client";
 import axios from "axios";
 import Head from "next/head";
 import React, { useState } from "react";
@@ -8,6 +16,7 @@ import toast from "react-hot-toast";
 
 export default function Login() {
 	const { mutateUser } = useUser({ redirectTo: "/", redirectIfFound: true });
+	const { colorMode } = useColorMode();
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
 
@@ -31,7 +40,7 @@ export default function Login() {
 				<title>Firefiles - Login</title>
 			</Head>
 			<Flex
-				className="auth-background"
+				className={colorMode === "light" ? "auth-background" : ""}
 				direction="column"
 				align="center"
 				justify="center"

@@ -14,14 +14,14 @@ class MyDocument extends Document {
 					<meta name="title" content="Firefiles" />
 					<meta
 						name="description"
-						content="Get your own file hosting service in minutes. Firefiles provides you with a drive like interface for your storage buckets."
+						content="The open-source alternative to Dropbox. Firebase gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
 					<meta property="og:type" content="website" />
 					<meta property="og:url" content="https://usefirefiles.vercel.app" />
 					<meta property="og:title" content="Firefiles" />
 					<meta
 						property="og:description"
-						content="Get your own file hosting service in minutes. Firefiles provides you with a drive like interface for your storage buckets."
+						content="The open-source alternative to Dropbox. Firebase gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
 					<meta
 						property="og:image"
@@ -32,7 +32,7 @@ class MyDocument extends Document {
 					<meta property="twitter:title" content="Firefiles" />
 					<meta
 						property="twitter:description"
-						content="Get your own file hosting service in minutes. Firefiles provides you with a drive like interface for your storage buckets."
+						content="The open-source alternative to Dropbox. Firebase gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
 					<meta
 						property="twitter:image"
