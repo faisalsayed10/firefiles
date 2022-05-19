@@ -16,12 +16,13 @@ import {
 	Tr,
 	useColorMode,
 } from "@chakra-ui/react";
+import useKeys from "@hooks/useKeys";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
 import "@uiw/react-textarea-code-editor/dist.css";
 import { download } from "@util/helpers";
-import { DriveFile } from "@util/types";
+import { DriveFile, Provider } from "@util/types";
 import dynamic from "next/dynamic";
 import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
@@ -190,17 +191,24 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 };
 
 const Error = ({ file, url }) => {
+	const { keys } = useKeys();
 	return (
 		<Flex flexDir="column" align="center" justify="center" p="6">
 			<Text as="h1" fontSize="2xl" mb="4" align="center">
 				Failed to preview the file
 			</Text>
-			<Text as="p" mb="2">
-				Make sure you've{" "}
-				<Link href="https://firefiles.vercel.app/docs/cors" target="_blank" textDecor="underline">
-					configured CORS correctly.
-				</Link>
-			</Text>
+			{Provider[keys.type] === Provider.firebase && (
+				<Text as="p" mb="2">
+					Make sure you've{" "}
+					<Link
+						href="https://firefiles.vercel.app/docs/firebase/03-cors"
+						target="_blank"
+						textDecor="underline"
+					>
+						configured CORS correctly.
+					</Link>
+				</Text>
+			)}
 			<ButtonGroup>
 				<Button leftIcon={<ExternalLink />} onClick={() => window.open(url, "_blank")}>
 					Open in new tab

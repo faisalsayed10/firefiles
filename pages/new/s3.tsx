@@ -129,7 +129,7 @@ const NewS3 = () => {
 					/>
 					<AWSRegionSelect value={region} onChange={(e) => setRegion(e.target.value)} />
 					<VideoModal src="/aws-keys-tutorial.mov" />
-					<Button mt="2" type="submit" isLoading={loading} colorScheme="green" variant="solid">
+					<Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
 						Next
 					</Button>
 				</Flex>

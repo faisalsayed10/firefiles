@@ -25,7 +25,7 @@ const VideoModal: React.FC<Props> = ({ src }) => {
 				size="sm"
 				variant="link"
 				colorScheme="black"
-				mt="2"
+				my="2"
 				_focus={{ outline: "none" }}
 			>
 				How do I get the credentials?

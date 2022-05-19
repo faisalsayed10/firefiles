@@ -1,17 +1,18 @@
 import {
+	Alert,
+	AlertIcon,
 	Button,
 	Container,
 	Flex,
 	Heading,
 	IconButton,
-	Link,
-	Text,
 	Textarea,
 } from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
 import toObject from "convert-to-object";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -69,6 +70,9 @@ const NewFirebase = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Create New Drive | Firebase</title>
+			</Head>
 			<Flex px="16px" pt="3">
 				<IconButton
 					variant="ghost"
@@ -90,16 +94,19 @@ const NewFirebase = () => {
 						placeholder={jsonPlaceholder}
 						required
 					/>
-					<Text fontSize="xs">
-						Make sure you've followed all the{" "}
-						<Link
-							href="https://firefiles.vercel.app/docs/hosted"
-							target="_blank"
-							textDecor="underline"
-						>
-							instructions.
-						</Link>
-					</Text>
+					<Alert status="info" mt="2">
+						<AlertIcon />
+						<span>
+							Make sure you've followed all the{" "}
+							<a
+								href="https://firefiles.vercel.app/docs/firebase/01-setup"
+								target="_blank"
+								style={{ textDecoration: "underline" }}
+							>
+								steps!
+							</a>
+						</span>
+					</Alert>
 					<VideoModal src="/firebase-config-tutorial.mov" />
 					<Button
 						type="submit"
