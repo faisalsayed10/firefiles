@@ -5,6 +5,8 @@
 		"dev": "next",
 		"build": "next build",
 		"start": "next start",
+		"vercel-build": "prisma generate && prisma db push && next build",
+		"prisma:generate": "prisma generate",
 		"type-check": "tsc",
 		"lint": "yarn prettier --write ."
 	},

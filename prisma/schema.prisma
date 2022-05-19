@@ -27,6 +27,8 @@ model Drive {
   type      String
   User      User?    @relation(fields: [userId], references: [id])
   userId    String?
+
+  @@index([userId])
 }
 
 enum PricingPlan {

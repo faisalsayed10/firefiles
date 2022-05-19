@@ -197,7 +197,7 @@ const Error = ({ file, url }) => {
 			<Text as="h1" fontSize="2xl" mb="4" align="center">
 				Failed to preview the file
 			</Text>
-			{Provider[keys.type] === Provider.firebase && (
+			{(Provider[keys.type] as Provider) === Provider.firebase && (
 				<Text as="p" mb="2">
 					Make sure you've{" "}
 					<Link
