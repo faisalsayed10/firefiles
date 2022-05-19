@@ -1,3 +1,4 @@
+import prisma from "@util/prisma";
 import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import jwt from "jsonwebtoken";

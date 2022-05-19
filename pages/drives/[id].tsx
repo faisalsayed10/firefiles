@@ -4,7 +4,7 @@ import { KeysProvider } from "@hooks/useKeys";
 import { S3Provider } from "@hooks/useS3";
 import useUser from "@hooks/useUser";
 import { Drive } from "@prisma/client";
-import { prisma } from "@util/prisma";
+import prisma from "@util/prisma";
 import { sessionOptions } from "@util/session";
 import { AES, enc } from "crypto-js";
 import { withIronSessionSsr } from "iron-session/next";
