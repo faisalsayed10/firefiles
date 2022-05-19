@@ -1,18 +1,16 @@
-import { Box, Center, Divider, Grid, Skeleton, Text, useColorMode } from "@chakra-ui/react";
-import FilesEmptyState from "@components/files/FilesEmptyState";
-import FilesTable from "@components/files/FilesTable";
-import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
+import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
-import AddFolderButton from "@components/folders/AddFolderButton";
-import Folder from "@components/folders/Folder";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
-import useFirebase from "@hooks/useFirebase";
-import { CurrentlyUploading } from "@util/types";
-import React, { useMemo, useState } from "react";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
+import { Provider } from "@util/types";
+import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
+import GridView from "./GridView";
+import ListView from "./ListView";
 
 const baseStyle = {
 	outline: "none",
@@ -29,12 +27,21 @@ const activeStyle = {
 
 const Dashboard = () => {
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
-	const [uploadingFiles, setUploadingFiles] = useState<CurrentlyUploading[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isFolderDeleting, setIsFolderDeleting] = useState(false);
-	const { app, appUser, currentFolder, files, folders, loading } = useFirebase();
+	const { currentFolder, files, folders, loading, uploadingFiles } = useBucket();
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
+	const [gridView, setGridView] = useState(false);
+
+	useEffect(() => {
+		const storedView = localStorage.getItem("grid_view");
+		if (storedView) setGridView(storedView === "true");
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem("grid_view", gridView.toString());
+	}, [gridView]);
 
 	return (
 		<>
@@ -48,13 +55,17 @@ const Dashboard = () => {
 						setDraggedFilesToUpload(files);
 						setIsDragging(false);
 					}}
-					disabled={!app || !appUser}
 					noClick
 					onDragOver={() => setIsDragging(true)}
 					onDragLeave={() => setIsDragging(false)}
 				>
 					{({ getRootProps, getInputProps }) => (
-						<Box {...getRootProps({ style })} minH="93vh">
+						<Box
+							{...getRootProps({
+								style,
+							})}
+							minH="93vh"
+						>
 							<input {...getInputProps()} />
 							<Text
 								hidden={!isDragging}
@@ -77,35 +88,24 @@ const Dashboard = () => {
 							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
 							<Divider />
-							{loading ? (
-								<Grid templateColumns="repeat(auto-fill, minmax(120px, 1fr))" gap={6} my="6" mx="4">
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-									<Skeleton h="110px" w="110px" borderRadius="3px" />
-								</Grid>
+							{!gridView ? (
+								<ListView
+									loading={loading}
+									currentFolder={currentFolder}
+									files={files}
+									folders={folders}
+									setGridView={setGridView}
+									setIsFolderDeleting={setIsFolderDeleting}
+								/>
 							) : (
-								<Grid templateColumns="repeat(auto-fill, minmax(120px, 1fr))" gap={6} my="6" mx="4">
-									{folders?.map((f) => (
-										<Box m="0 auto" key={f.name}>
-											<Folder setIsFolderDeleting={setIsFolderDeleting} folder={f} />
-										</Box>
-									))}
-									<Box m="0 auto">
-										<AddFolderButton currentFolder={currentFolder} />
-									</Box>
-								</Grid>
-							)}
-							<Divider />
-							<Text fontSize="3xl" fontWeight="600" m="4">
-								Your Files
-							</Text>
-							{files === null || loading ? (
-								<FilesTableSkeleton />
-							) : files.length === 0 ? (
-								<FilesEmptyState />
-							) : (
-								<FilesTable childFiles={files} />
+								<GridView
+									loading={loading}
+									currentFolder={currentFolder}
+									files={files}
+									folders={folders}
+									setGridView={setGridView}
+									setIsFolderDeleting={setIsFolderDeleting}
+								/>
 							)}
 						</Box>
 					)}
@@ -113,9 +113,6 @@ const Dashboard = () => {
 				<UploadFileButton
 					filesToUpload={draggedFilesToUpload}
 					setFilesToUpload={setDraggedFilesToUpload}
-					currentFolder={currentFolder}
-					uploadingFiles={uploadingFiles}
-					setUploadingFiles={setUploadingFiles}
 				/>
 			</LoadingOverlay>
 			{uploadingFiles.length > 0 && (
@@ -129,8 +126,8 @@ const Dashboard = () => {
 						boxShadow="3.8px 4.1px 6.3px -1.7px rgba(0, 0, 0, 0.2)"
 						backgroundColor={colorMode === "dark" ? "gray.700" : "white"}
 					>
-						{uploadingFiles.map((file) => (
-							<UploadProgress key={file.id} file={file} setUploadingFiles={setUploadingFiles} />
+						{uploadingFiles.map((uploading) => (
+							<UploadProgress key={uploading.id} file={uploading} />
 						))}
 					</Box>
 				</Center>

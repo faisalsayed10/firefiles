@@ -1,5 +1,5 @@
 <div align="center">
-      <h1> <img src="https://firefiles.vercel.app/firefiles-logo.png" width="80px"><br/>Firefiles</h1>
+      <h1> <img src="https://firefiles.vercel.app/logo.png" width="80px"><br/>Firefiles</h1>
      </div>
 <p align="center"> <a href="https://firefiles.vercel.app" target="_blank"><img alt="" src="https://img.shields.io/badge/Website-EA4C89?style=normal&logo=dribbble&logoColor=white" style="vertical-align:center" /></a> <a href="https://twitter.com/faisal_sayed05" target="_blank"><img alt="" src="https://img.shields.io/badge/Twitter-1DA1F2?style=normal&logo=twitter&logoColor=white" style="vertical-align:center" /></a></p>
 

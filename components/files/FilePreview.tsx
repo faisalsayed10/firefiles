@@ -2,9 +2,11 @@ import {
 	Box,
 	Button,
 	ButtonGroup,
+	Center,
 	Flex,
 	Image,
 	Link,
+	Spinner,
 	Table,
 	Tbody,
 	Td,
@@ -14,20 +16,20 @@ import {
 	Tr,
 	useColorMode,
 } from "@chakra-ui/react";
-import { faDownload, faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useKeys from "@hooks/useKeys";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor";
 import "@uiw/react-textarea-code-editor/dist.css";
 import { download } from "@util/helpers";
-import { StorageReference } from "firebase/storage";
+import { DriveFile, Provider } from "@util/types";
 import dynamic from "next/dynamic";
 import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { LoadingSpinner, Player } from "video-react";
+import { ExternalLink, FileDownload } from "tabler-icons-react";
+import { Player } from "video-react";
 
 const CodeEditor: React.ComponentType<TextareaCodeEditorProps> = dynamic(
 	() => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
@@ -40,16 +42,16 @@ const MarkdownPreview: React.ComponentType<MarkdownPreviewProps> = dynamic(
 );
 
 type Props = {
-	mimetype: string;
 	url: string;
-	file: StorageReference;
+	file: DriveFile;
 };
 
-const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
+const FilePreview: React.FC<Props> = ({ url, file }) => {
 	const [isError, setIsError] = useState(false);
 	const [showRaw, setShowRaw] = useState(false);
 	const [rawMd, setRawMd] = useState(false);
 	const [text, setText] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const extension = file.name.split(".").pop();
 	const { colorMode } = useColorMode();
@@ -68,51 +70,52 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 
 	useEffect(() => {
 		if (
-			mimetype.startsWith("text") ||
-			mimetype === "application/json" ||
-			mimetype === "text/markdown" ||
+			file?.contentType?.startsWith("text") ||
+			file?.contentType === "application/json" ||
+			file?.contentType === "text/markdown" ||
 			extension === "md" ||
 			showRaw
 		) {
+			setLoading(true);
 			fetch(url)
 				.then((res) => res.text())
 				.then((text) => setText(text))
-				.catch((err) => setIsError(true));
+				.catch(() => setIsError(true))
+				.finally(() => setLoading(false));
 		}
 	}, [showRaw]);
 
 	if (isError) {
 		return <Error file={file} url={url} />;
-	} else if (mimetype.startsWith("image")) {
+	} else if (file?.contentType?.startsWith("image")) {
 		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
-	} else if (mimetype.startsWith("video")) {
+	} else if (file?.contentType?.startsWith("video")) {
 		return (
-			<Box>
-				<Player playsInline src={url} onError={() => setIsError(true)}>
-					<LoadingSpinner />
-				</Player>
-			</Box>
+			<Box
+				children={<Player fluid={false} playsInline src={url} onError={() => setIsError(true)} />}
+			/>
 		);
-	} else if (mimetype.startsWith("audio")) {
+	} else if (file?.contentType?.startsWith("audio")) {
 		return (
 			<Flex p="6" align="center" justify="center">
 				<audio controls onError={() => setIsError(true)}>
-					<source src={url} type={mimetype} />
+					<source src={url} type={file?.contentType} />
 					Your browser does not support playing audio.
 				</audio>
 			</Flex>
 		);
-	} else if (mimetype === "application/pdf") {
+	} else if (file?.contentType === "application/pdf") {
 		return (
 			<iframe
 				src={url}
 				height={700}
 				width="100%"
 				title={file.name}
+				style={{ minWidth: 500 }}
 				onError={() => setIsError(true)}
 			/>
 		);
-	} else if (mimetype === "text/csv") {
+	} else if (file?.contentType === "text/csv") {
 		return (
 			<ErrorBoundary FallbackComponent={(...props) => <Error url={url} file={file} {...props} />}>
 				<CsvViewer file={file} url={url} />
@@ -120,77 +123,105 @@ const FilePreview: React.FC<Props> = ({ mimetype, url, file }) => {
 		);
 	} else if (/^docx?$|^xlsx?$|^pptx?$/.test(extension)) {
 		return <GoogleDocsViewer file={file} url={url} />;
-	} else if (mimetype === "text/markdown" || extension === "md") {
+	} else if (file?.contentType === "text/markdown" || extension === "md") {
 		return (
-			<Box height="600px">
-				<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
-					{!rawMd ? "View Raw" : "View Parsed"}
-				</Button>
-				{!rawMd ? (
-					<MarkdownPreview
-						source={text}
-						disallowedElements={["script"]}
-						style={{ height: "90%", overflowY: "auto", padding: 15 }}
-					/>
+			<>
+				{loading || !text ? (
+					<Center m="20">
+						<Spinner size="xl" />
+					</Center>
 				) : (
-					<CodeEditor
-						value={text}
-						disabled
-						language={extension}
-						padding={15}
-						style={codeEditorStyles}
-					/>
+					<Box height="600px">
+						<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
+							{!rawMd ? "View Raw" : "View Parsed"}
+						</Button>
+						{!rawMd ? (
+							<MarkdownPreview
+								source={text}
+								disallowedElements={["script"]}
+								style={{
+									height: "90%",
+									overflowY: "auto",
+									padding: 15,
+								}}
+							/>
+						) : (
+							<CodeEditor
+								value={text}
+								disabled
+								language={extension}
+								padding={15}
+								style={codeEditorStyles}
+							/>
+						)}
+					</Box>
 				)}
-			</Box>
+			</>
 		);
-	} else if (mimetype.startsWith("text") || mimetype === "application/json" || showRaw) {
+	} else if (
+		file?.contentType?.startsWith("text") ||
+		file?.contentType === "application/json" ||
+		showRaw
+	) {
 		return (
-			<Box height="600px">
-				<CodeEditor
-					value={text}
-					disabled
-					language={extension}
-					padding={15}
-					style={{ ...codeEditorStyles, marginTop: 40 }}
-				/>
-			</Box>
+			<>
+				{loading || !text ? (
+					<Center m="20">
+						<Spinner size="xl" />
+					</Center>
+				) : (
+					<Box height="600px">
+						<CodeEditor
+							value={text}
+							disabled
+							language={extension}
+							padding={15}
+							style={{
+								...codeEditorStyles,
+								marginTop: 40,
+							}}
+						/>
+					</Box>
+				)}
+			</>
 		);
 	}
 
-	return <NoPreview file={file} url={url} setShowRaw={setShowRaw} />;
+	return <NoPreview file={file} setShowRaw={setShowRaw} />;
 };
 
 const Error = ({ file, url }) => {
+	const { keys } = useKeys();
 	return (
 		<Flex flexDir="column" align="center" justify="center" p="6">
 			<Text as="h1" fontSize="2xl" mb="4" align="center">
 				Failed to preview the file
 			</Text>
-			<Text as="p" mb="2">
-				Make sure you've{" "}
-				<Link href="https://firefiles.vercel.app/docs/cors" target="_blank" textDecor="underline">
-					configured CORS correctly.
-				</Link>
-			</Text>
+			{(Provider[keys.type] as Provider) === Provider.firebase && (
+				<Text as="p" mb="2">
+					Make sure you've{" "}
+					<Link
+						href="https://firefiles.vercel.app/docs/firebase/03-cors"
+						target="_blank"
+						textDecor="underline"
+					>
+						configured CORS correctly.
+					</Link>
+				</Text>
+			)}
 			<ButtonGroup>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
-					onClick={() => window.open(url, "_blank")}
-				>
+				<Button leftIcon={<ExternalLink />} onClick={() => window.open(url, "_blank")}>
 					Open in new tab
 				</Button>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
-					onClick={() => download(file.name, url)}
-				>
-					Download It
+				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
+					Download
 				</Button>
 			</ButtonGroup>
 		</Flex>
 	);
 };
 
-const NoPreview = ({ file, url, setShowRaw }) => {
+const NoPreview = ({ file, setShowRaw }) => {
 	return (
 		<Flex flexDir="column" align="center" justify="center" p="6">
 			<Text as="h1" fontSize="2xl" mb="4" align="center">
@@ -198,11 +229,8 @@ const NoPreview = ({ file, url, setShowRaw }) => {
 			</Text>
 			<ButtonGroup>
 				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
-					onClick={() => download(file.name, url)}
-				>
-					Download It
+				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
+					Download
 				</Button>
 			</ButtonGroup>
 		</Flex>
@@ -226,11 +254,8 @@ const GoogleDocsViewer = ({ file, url }) => {
 				>
 					Open with Google Docs Viewer
 				</Button>
-				<Button
-					leftIcon={<FontAwesomeIcon icon={faDownload} />}
-					onClick={() => download(file.name, url)}
-				>
-					Download It
+				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
+					Download
 				</Button>
 			</ButtonGroup>
 		</Flex>
@@ -267,26 +292,30 @@ const CsvViewer = ({ file, url }) => {
 
 	return (
 		<Box maxH="700px" overflowY="auto" overflowX="auto">
-			<Table variant="striped" size="sm">
-				<Thead>
-					<Tr>
-						<Th>#</Th>
-						{columns.map((column) => (
-							<Th key={column.Header}>{column.Header}</Th>
-						))}
-					</Tr>
-				</Thead>
-				<Tbody>
-					{data.map((row, i) => (
-						<Tr key={row.id}>
-							<Td>{i + 1}</Td>
+			{columns.length > 0 ? (
+				<Table variant="simple" size="sm">
+					<Thead>
+						<Tr>
 							{columns.map((column) => (
-								<Td key={column.accessor}>{row[column.accessor]}</Td>
+								<Th key={column.Header}>{column.Header.replaceAll('"', "")}</Th>
 							))}
 						</Tr>
-					))}
-				</Tbody>
-			</Table>
+					</Thead>
+					<Tbody>
+						{data.map((row, i) => (
+							<Tr key={row.id}>
+								{columns.map((column) => (
+									<Td key={column.accessor}>{row[column.accessor]}</Td>
+								))}
+							</Tr>
+						))}
+					</Tbody>
+				</Table>
+			) : (
+				<Center m="20">
+					<Spinner size="xl" />
+				</Center>
+			)}
 		</Box>
 	);
 };

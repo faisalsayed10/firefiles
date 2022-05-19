@@ -13,26 +13,23 @@ import {
 	useColorModeValue,
 	useDisclosure,
 } from "@chakra-ui/react";
-import { StorageReference } from "@firebase/storage";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useFirebase from "@hooks/useFirebase";
-import { sendEvent } from "@util/firebase";
-import { useRouter } from "next/router";
+import useBucket from "@hooks/useBucket";
+import useKeys from "@hooks/useKeys";
+import { DriveFolder, Provider } from "@util/types";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { FolderPlus } from "tabler-icons-react";
 
 interface Props {
-	currentFolder: StorageReference;
+	currentFolder: DriveFolder;
 }
 
 const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
-	const router = useRouter();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<HTMLInputElement>();
-	const { addFolder } = useFirebase();
+	const { addFolder } = useBucket();
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -46,29 +43,8 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 
 		if (currentFolder === null) return;
 
-		const path =
-			currentFolder.fullPath !== ""
-				? decodeURIComponent(currentFolder.fullPath) + "/" + name
-				: name;
-
-		const newFolder = {
-			name,
-			fullPath: path,
-			root: null,
-			bucket: null,
-			storage: null,
-			parent: null,
-		};
-
-		addFolder(newFolder);
-
-		const id = router.asPath.split("/")[2];
-		const localFolders = localStorage.getItem(`local_folders_${id}`);
-		const folders: StorageReference[] = localFolders ? JSON.parse(localFolders) : [];
-		localStorage.setItem(`local_folders_${id}`, JSON.stringify([...folders, newFolder]));
-
+		addFolder(name);
 		toast.success("Folder Created Successfully.");
-		sendEvent("folder_create", {});
 
 		setName("");
 		setLoading(false);
@@ -82,17 +58,19 @@ const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
 				direction="column"
 				align="center"
 				justify="center"
-				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
 				transition="ease-in-out 0.1s"
 				cursor="pointer"
 				className="hoverAnim"
 				color={useColorModeValue("#2D3748", "white")}
-				w="110px"
-				h="110px"
+				w={["140px", "180px", "180px"]}
+				h="140px"
+				borderWidth="1px"
+				borderRadius="lg"
+				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
 			>
-				<FontAwesomeIcon icon={faPlus} size="2x" />
+				<FolderPlus size={72} strokeWidth="1px" />
 			</Flex>
-			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose}>
+			<Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose} autoFocus={false}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Create A Folder</ModalHeader>

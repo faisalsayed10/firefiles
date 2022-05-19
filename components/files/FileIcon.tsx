@@ -5,9 +5,10 @@ import { useEffect } from "react";
 type Props = {
 	id: string;
 	extension: string;
+	bigIcon?: boolean;
 };
 
-const FileIcon: React.FC<Props> = ({ extension, id }) => {
+const FileIcon: React.FC<Props> = ({ extension, id, bigIcon = false }) => {
 	useEffect(() => {
 		const icon = document.querySelector(`.icon-${id}`);
 		FILE_TYPES.includes(extension)
@@ -15,7 +16,7 @@ const FileIcon: React.FC<Props> = ({ extension, id }) => {
 			: icon.classList.add("fiv-icon-blank");
 	}, []);
 
-	return <span className={`fiv-sqo fiv-size-md icon-${id}`} />;
+	return <span className={`fiv-sqo ${bigIcon ? "fiv-size-2xl" : "fiv-size-md"} icon-${id}`} />;
 };
 
 export default FileIcon;

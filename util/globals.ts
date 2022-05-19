@@ -8,7 +8,6 @@ export const PROVIDERS = [
 		id: "s3",
 		name: "AWS S3",
 		logo: "/s3.png",
-		isComingSoon: true,
 	},
 	{
 		id: "minio",

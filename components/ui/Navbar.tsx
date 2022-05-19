@@ -3,31 +3,23 @@ import {
 	Button,
 	Divider,
 	Flex,
+	IconButton,
 	Menu,
 	MenuButton,
 	MenuItem,
 	MenuList,
-	Tooltip,
 	useColorMode,
 } from "@chakra-ui/react";
-import {
-	faArrowCircleLeft,
-	faChevronDown,
-	faDonate,
-	faFile,
-	faMoon,
-	faSignOutAlt,
-	faSun,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useUser from "@hooks/useUser";
 import { onLogout } from "@util/helpers";
+import axios from "axios";
 import { useRouter } from "next/router";
 import React from "react";
+import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
 
 export default function Navbar() {
 	const { colorMode, toggleColorMode } = useColorMode();
-	const { logout } = useUser();
+	const { mutateUser } = useUser();
 	const router = useRouter();
 
 	return (
@@ -36,44 +28,41 @@ export default function Navbar() {
 				align="center"
 				justify={router.route !== "/" ? "space-between" : "end"}
 				px="4"
-				mt="2"
-				boxShadow="sm"
+				my="3"
 				w="full"
 			>
 				{router.route !== "/" ? (
 					<Button
 						variant="link"
-						leftIcon={<FontAwesomeIcon icon={faArrowCircleLeft} />}
+						leftIcon={<ArrowNarrowLeft />}
 						fontWeight="bold"
 						onClick={() => router.push("/")}
 					>
 						Dashboard
 					</Button>
 				) : null}
-				<Box mb="2">
-					<TooltipButton
-						icon={<FontAwesomeIcon icon={colorMode === "light" ? faMoon : faSun} />}
-						label="Toggle dark mode"
+				<Box>
+					<IconButton
+						aria-label="toggle color theme"
+						size="md"
+						variant="ghost"
+						_focus={{ outline: "none" }}
 						onClick={toggleColorMode}
+						icon={colorMode === "light" ? <Moon size="16" /> : <Sun size="16" />}
 					/>
 					<Menu>
-						<MenuButton
-							h="50"
-							as={Button}
-							variant="ghost"
-							rightIcon={<FontAwesomeIcon icon={faChevronDown} />}
-						>
+						<MenuButton size="sm" as={Button} variant="ghost" rightIcon={<ChevronDown size="16" />}>
 							Actions
 						</MenuButton>
 						<MenuList>
 							<MenuItem
-								icon={<FontAwesomeIcon icon={faFile} />}
+								icon={<File />}
 								onClick={() => window.open("https://firefiles.vercel.app/docs", "_blank")}
 							>
 								View Documentation
 							</MenuItem>
 							<MenuItem
-								icon={<FontAwesomeIcon icon={faDonate} />}
+								icon={<Coin />}
 								onClick={() => {
 									const url = "https://github.com/faisalsayed10/firefiles#sponsor-this-project";
 									window.open(url, "_blank");
@@ -82,10 +71,12 @@ export default function Navbar() {
 								Donate Us
 							</MenuItem>
 							<MenuItem
-								icon={<FontAwesomeIcon icon={faSignOutAlt} />}
+								icon={<Logout />}
 								onClick={async () => {
 									await onLogout();
-									await logout();
+									await axios.get("/api/auth/logout");
+									mutateUser(null, false);
+									router.push("/login");
 								}}
 							>
 								Log Out
@@ -98,18 +89,3 @@ export default function Navbar() {
 		</>
 	);
 }
-
-const TooltipButton = ({ label, onClick, icon }) => (
-	<Tooltip label={label} hasArrow>
-		<Button
-			w="50px"
-			h="50px"
-			variant="outline"
-			_focus={{ outline: "none" }}
-			mr="2"
-			onClick={onClick}
-		>
-			{icon}
-		</Button>
-	</Tooltip>
-);

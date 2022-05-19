@@ -1,15 +1,15 @@
 import { Box, Table, Th, Tr } from "@chakra-ui/react";
-import { StorageReference } from "firebase/storage";
+import { DriveFile } from "@util/types";
 import React from "react";
 import File from "./File";
 
 interface Props {
-	childFiles: StorageReference[];
+	files: DriveFile[];
 }
 
-const FilesTable: React.FC<Props> = ({ childFiles }) => {
+const FilesTable: React.FC<Props> = ({ files }) => {
 	return (
-		<Box borderWidth="1px" borderRadius="lg" overflowX="auto" mx="4" mb="4">
+		<Box borderWidth="1px" borderRadius="lg" overflowX="auto" p="4" mx="4" mb="4">
 			<Table w="full">
 				<thead>
 					<Tr>
@@ -22,8 +22,7 @@ const FilesTable: React.FC<Props> = ({ childFiles }) => {
 					</Tr>
 				</thead>
 				<tbody>
-					{childFiles.length > 0 &&
-						childFiles.map((childFile) => <File key={childFile.name} file={childFile} />)}
+					{files.length > 0 && files.map((file) => <File key={file.name} file={file} />)}
 				</tbody>
 			</Table>
 		</Box>
