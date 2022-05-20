@@ -26,8 +26,10 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 			mailSettings: { spamCheck: { enable: false } },
 		});
 
-		// return res.json(`An email has been sent to you. Click the link to log in or sign up.`);
-		return res.json(response);
+		return res.json({
+			message: `An email has been sent to you. Click the link to log in or sign up.`,
+			response,
+		});
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
