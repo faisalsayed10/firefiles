@@ -27,7 +27,7 @@ export default function Login() {
 			setLoading(true);
 			const { data } = await axios.post("/api/auth/login", { email });
 
-			toast.success(data);
+			// toast.success(data);
 		} catch (err) {
 			toast.error(err.response.data.error || err.message);
 		}
