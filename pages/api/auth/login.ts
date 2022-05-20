@@ -20,7 +20,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 					from: process.env.EMAIL_FROM,
 					subject: "Log in to Firefiles",
 					text: text(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
-					html: html(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
+					// html: html(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
 				})
 				.catch((error) => {
 					console.error(error);
