@@ -5,25 +5,24 @@
 
 # Description
 
-Get your own file hosting service in minutes. This is the hosted version of Firefiles, Make sure you check the [docs](https://firefiles.vercel.app/docs) before getting started.
+Firefiles is an open‑source alternative to Dropbox which lets you setup a cloud drive with the backend of your choice and lets you seamlessly manage your files across multiple providers.
 
 # Features
 
-Get a Google Drive like interface for your storage buckets!
-
+- A modern file-system interface for your storage buckets.
 - Manage files in the browser.
 - Easily download and share files.
-- File previews (coming soon!)
-- AWS S3 support (coming soon!)
+- File previews.
+- AWS S3 support.
+- Dark theme.
 
 # Screenshots
 
- <img src="https://firefiles.vercel.app/firefiles-demo.png">
- <img src="https://firefiles.vercel.app/firefiles-demo2.png">
+ <img src="https://firefiles.vercel.app/firefiles-demo3.png">
  
 # Tech Used
 
-![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white) ![Firebase](https://img.shields.io/badge/firebase-%23039BE5.svg?style=for-the-badge&logo=firebase) ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white) ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 
 <!-- </> with 💛 by readMD (https://readmd.itsvg.in) -->
 
