@@ -14,7 +14,7 @@ const Footer = () => {
 						<a className="text-gray-400 hover:text-white" href="https://twitter.com/tryfirefiles">
 							<BrandTwitter />
 						</a>
-						<a className="ml-3 text-gray-400 hover:text-white" href="https://discord.com">
+						<a className="ml-3 text-gray-400 hover:text-white" href="https://discord.gg/285WKUbuYG">
 							<BrandDiscord />
 						</a>
 						<a

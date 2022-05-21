@@ -27,7 +27,7 @@ const Navbar = () => {
 						</a>
 						<a
 							className="text-sm text-[#ccc] hover:text-[#ecf0f1] transition duration-300"
-							href="https://discord.com"
+							href="https://discord.gg/285WKUbuYG"
 							target="_blank"
 						>
 							Community
@@ -71,7 +71,7 @@ const Navbar = () => {
 					</a>
 					<a
 						className="text-sm text-[#ccc] hover:text-[#ecf0f1] transition duration-300"
-						href="https://discord.com"
+						href="https://discord.gg/285WKUbuYG"
 						target="_blank"
 					>
 						Community
