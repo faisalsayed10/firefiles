@@ -8,6 +8,7 @@ import {
 	Text,
 	useColorMode,
 } from "@chakra-ui/react";
+import useInterval from "@hooks/useInterval";
 import useUser from "@hooks/useUser";
 import axios from "axios";
 import Head from "next/head";
@@ -19,6 +20,14 @@ export default function Login() {
 	const { colorMode } = useColorMode();
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [timeGap, setTimeGap] = useState(0);
+
+	useInterval(
+		() => {
+			setTimeGap(timeGap - 1);
+		},
+		timeGap > 0 ? 1000 : null
+	);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
@@ -28,6 +37,7 @@ export default function Login() {
 			const { data } = await axios.post("/api/auth/login", { email });
 
 			toast.success(data.message);
+			setTimeGap(30);
 		} catch (err) {
 			toast.error(err.response.data.error || err.message);
 		}
@@ -70,7 +80,7 @@ export default function Login() {
 						mb="3"
 						colorScheme="green"
 						variant="solid"
-						disabled={!email}
+						disabled={!email || timeGap > 0}
 						isLoading={loading}
 						w="full"
 						height="60px"
@@ -79,6 +89,9 @@ export default function Login() {
 					>
 						Log in
 					</Button>
+					{timeGap > 0 && (
+						<Text fontSize="sm">Please wait {timeGap} seconds before trying again.</Text>
+					)}
 				</Flex>
 			</Flex>
 		</>

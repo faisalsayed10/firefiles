@@ -1,4 +1,5 @@
 import sgMail from "@sendgrid/mail";
+import rateLimit from "@util/rate-limit";
 import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import jwt from "jsonwebtoken";
@@ -7,9 +8,19 @@ import validator from "validator";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
-	const { email } = req.body;
+const limiter = rateLimit({
+	interval: 5 * 60 * 1000, // 5 minutes
+	uniqueTokenPerInterval: 500, // Max 500 users per second
+});
 
+export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
+	try {
+		await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per 5 minutes
+	} catch (error) {
+		return res.status(429).json({ error: "Too many requests. Please try again after 5 minutes." });
+	}
+
+	const { email } = req.body;
 	if (!validator.isEmail(email))
 		return res.status(400).json({ error: "The email you provided is invalid." });
 
