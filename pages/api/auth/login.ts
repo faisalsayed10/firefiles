@@ -1,34 +1,46 @@
-import sendgrid from "@sendgrid/mail";
+import sgMail from "@sendgrid/mail";
+import rateLimit from "@util/rate-limit";
 import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import jwt from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import validator from "validator";
 
-export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
-	const { email } = req.body;
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+const limiter = rateLimit({
+	interval: 5 * 60 * 1000, // 5 minutes
+	uniqueTokenPerInterval: 500, // Max 500 users per second
+});
+
+export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
+	try {
+		await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per 5 minutes
+	} catch (error) {
+		return res.status(429).json({ error: "Too many requests. Please try again after 5 minutes." });
+	}
+
+	const { email } = req.body;
 	if (!validator.isEmail(email))
 		return res.status(400).json({ error: "The email you provided is invalid." });
 
 	try {
-		sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
-		jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" }, async (err, token) => {
-			await sendgrid
-				.send({
-					to: email,
-					from: process.env.EMAIL_FROM,
-					subject: "Log in to Firefiles",
-					text: text(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
-					html: html(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
-				})
-				.catch((error) => {
-					console.error(error);
-					return res.status(500).json({ error: err.message });
-				});
+		const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+		const response = await sgMail.send({
+			to: email,
+			from: process.env.EMAIL_FROM,
+			subject: "Log in to Firefiles",
+			text: text(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
+			html: html(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
+			hideWarnings: false,
+			mailSettings: { spamCheck: { enable: false } },
 		});
 
-		return res.json(`An email has been sent to you. Click the link to log in or sign up.`);
+		return res.json({
+			message: `An email has been sent to you. Click the link to log in or sign up.`,
+			response,
+		});
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
