@@ -4,21 +4,24 @@ import "nextra-theme-docs/style.css";
 
 If you want to enable file previewing in the app, you'll have to tweak your bucket's CORS settings.  
 Here's how:
+
 1. Go to the Firebase Console, Click on `Storage` and copy your bucket's URL.
-![firebase-copy-bucket](/firebase-copy-bucket.png)
+   ![firebase-copy-bucket](/firebase-copy-bucket.png)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/home/dashboard?cloudshell=true).
 
-2. You'll see a terminal window pop up. Click on `+` and select your project from the list.
-![gcp-console](/gcp-console.png)
+1. You'll see a terminal window pop up. Click on `+` and select your project from the list.
+   ![gcp-console](/gcp-console.png)
 
-3. First, paste this in the terminal window and press enter:
+1. First, paste this in the terminal window and press enter:
+
 ```bash
-rm cors.json 
+rm cors.json
 echo "[ { \"origin\": [\"https://usefirefiles.vercel.app\"], \"method\": [\"GET\"], \"maxAgeSeconds\": 3600 } ]" >> cors.json
 ```
 
 4. Then replace `<your-bucket-url>` with the bucket URL you copied at step 1 and then paste this in the terminal to enable CORS for your bucket:
+
 ```bash
 gsutil cors set cors.json <your-bucket-url>
 ```

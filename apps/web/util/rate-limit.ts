@@ -1,4 +1,4 @@
-import LRU from "lru-cache"
+import LRU from "lru-cache";
 
 const rateLimit = (options) => {
 	const tokenCache = new LRU({

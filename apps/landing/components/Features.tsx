@@ -24,7 +24,10 @@ const Features = () => {
 						<br /> for your storage buckets.
 					</h1>
 				</div>
-				<div ref={ref} className="grid grid-rows-6 sm:grid-cols-2 sm:grid-rows-3 lg:grid-cols-3 lg:grid-rows-2 gap-y-8 gap-x-8 relative z-10 mx-5">
+				<div
+					ref={ref}
+					className="grid grid-rows-6 sm:grid-cols-2 sm:grid-rows-3 lg:grid-cols-3 lg:grid-rows-2 gap-y-8 gap-x-8 relative z-10 mx-5"
+				>
 					<FeatureCard
 						title="Open Source"
 						subtitle="The entire code is fully open-sourced on Github."

@@ -60,12 +60,13 @@ yarn lint
 
 ## Adding cloud providers
 
-Adding a new cloud providers simply requires you to create a new hook in the `hooks/` directory. 
+Adding a new cloud providers simply requires you to create a new hook in the `hooks/` directory.
 
 - First, create a new file inside `pages/new/` directory which will be used to get the credentials for that provider. (refer other files to get an idea)
 - Then, create a new file inside the `hooks/` folder named `use<YOUR_PROVIDER_NAME>.tsx`.
 - You can use `useS3.tsx` as a starting point.
 - It must contain a context which provides the following values:
+
 ```
 loading: boolean;
 currentFolder: DriveFolder;
@@ -80,6 +81,7 @@ removeFile: (file: DriveFile) => Promise<boolean>;
 ```
 
 This is defined in the `useBucket` hook.
+
 - The first `useEffect` with the `// set currentFolder` comment must be used to change the current directory according to the path. You won't need to make much changes in this hook.
 - The next `useEffect` commented with `// get files and folders` must be used to populate the `files` and `folders` states according to the current directory.
 - Fill out the remaining functions like `addFolder`, `removeFolder`, `addFile` and `removeFile`.
@@ -97,12 +99,12 @@ Once that is done, your drive will show up on your dashboard, click on that driv
 If you're facing any issues, bugs or errors, try checking the console and debugging it.
 
 Things to test:
+
 - [ ] Check if the files and folders are getting populated correctly.
 - [ ] Check if you can navigate inside subfolders.
 - [ ] Check if you can preview / download / upload / delete / share the files.
 - [ ] Check if you can delete an entire folder with its contents.
 - [ ] Check if you can create a folder and upload files to it.
-
 
 ## Creating a PR
 

@@ -23,5 +23,5 @@ export default {
 			<meta name="description" content="Get your own file hosting service in minutes." />
 			<meta name="og:title" content="Firefiles" />
 		</>
-	)
+	),
 };

@@ -42,6 +42,6 @@ We don't provide cloud storage. We let you bring a cloud provider of your own ch
 
 Yes! We do! We can't provide a time frame for this yet, but we can only say that it is surely coming soon.
 
-## I wanted ______ as a provider but I couldn't find it.
+## I wanted **\_\_** as a provider but I couldn't find it.
 
 Create an issue at https://github.com/faisalsayed10/firefiles/issues and we'll add it for you (or if you're a developer yourself, we'd love some contributions!) :)

@@ -23,10 +23,7 @@ class MyDocument extends Document {
 						property="og:description"
 						content="The open-source alternative to Dropbox. Firebase gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
-					<meta
-						property="og:image"
-						content="https://firefiles.vercel.app/firefiles-preview.png"
-					/>
+					<meta property="og:image" content="https://firefiles.vercel.app/firefiles-preview.png" />
 					<meta property="twitter:card" content="summary_large_image" />
 					<meta property="twitter:url" content="https://firefiles.vercel.app" />
 					<meta property="twitter:title" content="Firefiles" />
