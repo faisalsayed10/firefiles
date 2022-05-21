@@ -13,7 +13,7 @@ As we're using PlanetScale, our script is `prisma generate && prisma db push && 
 
 For changing the `package.json` file, you'll have to fork and clone the repository locally and then make the edits and then finally deploy your edited version.
 
-**NOTE:** If you prefer to use PlanetScale, you won't have to make any changes.
+**NOTE:** If you prefer to use PlanetScale, you won't have to make any changes (Although, make sure you do not promote any branch to production).
 
 ## Deploying with Vercel
 
@@ -42,7 +42,7 @@ Click on the button above. You will be asked for some environment variables. Let
 `SELF_HOST` - Just keep this value as `true`, we'll use this to disable paywalls in the future versions.
 
 **TIP:** You can use a service like a random password generator to generate the secrets.  
-**NOTE:** If you change an environment variables, you will have to redeploy the app.
+**NOTE:** If you change an environment variable, you will have to redeploy the app.
 
 And finally, click on the `Deploy` button!
 
