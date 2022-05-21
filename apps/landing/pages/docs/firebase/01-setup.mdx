@@ -1,0 +1,41 @@
+import Callout from "nextra-theme-docs/callout";
+import "nextra-theme-docs/style.css";
+
+# Setup
+
+Let's first setup our Firebase project. (This guide is beginner-friendly, so if you have 0 experience with Firebase, you'll still be able to follow along.)
+
+## Creating a new Firebase project
+
+**Note:** Skip this step if you already have a Firebase project.
+
+1. Go to [Firebase console](https://console.firebase.google.com/).
+   ![firebase-console](/firebase-console.png)
+
+2. Click on the `+ Add Project` button.
+
+3. Give your project a name, and on the next page, disable Google Analytics if not required.
+   ![firebase-add-project](/firebase-add-project.png)
+
+4. Click on `Create` and wait for your project to get created.
+   ![firebase-add-project](/firebase-project-created.png)
+
+5. Once created, you'll need to configure your project for each platform. However, we only need to worry about configuring the `Web` platform. To do this, click on the `</>` icon in the console.
+
+6. Once you get to the `Add Firebase SDK` section, copy and store your config values.
+   ![firebase-add-sdk](/firebase-add-sdk.png)
+
+Once this is done, let's move to setting up our cloud storage. Click on the `Storage` section in the sidebar and click on `Get Started`. Select `Production Mode` when asked to select the type of mode to use. Firebase will now ask you to select a location for your bucket. Select the one which is closer to you.
+
+**NOTE:** Once the location is selected, it cannot be changed again. Upload/Download speeds depend on the selected location and your location.
+
+![firebase-create-bucket](/firebase-create-bucket.png)
+
+Aaand our bucket is created!
+
+![firebase-bucket](/firebase-bucket.png)
+
+<Callout emoji="‼️">
+	Make sure you read the next section which highlights some important stuff that needs to be done
+	before you can use Firefiles!
+</Callout>

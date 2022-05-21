@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+* {
+	scroll-behavior: smooth;
+}
+
+.main {
+	font-family: "Inter", sans-serif;
+}
+
+.blur-gradient {
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%, 0%);
+	width: 100%;
+	height: 75%;
+	border-radius: 50% 22% 40% 80%;
+	filter: blur(100px);
+	background: radial-gradient(circle at 50% 50%, #4c00ff, #4c00ff00);
+	opacity: 0.5;
+}
+
+.pricing-card {
+	width: 380px;
+}
+
+.floss {
+	background-image: url("/floss.png");
+	background-size: cover;
+}
+
+.blossom {
+	background-image: url("/blossom.png");
+	background-size: cover;
+}
+.glass-rainbow {
+	background-image: url("/glass-rainbow.png");
+	background-size: cover;
+}

@@ -1,0 +1,55 @@
+import "nextra-theme-docs/style.css";
+
+# Guide
+
+## Prerequisites
+
+- A [SendGrid](https://sendgrid.com/) account to make sure passwordless login works.
+- A MySQL database. (We recommend using [Railway](https://railway.app/) or [PlanetScale](https://planetscale.com/))
+
+**VERY IMPORTANT:** Depending on the database you use, you'll have to change the `vercel-build` script in [package.json](https://github.com/faisalsayed10/firefiles/blob/main/package.json):
+
+As we're using PlanetScale, our script is `prisma generate && prisma db push && next build` but for most of the other databases, you'll have to change it to `prisma generate && prisma migrate && next build`. Search for the specific Prisma integration guides to know more details.
+
+For changing the `package.json` file, you'll have to fork and clone the repository locally and then make the edits and then finally deploy your edited version.
+
+**NOTE:** If you prefer to use PlanetScale, you won't have to make any changes.
+
+## Deploying with Vercel
+
+We will use [Vercel](https://vercel.com?utm_source=firefiles&utm_medium=docs) to deploy our instance. However, you can use any other hosting service which supports Next.js. Go ahead and create an account on Vercel if you haven't already. (It's free!)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ffaisalsayed10%2Ffirefiles%2Ftree%2Fmain&env=COOKIE_PASSWORD,CIPHER_KEY,SENDGRID_API_KEY,EMAIL_FROM,JWT_SECRET,DATABASE_URL,DEPLOY_URL,SELF_HOST&envDescription=Important%20ENVs%20for%20the%20app%20to%20work.&envLink=https%3A%2F%2Ffirefiles.vercel.app%2Fdocs%2Fself-host%23environment-variables&redirect-url=https%3A%2F%2Ffayd.me%2Ffirefiles-selfhost)
+
+Click on the button above. You will be asked for some environment variables. Let us look at these variables one-by-one.
+
+### Environment Variables
+
+`COOKIE_PASSWORD` - It is used to encrypt cookies in the browser. This should be a 32 character long randomly generated string. (Make sure to exclude characters like `$"'` which can break the app)
+
+`CIPHER_KEY` - It is used to encrypt the bucket keys which the user provides. This should also be a strong and randomly generated string.
+
+`SENDGRID_API_KEY` - It is used to send emails for passwordless login. You can get this from the SendGrid dashboard.
+
+`EMAIL_FROM` - It is used to send emails for passwordless login. This is the email which is added and verified in the SendGrid dashboard.
+
+`JWT_SECRET` - This is again a randomly generated string which is used to sign and verify JWT tokens (used for paswordless logins).
+
+`DATABASE_URL` - The database URL of your MySQL database. (This should not be a localhost URL)
+
+`DEPLOY_URL` - This is the URL where you app will be deployed. For most of the times, Vercel gives you a URL like `https://<your-project-name-on-vercel>.vercel.app`. If this is not the case, you can keep a placeholder value here, wait until your app gets deployed for the first time, get your deployed URL, change the environment variable, and then finally click on `Redeploy`.
+
+`SELF_HOST` - Just keep this value as `true`, we'll use this to disable paywalls in the future versions.
+
+**TIP:** You can use a service like a random password generator to generate the secrets.  
+**NOTE:** If you change an environment variables, you will have to redeploy the app.
+
+And finally, click on the `Deploy` button!
+
+![vercel-deployed](/vercel-deployed.png)
+
+You can configure the domain of your instance in Vercel's project settings. (Make sure you update the `DEPLOY_URL` env)
+
+It's time to start using Firefiles!
+
+![nice](https://media.giphy.com/media/SYzDscQMN98G0LUHib/giphy.gif)

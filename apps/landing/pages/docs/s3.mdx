@@ -1,0 +1,24 @@
+import Callout from "nextra-theme-docs/callout";
+import "nextra-theme-docs/style.css";
+
+# Guide
+
+A video tutorial on how to setup your s3 bucket and how to get the keys has been provided in the Firefiles app at the time of creating a new s3 drive.
+You may refer to that video.
+
+We recommend you to not change any settings or configurations at the time of creating your s3 bucket.
+If you are concerned about the security, the default settings are actually very secure and block all public access to your buckets (As of May 2022).
+
+<Callout>
+	There is no need of creating an s3 bucket before using Firefiles. If you provide us with the
+	access keys only, we'll let you create an s3 bucket directly from Firefiles!
+</Callout>
+
+At the time of creating a new drive in Firefiles, make sure that you enter the `region` correctly, otherwise AWS might throw an error.
+
+## Regarding File Sharing
+
+Unlike Firebase, there are no permanent links to files in s3. So when you share a file, you will get a presigned URL which has an expiration of 24 hours. 
+We will add an option to extend this expiry in a future release, but until then please be aware that your URLs will expire after 24 hours.
+
+If you're still facing any issues, please feel free to reach out to us by [emailing us](mailto://firefiles@fayd.me) or by creating an issue at our [Github page](https://github.com/faisalsayed10/firefiles)
