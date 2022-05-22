@@ -33,7 +33,7 @@ const NewFirebase = () => {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
-	const handleSubmit = async (e: React.FormEvent<HTMLDivElement>) => {
+	const createBucket = async (e: React.FormEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setLoading(true);
 
@@ -71,7 +71,7 @@ const NewFirebase = () => {
 	return (
 		<>
 			<Head>
-				<title>Create New Drive | Firebase</title>
+				<title>Firebase | Firefiles</title>
 			</Head>
 			<Flex px="16px" pt="3">
 				<IconButton
@@ -86,7 +86,7 @@ const NewFirebase = () => {
 				</Heading>
 			</Flex>
 			<Container display="flex" minH="90vh" alignItems="center">
-				<Flex as="form" onSubmit={handleSubmit} flexDir="column" w="full">
+				<Flex as="form" onSubmit={createBucket} flexDir="column" w="full">
 					<Textarea
 						value={raw}
 						onChange={(e) => setRaw(e.target.value)}

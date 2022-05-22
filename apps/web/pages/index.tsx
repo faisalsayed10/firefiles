@@ -39,7 +39,7 @@ const Dashboard = () => {
 	return (
 		<>
 			<Head>
-				<title>Firefiles - Dashboard</title>
+				<title>Your Drives | Firefiles</title>
 				<meta charSet="utf-8" />
 			</Head>
 			<Flex flexDir="column">

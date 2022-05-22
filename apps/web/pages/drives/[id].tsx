@@ -29,8 +29,7 @@ const DrivePage: React.FC<Props> = ({ data }) => {
 	return (
 		<>
 			<Head>
-				<title>Firefiles - Your Files</title>
-				<meta charSet="utf-8" />
+				<title>Your Files | Firefiles</title>
 			</Head>
 			<KeysProvider data={data}>
 				{data.type === "firebase" ? (

@@ -15,6 +15,7 @@ import AWSRegionSelect from "@components/ui/AWSRegionSelect";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -32,7 +33,7 @@ const NewS3 = () => {
 	const [buckets, setBuckets] = useState<Bucket[]>([]);
 	const [selectedBucket, setSelectedBucket] = useState("Not Selected");
 
-	const handleSubmit = async (e: React.FormEvent<HTMLDivElement>) => {
+	const listBuckets = async (e: React.FormEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setLoading(true);
 
@@ -57,7 +58,7 @@ const NewS3 = () => {
 		setLoading(false);
 	};
 
-	const handleCreate = async () => {
+	const createBucket = async () => {
 		setLoading(true);
 
 		try {
@@ -95,6 +96,9 @@ const NewS3 = () => {
 
 	return (
 		<>
+			<Head>
+				<title>AWS S3 | Firefiles</title>
+			</Head>
 			<Flex px="16px" pt="3">
 				<IconButton
 					variant="ghost"
@@ -108,7 +112,7 @@ const NewS3 = () => {
 				</Heading>
 			</Flex>
 			<Container display="flex" minH="90vh" flexDir="column" justifyContent="center">
-				<Flex as="form" onSubmit={handleSubmit} flexDir="column" w="full">
+				<Flex as="form" onSubmit={listBuckets} flexDir="column" w="full">
 					<Input
 						mb="2"
 						variant="flushed"
@@ -170,7 +174,7 @@ const NewS3 = () => {
 								mt="2"
 								w="full"
 								isLoading={loading}
-								onClick={handleCreate}
+								onClick={createBucket}
 								colorScheme="green"
 								variant="solid"
 							>

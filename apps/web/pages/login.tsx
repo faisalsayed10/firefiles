@@ -47,7 +47,7 @@ export default function Login() {
 	return (
 		<>
 			<Head>
-				<title>Firefiles - Login</title>
+				<title>Login | Firefiles</title>
 			</Head>
 			<Flex
 				className={colorMode === "light" ? "auth-background" : ""}
