@@ -31,6 +31,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			region: data.keys.region,
 			maxAttempts: 1,
 			credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
+			...(data.keys?.endpoint ? { endpoint: data.keys.endpoint } : {}),
 		})
 	);
 	const [loading, setLoading] = useState(false);
@@ -40,6 +41,24 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	const [folders, setFolders] = useState<DriveFolder[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const [files, setFiles] = useState<DriveFile[]>(null);
+	const isMounted = useRef(false);
+
+	// Fallback for old buckets not already having the bucketUrl.
+	useEffect(() => {
+		if (isMounted.current || !data?.keys) return;
+		isMounted.current = true;
+		if (data.keys.bucketUrl) return;
+
+		if ((Provider[data.type] as Provider) === Provider.s3) {
+			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`;
+		} else if ((Provider[data.type] as Provider) === Provider.backblaze) {
+			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.backblazeb2.com`;
+		}
+
+		return () => {
+			isMounted.current = false;
+		};
+	}, [data]);
 
 	const addFolder = (name: string) => {
 		const path =
@@ -53,7 +72,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			parent: currentFolder.fullPath,
 			createdAt: new Date().toISOString(),
 			bucketName: data.keys.Bucket,
-			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
+			bucketUrl: data.keys.bucketUrl,
 		};
 
 		setFolders((folders) => [...folders, newFolder]);
@@ -210,7 +229,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			name: fullPath.split("/").pop(),
 			bucketName: data.keys.Bucket,
 			parent: fullPath.split("/").shift() + "/",
-			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
+			bucketUrl: data.keys.bucketUrl,
 		});
 	}, [fullPath, user]);
 
@@ -240,7 +259,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								size: result.Size.toString(),
 								contentType: mime.lookup(result.Key) || "",
 								bucketName: results.Name,
-								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								bucketUrl: data.keys.bucketUrl,
 								url: await getSignedUrl(
 									s3Client,
 									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
@@ -269,7 +288,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								name: results.CommonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
 								bucketName: results.Name,
 								parent: currentFolder.fullPath,
-								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								bucketUrl: data.keys.bucketUrl,
 							};
 							setFolders((folders) => [...folders, driveFolder]);
 						}
@@ -295,7 +314,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								size: result.Size.toString(),
 								contentType: mime.lookup(result.Key) || "",
 								bucketName: results.Name,
-								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								bucketUrl: data.keys.bucketUrl,
 								url: await getSignedUrl(
 									s3Client,
 									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
