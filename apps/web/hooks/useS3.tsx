@@ -8,11 +8,11 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive } from "@prisma/client";
 import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
 import Evaporate from "evaporate";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
