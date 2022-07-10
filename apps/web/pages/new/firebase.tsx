@@ -85,7 +85,7 @@ const NewFirebase = () => {
 					Paste your Firebase config
 				</Heading>
 			</Flex>
-			<Container display="flex" minH="90vh" alignItems="center">
+			<Container display="flex" minH="90vh" alignItems="center" maxW="lg">
 				<Flex as="form" onSubmit={createBucket} flexDir="column" w="full">
 					<Textarea
 						value={raw}

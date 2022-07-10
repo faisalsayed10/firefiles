@@ -11,7 +11,6 @@ import {
 	Select,
 	Text,
 } from "@chakra-ui/react";
-import AWSRegionSelect from "@components/ui/AWSRegionSelect";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
@@ -21,14 +20,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
+import validator from "validator";
 
 const NewS3 = () => {
 	const { user } = useUser();
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
-	const [accessKey, setAccessKey] = useState("");
-	const [secretKey, setSecretKey] = useState("");
-	const [region, setRegion] = useState("");
+	const [keyId, setKeyId] = useState("");
+	const [applicationKey, setApplicationKey] = useState("");
+	const [endpoint, setEndpoint] = useState("");
 	const [bucketName, setBucketName] = useState("");
 	const [buckets, setBuckets] = useState<Bucket[]>([]);
 	const [selectedBucket, setSelectedBucket] = useState("Not Selected");
@@ -40,13 +40,20 @@ const NewS3 = () => {
 		try {
 			if (!user?.email) throw new Error("You need to login to perform this action!");
 
-			if (!accessKey.trim() || !secretKey.trim() || !region.trim())
+			if (!keyId.trim() || !applicationKey.trim() || !endpoint.trim())
 				throw new Error("One or more fields are missing!");
 
+			if (
+				!validator.isURL(endpoint, { require_protocol: true, protocols: ["https"] }) ||
+				!/^(https:\/\/s3\.).+(\.backblazeb2.com)$/g.test(endpoint)
+			)
+				throw new Error("Endpoint URL does not match the required format!");
+
 			const { data } = await axios.post<ListBucketsCommandOutput>("/api/s3/list-buckets", {
-				accessKey,
-				secretKey,
-				region,
+				accessKey: keyId,
+				secretKey: applicationKey,
+				endpoint,
+				region: endpoint.split(".")[1],
 			});
 
 			setBuckets(data.Buckets);
@@ -64,10 +71,16 @@ const NewS3 = () => {
 		try {
 			if (!user?.email) throw new Error("You need to login to perform this action!");
 
-			if (!accessKey.trim() || !secretKey.trim() || !region.trim())
+			if (!keyId.trim() || !applicationKey.trim())
 				throw new Error("One or more fields are missing!");
 
-			if (selectedBucket === "Not Selected" && !bucketName.trim())
+			if (
+				!validator.isURL(endpoint, { require_protocol: true, protocols: ["https"] }) ||
+				!/^(https:\/\/s3\.).+(\.backblazeb2.com)$/g.test(endpoint)
+			)
+				throw new Error("Endpoint URL does not match the required format!");
+
+			if ((selectedBucket === "Not Selected" && !bucketName.trim()) || !endpoint.trim())
 				throw new Error("Select an existing bucket or enter a new bucket name!");
 
 			if (
@@ -80,14 +93,15 @@ const NewS3 = () => {
 
 			await axios.post("/api/drive", {
 				data: {
-					accessKey,
-					secretKey,
+					accessKey: keyId,
+					secretKey: applicationKey,
 					Bucket,
-					bucketUrl: `https://${Bucket}.s3.${region}.amazonaws.com`,
-					region,
+					bucketUrl: `https://${Bucket}.s3.${endpoint.split(".")[1]}.backblazeb2.com`,
+					endpoint,
+					region: endpoint.split(".")[1],
 				},
 				name: Bucket,
-				type: "s3",
+				type: "backblaze",
 			});
 
 			toast.success("Drive created successfully!");
@@ -103,7 +117,7 @@ const NewS3 = () => {
 	return (
 		<>
 			<Head>
-				<title>AWS S3 | Firefiles</title>
+				<title>Backblaze | Firefiles</title>
 			</Head>
 			<Flex px="16px" pt="3">
 				<IconButton
@@ -114,7 +128,7 @@ const NewS3 = () => {
 					onClick={() => router.push("/new")}
 				/>
 				<Heading as="h3" size="lg">
-					Enter your AWS keys
+					Enter your Backblaze keys
 				</Heading>
 			</Flex>
 			<Container display="flex" minH="90vh" flexDir="column" justifyContent="center" maxW="lg">
@@ -122,23 +136,31 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Access Key ID"
+						placeholder="Key ID"
 						type="text"
-						value={accessKey}
-						onChange={(e) => setAccessKey(e.target.value)}
+						value={keyId}
+						onChange={(e) => setKeyId(e.target.value)}
 						required
 					/>
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Secret Access Key"
+						placeholder="Application Key"
 						type="text"
-						value={secretKey}
-						onChange={(e) => setSecretKey(e.target.value)}
+						value={applicationKey}
+						onChange={(e) => setApplicationKey(e.target.value)}
 						required
 					/>
-					<AWSRegionSelect value={region} onChange={(e) => setRegion(e.target.value)} />
-					<VideoModal src="/aws-keys-tutorial.mov" />
+					<Input
+						mb="2"
+						variant="flushed"
+						placeholder="Endpoint - https://s3.<your-region>.backblazeb2.com"
+						type="text"
+						value={endpoint}
+						onChange={(e) => setEndpoint(e.target.value)}
+						required
+					/>
+					<VideoModal src="/backblaze-keys-tutorial.mov" />
 					<Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
 						Next
 					</Button>

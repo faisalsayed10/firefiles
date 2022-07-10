@@ -31,6 +31,8 @@ export default function useBucket(): ContextValue {
 		return useFirebase();
 	} else if ((Provider[keys.type] as Provider) === Provider.s3) {
 		return useS3();
+	} else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
+		return useS3();
 	}
 
 	return null;

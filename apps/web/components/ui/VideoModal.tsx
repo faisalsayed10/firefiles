@@ -31,14 +31,11 @@ const VideoModal: React.FC<Props> = ({ src }) => {
 				How do I get the credentials?
 			</Button>
 
-			<Modal isOpen={isOpen} onClose={onClose} isCentered>
+			<Modal isOpen={isOpen} onClose={onClose} isCentered size="2xl">
 				<ModalOverlay />
 				<ModalContent>
-					<ModalHeader py="2" px="4">
-						Here's How:
-					</ModalHeader>
 					<ModalCloseButton _focus={{ outline: "none" }} />
-					<ModalBody p="0">
+					<ModalBody p={0}>
 						<Player playsInline src={src} />
 					</ModalBody>
 				</ModalContent>
