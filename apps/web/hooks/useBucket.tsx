@@ -12,7 +12,7 @@ export type ContextValue = {
 	setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>;
 	addFolder: (name: string) => void;
 	removeFolder: (folder: DriveFolder) => Promise<void>;
-	addFile: (files: File[] | FileList) => Promise<void>;
+	addFile: (files: File[] | FileList) => Promise<any>;
 	removeFile: (file: DriveFile) => Promise<boolean>;
 };
 

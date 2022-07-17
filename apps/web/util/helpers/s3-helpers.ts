@@ -118,3 +118,13 @@ export const cryptoHexEncodedHash256 = (x) => {
 	o.update(x);
 	return o.hex();
 };
+
+export const calculateVariablePartSize = (size: number) => {
+	const mb = 1024 * 1024;
+	const gb = mb * 1024;
+	if (size <= 200 * mb) return 5 * mb;
+	else if (size <= 5 * gb) return 25 * mb;
+	else if (size <= 10 * gb) return 50 * mb;
+	else if (size <= 100 * gb) return 100 * mb;
+	else return 500 * mb;
+};
