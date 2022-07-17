@@ -4,12 +4,9 @@ import {
 	PutBucketCorsCommand,
 	PutBucketCorsCommandInput,
 	PutPublicAccessBlockCommand,
-	S3Client,
+	S3Client
 } from "@aws-sdk/client-s3";
 import { NextApiRequest, NextApiResponse } from "next";
-import Crypto from "crypto-js";
-import MD5 from "js-md5";
-import { sha256 as SHA256 } from "js-sha256";
 
 export const createNewBucket = async (
 	client: S3Client,
@@ -86,37 +83,6 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 		default:
 			break;
 	}
-};
-
-export const signRequest = async (stringToSign: string, secretKey: string) => {
-	const stringToSignDecoded = decodeURIComponent(stringToSign);
-	const requestScope = stringToSignDecoded.split("\n")[2];
-	const [date, region, service, signatureType] = requestScope.split("/");
-
-	const hmacSha256 = (stringToSign, signingKey) => {
-		return Crypto.HmacSHA256(signingKey, stringToSign);
-	};
-
-	return new Promise<string>(function (resolve, reject) {
-		const round1 = hmacSha256(`AWS4${secretKey}`, date);
-		const round2 = hmacSha256(round1, region);
-		const round3 = hmacSha256(round2, service);
-		const round4 = hmacSha256(round3, signatureType);
-		const final = hmacSha256(round4, stringToSignDecoded);
-		resolve(final.toString(Crypto.enc.Hex));
-	});
-};
-
-export const cryptoMd5Method = (x) => {
-	const o = MD5.create();
-	o.update(x);
-	return o.base64();
-};
-
-export const cryptoHexEncodedHash256 = (x) => {
-	const o = SHA256.create();
-	o.update(x);
-	return o.hex();
 };
 
 export const calculateVariablePartSize = (size: number) => {
