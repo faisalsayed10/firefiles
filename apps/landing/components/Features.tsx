@@ -74,7 +74,7 @@ const Features = () => {
 					/>
 					<FeatureCard
 						title="AWS Support"
-						subtitle="Use s3 buckets as your cloud drives."
+						subtitle="Use S3 buckets as your cloud drives."
 						icon={<Bucket />}
 						controls={controls}
 						variants={cardVariant}
