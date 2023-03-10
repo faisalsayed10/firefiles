@@ -12,7 +12,7 @@ export type ContextValue = {
 	setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>;
 	addFolder: (name: string) => void;
 	removeFolder: (folder: DriveFolder) => Promise<void>;
-	addFile: (files: File[] | FileList) => Promise<void>;
+	addFile: (files: File[] | FileList) => Promise<any>;
 	removeFile: (file: DriveFile) => Promise<boolean>;
 };
 
@@ -30,6 +30,8 @@ export default function useBucket(): ContextValue {
 	if ((Provider[keys.type] as Provider) === Provider.firebase) {
 		return useFirebase();
 	} else if ((Provider[keys.type] as Provider) === Provider.s3) {
+		return useS3();
+	} else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
 		return useS3();
 	}
 

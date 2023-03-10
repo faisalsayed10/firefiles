@@ -9,7 +9,7 @@ const Error = () => {
 	return (
 		<>
 			<Head>
-				<title>Firefiles - Something Went Wrong</title>
+				<title>Something Went Wrong | Firefiles</title>
 			</Head>
 			<CenterContainer>
 				<Box w="md" px="6" py="8">

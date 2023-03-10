@@ -10,15 +10,14 @@ export const PROVIDERS = [
 		logo: "/s3.png",
 	},
 	{
-		id: "minio",
-		name: "Min.io",
-		logo: "/minio.png",
-		isComingSoon: true,
-	},
-	{
 		id: "backblaze",
 		name: "Backblaze",
 		logo: "/backblaze.png",
+	},
+	{
+		id: "minio",
+		name: "Min.io",
+		logo: "/minio.png",
 		isComingSoon: true,
 	},
 	{
