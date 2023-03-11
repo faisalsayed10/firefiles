@@ -29,15 +29,14 @@ const DrivePage: React.FC<Props> = ({ data }) => {
 	return (
 		<>
 			<Head>
-				<title>Firefiles - Your Files</title>
-				<meta charSet="utf-8" />
+				<title>Your Files | Firefiles</title>
 			</Head>
 			<KeysProvider data={data}>
 				{data.type === "firebase" ? (
 					<FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
 						<Dashboard />
 					</FirebaseProvider>
-				) : data.type === "s3" ? (
+				) : data.type === "s3" || data.type === "backblaze" ? (
 					<S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
 						<Dashboard />
 					</S3Provider>

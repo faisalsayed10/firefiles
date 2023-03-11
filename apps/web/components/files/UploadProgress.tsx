@@ -1,7 +1,6 @@
 import { Box, Flex, IconButton, Progress, Text } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
-import useKeys from "@hooks/useKeys";
-import { Provider, UploadingFile } from "@util/types";
+import { UploadingFile } from "@util/types";
 import React from "react";
 import toast from "react-hot-toast";
 import { PlayerPause, PlayerPlay, X } from "tabler-icons-react";

@@ -10,6 +10,7 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { PROVIDERS } from "@util/globals";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import { ArrowNarrowLeft } from "tabler-icons-react";
@@ -19,6 +20,9 @@ const New = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Create New Drive | Firefiles</title>
+			</Head>
 			<Flex px="16px" pt="3">
 				<IconButton
 					variant="ghost"

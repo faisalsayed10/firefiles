@@ -3,16 +3,16 @@ import {
 	DeleteObjectsCommand,
 	GetObjectCommand,
 	ListObjectsV2Command,
-	S3Client,
+	S3Client
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive } from "@prisma/client";
-import { cryptoHexEncodedHash256, cryptoMd5Method, signRequest } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, UploadingFile } from "@util/types";
-import Evaporate from "evaporate";
+import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
+import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
+import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
@@ -31,6 +31,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			region: data.keys.region,
 			maxAttempts: 1,
 			credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
+			...(data.keys?.endpoint ? { endpoint: data.keys.endpoint } : {}),
 		})
 	);
 	const [loading, setLoading] = useState(false);
@@ -40,6 +41,24 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	const [folders, setFolders] = useState<DriveFolder[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const [files, setFiles] = useState<DriveFile[]>(null);
+	const isMounted = useRef(false);
+
+	// Fallback for old buckets not already having the bucketUrl.
+	useEffect(() => {
+		if (isMounted.current || !data?.keys) return;
+		isMounted.current = true;
+		if (data.keys.bucketUrl) return;
+
+		if ((Provider[data.type] as Provider) === Provider.s3) {
+			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`;
+		} else if ((Provider[data.type] as Provider) === Provider.backblaze) {
+			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.backblazeb2.com`;
+		}
+
+		return () => {
+			isMounted.current = false;
+		};
+	}, [data]);
 
 	const addFolder = (name: string) => {
 		const path =
@@ -53,7 +72,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			parent: currentFolder.fullPath,
 			createdAt: new Date().toISOString(),
 			bucketName: data.keys.Bucket,
-			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
+			bucketUrl: data.keys.bucketUrl,
 		};
 
 		setFolders((folders) => [...folders, newFolder]);
@@ -79,112 +98,113 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	};
 
 	const addFile = async (filesToUpload: File[] | FileList) => {
-		const evaporate = await Evaporate.create({
-			bucket: data.keys.Bucket,
-			awsRegion: data.keys.region,
-			aws_key: data.keys.accessKey,
-			computeContentMd5: true,
-			cryptoMd5Method,
-			cryptoHexEncodedHash256,
-			customAuthMethod: (_, __, stringToSign) => signRequest(stringToSign, data.keys.secretKey),
-			logging: false,
-		});
+		Array.from(filesToUpload).forEach(async (file) => {
+			if (/[#\$\[\]\*/]/.test(file.name))
+				return toast.error("File name cannot contain special characters (#$[]*/).");
 
-		Array.from(filesToUpload).forEach(async (toUpload) => {
+			if (files?.filter((f) => f.name === file.name).length > 0)
+				return toast.error("File with same name already exists.");
+
 			const id = nanoid();
-			if (/[#\$\[\]\*/]/.test(toUpload.name)) {
-				toast.error("File name cannot contain special characters (#$[]*/).");
-				return;
-			}
-
-			if (files?.filter((f) => f.name === toUpload.name).length > 0) {
-				toast.error("File with same name already exists.");
-				return;
-			}
-
-			const filePath =
+			const Key =
 				currentFolder === ROOT_FOLDER
-					? toUpload.name
-					: `${decodeURIComponent(currentFolder.fullPath)}${toUpload.name}`;
+					? file.name
+					: `${decodeURIComponent(currentFolder.fullPath)}${file.name}`;
 
-			evaporate.add({
-				name: filePath,
-				file: toUpload,
-				contentType: mime.lookup(toUpload.name) || "application/octet-stream",
-				uploadInitiated: () => {
-					setUploadingFiles((prev) =>
-						prev.concat([
-							{
-								id,
-								name: toUpload.name,
-								key: `${data.keys.Bucket}/${filePath}`,
-								task: evaporate,
-								state: "running",
-								progress: 0,
-								error: false,
-							},
-						])
-					);
+			const upload = new Upload({
+				client: s3Client,
+				params: {
+					Key,
+					Body: file,
+					Bucket: data.keys.Bucket,
+					ContentType: mime.lookup(file.name) || "application/octet-stream",
 				},
-				progress: (_, stats) => {
-					setUploadingFiles((prevUploadingFiles) =>
-						prevUploadingFiles.map((uploadFile) => {
-							return uploadFile.id === id
-								? {
-										...uploadFile,
-										state: "running",
-										progress: Math.round((stats.totalUploaded / stats.fileSize) * 100),
-								  }
-								: uploadFile;
-						})
-					);
-				},
-				paused: () => {
-					setUploadingFiles((prevUploadingFiles) =>
-						prevUploadingFiles.map((uploadFile) => {
-							return uploadFile.id === id ? { ...uploadFile, state: "paused" } : uploadFile;
-						})
-					);
-				},
-				resumed: () => {
-					setUploadingFiles((prevUploadingFiles) =>
-						prevUploadingFiles.map((uploadFile) => {
-							return uploadFile.id === id ? { ...uploadFile, state: "running" } : uploadFile;
-						})
-					);
-				},
-				error: (_) => {
-					setUploadingFiles((prevUploadingFiles) => {
-						return prevUploadingFiles.map((uploadFile) => {
-							if (uploadFile.id === id) return { ...uploadFile, error: true };
-							return uploadFile;
-						});
-					});
-				},
-				complete: async (_xhr, file_key) => {
-					console.log("complete", decodeURIComponent(file_key));
-					setUploadingFiles((prevUploadingFiles) =>
-						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
-					);
-					const newFile: DriveFile = {
-						fullPath: filePath,
-						name: toUpload.name,
-						parent: currentFolder.fullPath,
-						size: toUpload.size.toString(),
-						createdAt: new Date().toISOString(),
-						contentType: mime.lookup(toUpload.name) || "application/octet-stream",
-						bucketName: data.keys.Bucket,
-						bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
-						url: await getSignedUrl(
-							s3Client,
-							new GetObjectCommand({ Bucket: data.keys.Bucket, Key: decodeURIComponent(file_key) }),
-							{ expiresIn: 3600 * 24 }
-						),
-					};
-					setFiles((files) => (files ? [...files, newFile] : [newFile]));
-					toast.success("File uploaded successfully.");
-				},
+				partSize: calculateVariablePartSize(file.size),
 			});
+
+			upload.on("initiated", () => {
+				setUploadingFiles((prev) =>
+					prev.concat([
+						{
+							id,
+							name: file.name,
+							key: Key,
+							task: upload,
+							state: "running",
+							progress: 0,
+							error: false,
+						},
+					])
+				);
+			});
+
+			upload.on("progress", (progress) => {
+				setUploadingFiles((prevUploadingFiles) =>
+					prevUploadingFiles.map((uploadFile) => {
+						return uploadFile.id === id
+							? {
+									...uploadFile,
+									state: "running",
+									progress: Number(
+										parseFloat(((progress.loaded / progress.total) * 100).toString()).toFixed(2)
+									),
+							  }
+							: uploadFile;
+					})
+				);
+			});
+
+			upload.on("paused", () => {
+				setUploadingFiles((prevUploadingFiles) =>
+					prevUploadingFiles.map((uploadFile) => {
+						return uploadFile.id === id ? { ...uploadFile, state: "paused" } : uploadFile;
+					})
+				);
+			});
+
+			upload.on("resumed", () => {
+				setUploadingFiles((prevUploadingFiles) =>
+					prevUploadingFiles.map((uploadFile) => {
+						return uploadFile.id === id ? { ...uploadFile, state: "running" } : uploadFile;
+					})
+				);
+			});
+
+			upload.on("error", (err) => {
+				toast.error(err.message);
+				setUploadingFiles((prevUploadingFiles) => {
+					return prevUploadingFiles.map((uploadFile) => {
+						if (uploadFile.id === id) return { ...uploadFile, error: true };
+						return uploadFile;
+					});
+				});
+			});
+
+			upload.on("completed", async () => {
+				setUploadingFiles((prevUploadingFiles) =>
+					prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+				);
+				const newFile: DriveFile = {
+					fullPath: Key,
+					name: file.name,
+					parent: currentFolder.fullPath,
+					size: file.size.toString(),
+					createdAt: new Date().toISOString(),
+					contentType: mime.lookup(file.name) || "application/octet-stream",
+					bucketName: data.keys.Bucket,
+					bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
+					url: await getSignedUrl(
+						s3Client,
+						new GetObjectCommand({ Bucket: data.keys.Bucket, Key: Key }),
+						{ expiresIn: 3600 * 24 }
+					),
+				};
+
+				setFiles((files) => (files ? [...files, newFile] : [newFile]));
+				toast.success("File uploaded successfully.");
+			});
+
+			await upload.start();
 		});
 	};
 
@@ -210,7 +230,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 			name: fullPath.split("/").pop(),
 			bucketName: data.keys.Bucket,
 			parent: fullPath.split("/").shift() + "/",
-			bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
+			bucketUrl: data.keys.bucketUrl,
 		});
 	}, [fullPath, user]);
 
@@ -240,7 +260,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								size: result.Size.toString(),
 								contentType: mime.lookup(result.Key) || "",
 								bucketName: results.Name,
-								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								bucketUrl: data.keys.bucketUrl,
 								url: await getSignedUrl(
 									s3Client,
 									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
@@ -269,7 +289,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								name: results.CommonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
 								bucketName: results.Name,
 								parent: currentFolder.fullPath,
-								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								bucketUrl: data.keys.bucketUrl,
 							};
 							setFolders((folders) => [...folders, driveFolder]);
 						}
@@ -295,7 +315,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								size: result.Size.toString(),
 								contentType: mime.lookup(result.Key) || "",
 								bucketName: results.Name,
-								bucketUrl: `https://${results.Name}.s3.${data.keys.region}.amazonaws.com`,
+								bucketUrl: data.keys.bucketUrl,
 								url: await getSignedUrl(
 									s3Client,
 									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
