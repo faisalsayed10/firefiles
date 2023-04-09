@@ -1,56 +1,28 @@
-import {
-	Box,
-	Button,
-	Divider,
-	Flex,
-	IconButton,
-	Menu,
-	MenuButton,
-	MenuItem,
-	MenuList,
-	useColorMode,
-} from "@chakra-ui/react";
 import useUser from "@hooks/useUser";
-import { onLogout } from "@util/helpers";
-import axios from "axios";
 import { useRouter } from "next/router";
-import React from "react";
-import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
+import { ArrowNarrowLeft } from "tabler-icons-react";
 
 export default function Navbar() {
-	const { colorMode, toggleColorMode } = useColorMode();
 	const { mutateUser } = useUser();
 	const router = useRouter();
 
 	return (
-		<>
-			<Flex
-				align="center"
-				justify={router.route !== "/" ? "space-between" : "end"}
-				px="4"
-				my="3"
-				w="full"
-			>
-				{router.route !== "/" ? (
-					<Button
-						variant="link"
-						leftIcon={<ArrowNarrowLeft />}
-						fontWeight="bold"
-						onClick={() => router.push("/")}
-					>
-						Dashboard
-					</Button>
-				) : null}
-				<Box>
-					<IconButton
+		<div className="flex items-center justify-between w-full h-16 px-4 bg-white border-b border-gray-200">
+			{router.route !== "/" ? (
+				<button onClick={() => router.push("/")}>
+					<ArrowNarrowLeft /> Dashboard
+				</button>
+			) : null}
+			<div>
+				{/* <IconButton
 						aria-label="toggle color theme"
 						size="md"
 						variant="ghost"
 						_focus={{ outline: "none" }}
 						onClick={toggleColorMode}
 						icon={colorMode === "light" ? <Moon size="16" /> : <Sun size="16" />}
-					/>
-					<Menu>
+					/> */}
+				{/* <Menu>
 						<MenuButton size="sm" as={Button} variant="ghost" rightIcon={<ChevronDown size="16" />}>
 							Actions
 						</MenuButton>
@@ -82,10 +54,8 @@ export default function Navbar() {
 								Log Out
 							</MenuItem>
 						</MenuList>
-					</Menu>
-				</Box>
-			</Flex>
-			<Divider />
-		</>
+					</Menu> */}
+			</div>
+		</div>
 	);
 }

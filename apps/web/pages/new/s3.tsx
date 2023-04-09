@@ -115,7 +115,7 @@ const NewS3 = () => {
 						onChange={(e) => setSecretKey(e.target.value)}
 						required
 					/>
-					<AWSRegionSelect value={region} onChange={(e) => setRegion(e.target.value)} />
+					<AWSRegionSelect value={region} onChange={setRegion} />
 					<VideoModal src="/aws-keys-tutorial.mov" />
 					<button type="submit" disabled={loading}>
 						{loading ? "Loading" : "Next"}
