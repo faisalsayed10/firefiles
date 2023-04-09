@@ -3,6 +3,8 @@ lockfileVersion: 5.4
 specifiers:
   '@aws-sdk/client-s3': ^3.72.0
   '@aws-sdk/s3-request-presigner': ^3.81.0
+  '@headlessui/react': ^1.7.13
+  '@heroicons/react': ^2.0.17
   '@prisma/client': ^4.12.0
   '@react-hook/media-query': ^1.1.1
   '@sendgrid/mail': ^7.6.2
@@ -61,6 +63,8 @@ specifiers:
 dependencies:
   '@aws-sdk/client-s3': 3.306.0
   '@aws-sdk/s3-request-presigner': 3.306.0
+  '@headlessui/react': 1.7.13_sfoxds7t5ydpegc3knd667wn6m
+  '@heroicons/react': 2.0.17_react@17.0.2
   '@prisma/client': 4.12.0_prisma@4.12.0
   '@react-hook/media-query': 1.1.1_react@17.0.2
   '@sendgrid/mail': 7.7.0
@@ -1844,6 +1848,26 @@ packages:
       long: 4.0.0
       protobufjs: 7.2.3
       yargs: 16.2.0
+    dev: false
+
+  /@headlessui/react/1.7.13_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-9n+EQKRtD9266xIHXdY5MfiXPDfYwl7zBM7KOx2Ae3Gdgxy8QML1FkCMjq6AsOf0l6N9uvI4HcFtuFlenaldKg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16 || ^17 || ^18
+      react-dom: ^16 || ^17 || ^18
+    dependencies:
+      client-only: 0.0.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    dev: false
+
+  /@heroicons/react/2.0.17_react@17.0.2:
+    resolution: {integrity: sha512-90GMZktkA53YbNzHp6asVEDevUQCMtxWH+2UK2S8OpnLEu7qckTJPhNxNQG52xIR1WFTwFqtH6bt7a60ZNcLLA==}
+    peerDependencies:
+      react: '>= 16'
+    dependencies:
+      react: 17.0.2
     dev: false
 
   /@jridgewell/gen-mapping/0.3.3:
