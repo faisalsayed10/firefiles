@@ -1,16 +1,4 @@
 import { Bucket, ListBucketsCommandOutput } from "@aws-sdk/client-s3";
-import {
-	Box,
-	Button,
-	Container,
-	Divider,
-	Flex,
-	Heading,
-	IconButton,
-	Input,
-	Select,
-	Text,
-} from "@chakra-ui/react";
 import AWSRegionSelect from "@components/ui/AWSRegionSelect";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
@@ -33,7 +21,7 @@ const NewS3 = () => {
 	const [buckets, setBuckets] = useState<Bucket[]>([]);
 	const [selectedBucket, setSelectedBucket] = useState("Not Selected");
 
-	const listBuckets = async (e: React.FormEvent<HTMLDivElement>) => {
+	const listBuckets = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setLoading(true);
 
@@ -105,32 +93,22 @@ const NewS3 = () => {
 			<Head>
 				<title>AWS S3 | Firefiles</title>
 			</Head>
-			<Flex px="16px" pt="3">
-				<IconButton
-					variant="ghost"
-					aria-label="back"
-					icon={<ArrowNarrowLeft />}
-					mr="3"
-					onClick={() => router.push("/new")}
-				/>
-				<Heading as="h3" size="lg">
-					Enter your AWS keys
-				</Heading>
-			</Flex>
-			<Container display="flex" minH="90vh" flexDir="column" justifyContent="center" maxW="lg">
-				<Flex as="form" onSubmit={listBuckets} flexDir="column" w="full">
-					<Input
-						mb="2"
-						variant="flushed"
+			<div className="px-4 pt-3">
+				<button aria-label="back" className="mr-3" onClick={() => router.push("/new")}>
+					<ArrowNarrowLeft />
+				</button>
+				<h3 className="text-lg">Enter your AWS keys</h3>
+			</div>
+			<div className="flex min-h-screen flex-col items-center justify-center max-w-lg">
+				<form className="flex flex-col w-full" onSubmit={listBuckets}>
+					<input
 						placeholder="Access Key ID"
 						type="text"
 						value={accessKey}
 						onChange={(e) => setAccessKey(e.target.value)}
 						required
 					/>
-					<Input
-						mb="2"
-						variant="flushed"
+					<input
 						placeholder="Secret Access Key"
 						type="text"
 						value={secretKey}
@@ -139,33 +117,27 @@ const NewS3 = () => {
 					/>
 					<AWSRegionSelect value={region} onChange={(e) => setRegion(e.target.value)} />
 					<VideoModal src="/aws-keys-tutorial.mov" />
-					<Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
-						Next
-					</Button>
-				</Flex>
+					<button type="submit" disabled={loading}>
+						{loading ? "Loading" : "Next"}
+					</button>
+				</form>
 				{buckets?.length > 0 ? (
 					<>
-						<Divider my="6" />
-						<Box>
-							<Heading as="h4" size="md" mb="2">
-								Found {buckets.length} buckets:
-							</Heading>
-							<Text fontSize="sm">Choose a bucket:</Text>
-							<Select value={selectedBucket} onChange={(e) => setSelectedBucket(e.target.value)}>
+						<hr className="my-6" />
+						<div>
+							<h4 className="text-md mb-2">Found {buckets.length} buckets:</h4>
+							<p className="text-sm">Choose a bucket:</p>
+							{/* <Select value={selectedBucket} onChange={(e) => setSelectedBucket(e.target.value)}>
 								<option>Not Selected</option>
 								{buckets.map((bucket) => (
 									<option key={bucket.CreationDate.toString()} value={bucket.Name}>
 										{bucket.Name}
 									</option>
 								))}
-							</Select>
-							<Text fontSize="lg" align="center" my="2">
-								OR
-							</Text>
-							<Text fontSize="sm">Create New:</Text>
-							<Input
-								mb="2"
-								variant="flushed"
+							</Select> */}
+							<p className="text-lg align-center my-2">OR</p>
+							<p className="text-sm">Create New:</p>
+							<input
 								placeholder="Bucket Name"
 								type="text"
 								value={bucketName}
@@ -176,20 +148,13 @@ const NewS3 = () => {
 								}}
 								required
 							/>
-							<Button
-								mt="2"
-								w="full"
-								isLoading={loading}
-								onClick={createBucket}
-								colorScheme="green"
-								variant="solid"
-							>
-								Create
-							</Button>
-						</Box>
+							<button className="w-full mt-2" disabled={loading} onClick={createBucket}>
+								{loading ? "Loading" : "Create"}
+							</button>
+						</div>
 					</>
 				) : null}
-			</Container>
+			</div>
 		</>
 	);
 };

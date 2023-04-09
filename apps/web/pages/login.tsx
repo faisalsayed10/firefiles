@@ -1,13 +1,4 @@
-import {
-	Button,
-	Flex,
-	FormControl,
-	Heading,
-	Image,
-	Input,
-	Text,
-	useColorMode,
-} from "@chakra-ui/react";
+import Image from "next/image";
 import useInterval from "@hooks/useInterval";
 import useUser from "@hooks/useUser";
 import axios from "axios";
@@ -17,7 +8,6 @@ import toast from "react-hot-toast";
 
 export default function Login() {
 	const { mutateUser } = useUser({ redirectTo: "/", redirectIfFound: true });
-	const { colorMode } = useColorMode();
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [timeGap, setTimeGap] = useState(0);
@@ -49,51 +39,33 @@ export default function Login() {
 			<Head>
 				<title>Login | Firefiles</title>
 			</Head>
-			<Flex
-				className={colorMode === "light" ? "auth-background" : ""}
-				direction="column"
-				align="center"
-				justify="center"
-				minH="100vh"
-			>
-				<Image src="/logo.png" w="100px" />
-				<Flex as="form" onSubmit={handleSubmit} align="center" direction="column" py="4">
-					<Heading as="h1" size="2xl" mb="2">
-						Welcome back
-					</Heading>
-					<Text color="gray.600" mb="8">
-						Login or Signup to Firefiles
-					</Text>
-					<FormControl id="email" mb="4">
-						<Input
-							w={["300px", "370px", "370px"]}
-							h="50px"
-							variant="outline"
-							placeholder="john@example.com"
-							type="email"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							required
-						/>
-					</FormControl>
-					<Button
-						mb="3"
-						colorScheme="green"
-						variant="solid"
+			<div className="auth-background flex flex-col items-center justify-center min-h-screen">
+				<Image src="/logo.png" width={100} height={100} priority alt="Firefiles logo" />
+				<form className="flex items-center flex-col py-4" onSubmit={handleSubmit}>
+					<h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+						Sign in to your account
+					</h2>
+
+					<input
+						className="mb=4"
+						placeholder="john@example.com"
+						type="email"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+						required
+					/>
+					<button
+						className="mb=3 bg-green-400 w-full h-16 rounded-3xl"
 						disabled={!email || timeGap > 0}
-						isLoading={loading}
-						w="full"
-						height="60px"
-						borderRadius="100px"
 						type="submit"
 					>
-						Log in
-					</Button>
+						{loading ? <></> : "Log in"}
+					</button>
 					{timeGap > 0 && (
-						<Text fontSize="sm">Please wait {timeGap} seconds before trying again.</Text>
+						<p className="text-sm">Please wait {timeGap} seconds before trying again.</p>
 					)}
-				</Flex>
-			</Flex>
+				</form>
+			</div>
 		</>
 	);
 }

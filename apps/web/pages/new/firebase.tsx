@@ -1,13 +1,3 @@
-import {
-	Alert,
-	AlertIcon,
-	Button,
-	Container,
-	Flex,
-	Heading,
-	IconButton,
-	Textarea,
-} from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
@@ -33,7 +23,7 @@ const NewFirebase = () => {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
-	const createBucket = async (e: React.FormEvent<HTMLDivElement>) => {
+	const createBucket = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setLoading(true);
 
@@ -73,52 +63,40 @@ const NewFirebase = () => {
 			<Head>
 				<title>Firebase | Firefiles</title>
 			</Head>
-			<Flex px="16px" pt="3">
-				<IconButton
-					variant="ghost"
-					aria-label="back"
-					icon={<ArrowNarrowLeft />}
-					mr="3"
-					onClick={() => router.push("/new")}
-				/>
-				<Heading as="h3" size="lg">
-					Paste your Firebase config
-				</Heading>
-			</Flex>
-			<Container display="flex" minH="90vh" alignItems="center" maxW="lg">
-				<Flex as="form" onSubmit={createBucket} flexDir="column" w="full">
-					<Textarea
+			<div className="px-4 pt-3">
+				<button aria-label="back" className="mr-3" onClick={() => router.push("/new")}>
+					<ArrowNarrowLeft />
+				</button>
+				<h3 className="text-lg">Paste your Firebase config</h3>
+			</div>
+			<div className="flex min-h-screen flex-col items-center justify-center max-w-lg">
+				<form className="flex flex-col w-full" onSubmit={createBucket}>
+					<textarea
 						value={raw}
 						onChange={(e) => setRaw(e.target.value)}
-						minH="200px"
+						className="w-full p-2 border border-gray-300 rounded-md"
 						placeholder={jsonPlaceholder}
 						required
 					/>
-					<Alert status="info" mt="2">
+					{/* <Alert status="info" mt="2">
 						<AlertIcon />
 						<span>
 							Make sure you've followed all the{" "}
 							<a
-								href="https://firefiles.vercel.app/docs/firebase/01-setup"
+								href="https://firefiles.app/docs/firebase/01-setup"
 								target="_blank"
 								style={{ textDecoration: "underline" }}
 							>
 								steps!
 							</a>
 						</span>
-					</Alert>
+					</Alert> */}
 					<VideoModal src="/firebase-config-tutorial.mov" />
-					<Button
-						type="submit"
-						isLoading={loading}
-						loadingText="Creating"
-						colorScheme="green"
-						variant="solid"
-					>
-						Create
-					</Button>
-				</Flex>
-			</Container>
+					<button type="submit" disabled={loading}>
+						{loading ? "Loading" : "Create"}
+					</button>
+				</form>
+			</div>
 		</>
 	);
 };
