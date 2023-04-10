@@ -1,4 +1,3 @@
-import { IconButton, Td, Tr } from "@chakra-ui/react";
 import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
@@ -16,52 +15,39 @@ interface Props {
 
 const FileRow: React.FC<Props> = (props) => {
 	return (
-		<Tr>
-			<Td maxW="36px">
+		<tr>
+			<td className="max-w-[36px]">
 				<FileIcon extension={props.file.name.split(".").pop()} id={props.id} />
-			</Td>
-			<Td
-				fontWeight="medium"
-				isTruncated
-				maxW={["250px", "300px", "300px"]}
+			</td>
+			<td
+				className="max-w-[250px] font-medium truncate underline cursor-pointer hover:text-blue-500"
 				onClick={props.onPreviewOpen}
-				textDecor="underline"
-				cursor="pointer"
-				_hover={{ textDecor: "none" }}
 			>
 				{props.file.name}
-			</Td>
-			<Td minW="110px">{props.file.size && prettyBytes(parseInt(props.file.size) || 0)}</Td>
-			<Td textAlign="center">
-				<IconButton
-					aria-label="Copy file URL"
-					icon={<Copy />}
-					onClick={props.copyFile}
-					isLoading={!props.file.url}
-					variant="outline"
-					colorScheme="blue"
-				/>
-			</Td>
-			<Td textAlign="center">
-				<IconButton
+			</td>
+			<td className="min-w-[110px]">
+				{props.file.size && prettyBytes(parseInt(props.file.size) || 0)}
+			</td>
+			<td className="text-center">
+				<button aria-label="Copy file URL" onClick={props.copyFile} disabled={!props.file.url}>
+					<Copy />
+				</button>
+			</td>
+			<td className="text-center">
+				<button
 					aria-label="Download file"
-					icon={<FileDownload />}
-					isLoading={!props.file.url}
-					variant="outline"
-					colorScheme="blue"
+					disabled={!props.file.url}
 					onClick={() => download(props.file)}
-				/>
-			</Td>
-			<Td textAlign="center">
-				<IconButton
-					aria-label="Delete file"
-					icon={<FileMinus />}
-					onClick={() => props.setIsOpen(true)}
-					variant="outline"
-					colorScheme="red"
-				/>
-			</Td>
-		</Tr>
+				>
+					<FileDownload />
+				</button>
+			</td>
+			<td className="text-center">
+				<button aria-label="Delete file" onClick={() => props.setIsOpen(true)}>
+					<FileMinus />
+				</button>
+			</td>
+		</tr>
 	);
 };
 

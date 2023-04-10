@@ -1,24 +1,12 @@
-import { Flex, Text } from "@chakra-ui/react";
-import React from "react";
-
 const FilesEmptyState = () => (
-	<Flex
-		p={["8", "16", "16"]}
-		mx="4"
-		borderWidth="1px"
-		borderRadius="lg"
-		justify="center"
-		direction="column"
-		align="center"
-		textAlign="center"
-	>
-		<Text fontSize={["lg", "xl", "2xl"]} fontWeight="400" mb={8}>
+	<div className="flex p-8 mx-4 border rounded-lg justify-center items-center flex-col text-center">
+		<p className="text-2xl font-normal mb-8">
 			There aren't any files
-		</Text>
-		<Text fontSize={["sm", "sm", "md"]} fontWeight="400">
+		</p>
+		<p className="text-xl font-normal">
 			Drop a file anywhere on the screen or click the button on the bottom right to upload a file.
-		</Text>
-	</Flex>
+		</p>
+	</div>
 );
 
 export default FilesEmptyState;

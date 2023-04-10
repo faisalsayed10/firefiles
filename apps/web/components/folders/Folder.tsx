@@ -1,4 +1,3 @@
-import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
@@ -23,7 +22,6 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 	const optionProps = {
 		p: 2,
 		cursor: "pointer",
-		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
 	};
 
 	return (
@@ -44,59 +42,47 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 					}
 				}}
 			/>
-			<Flex
-				cursor="pointer"
-				direction="column"
-				align="center"
-				borderRadius="lg"
-				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
-				w={["140px", "180px", "180px"]}
-				h="140px"
-				borderWidth="1px"
-				transition="ease-in-out 0.1s"
-				className="hoverAnim"
-			>
+			<div className="hoverAnim h-[140px] border rounded-lg shadow-lg flex flex-col items-center justify-center transition-all ease-in-out duration-100 cursor-pointer text-[#2D3748] w-[140px]">
 				<FolderIcon
 					onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-					style={{ flex: 1, strokeWidth: "1px", color: useColorModeValue("#2D3748", "white") }}
+					style={{ flex: 1, strokeWidth: "1px" }}
 					size={72}
 				/>
-				<Flex p="2" w="inherit" justify="space-between" alignItems="center">
-					<Text
+				<div className="flex items-center justify-between p-2 w-[inherit]">
+					<p
 						onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-						flex="1"
-						isTruncated={true}
-						maxW="150px"
-						as="p"
-						fontSize="xs"
-						align="left"
-						px="2"
+						className="flex-1 truncate max-w-[150px] text-xs text-left px-2"
 					>
 						{folder.name}
-					</Text>
+					</p>
 					<OptionsPopover header={folder.name}>
-						<Flex alignItems="stretch" flexDirection="column">
-							<Flex {...optionProps} onClick={() => router.push(`${router.asPath}/${folder.name}`)}>
+						<div className="flex items-stretch flex-col">
+							<div
+								className="flex"
+								{...optionProps}
+								onClick={() => router.push(`${router.asPath}/${folder.name}`)}
+							>
 								<Plus />
-								<Text ml="2">Open</Text>
-							</Flex>
-							<MenuDivider />
-							<Flex
+								<p className="ml-2">Open</p>
+							</div>
+							<hr />
+							<div
+								className="flex"
 								{...optionProps}
 								onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
 							>
 								<ExternalLink />
-								<Text ml="2">Open in new tab</Text>
-							</Flex>
-							<MenuDivider />
-							<Flex {...optionProps} onClick={() => setIsOpen(true)}>
+								<p className="ml-2">Open in new tab</p>
+							</div>
+							<hr />
+							<div className="flex" {...optionProps} onClick={() => setIsOpen(true)}>
 								<FolderMinus />
-								<Text ml="2">Delete Folder</Text>
-							</Flex>
-						</Flex>
+								<p className="ml-2">Delete Folder</p>
+							</div>
+						</div>
 					</OptionsPopover>
-				</Flex>
-			</Flex>
+				</div>
+			</div>
 		</>
 	);
 };

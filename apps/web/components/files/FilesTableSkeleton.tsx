@@ -1,42 +1,41 @@
-import { Box, Skeleton, Table, Td, Th, Tr } from "@chakra-ui/react";
-import React from "react";
+import Skeleton from "react-loading-skeleton";
 
 interface Props {
 	width?: string;
 }
 
 const SkeletonRow: React.FC<Props> = ({ width }) => (
-	<Box as="tr">
-		<Td>
-			<Skeleton height="5px" width={width} my={3} />
-		</Td>
-		<Td>
-			<Skeleton height="5px" width={width} my={3} />
-		</Td>
-		<Td>
-			<Skeleton height="5px" width={width} my={3} />
-		</Td>
-		<Td>
-			<Skeleton height="5px" width={width} my={3} />
-		</Td>
-		<Td>
-			<Skeleton height="5px" width={width} my={3} />
-		</Td>
-	</Box>
+	<tr>
+		<td>
+			<Skeleton height="5px" width={width} className="my-3" />
+		</td>
+		<td>
+			<Skeleton height="5px" width={width} className="my-3" />
+		</td>
+		<td>
+			<Skeleton height="5px" width={width} className="my-3" />
+		</td>
+		<td>
+			<Skeleton height="5px" width={width} className="my-3" />
+		</td>
+		<td>
+			<Skeleton height="5px" width={width} className="my-3" />
+		</td>
+	</tr>
 );
 
 const FilesTableSkeleton = () => {
 	return (
-		<Box borderWidth="1px" borderRadius="lg" overflowX="auto" mx="4">
-			<Table>
+		<div className="border rounded-lg overflow-x-auto mx-4">
+			<table>
 				<thead>
-					<Tr>
-						<Th>Name</Th>
-						<Th>Size</Th>
-						<Th>Share</Th>
-						<Th>Download</Th>
-						<Th>Delete</Th>
-					</Tr>
+					<tr>
+						<th>Name</th>
+						<th>Size</th>
+						<th>Share</th>
+						<th>Download</th>
+						<th>Delete</th>
+					</tr>
 				</thead>
 				<tbody>
 					<SkeletonRow width="75px" />
@@ -44,8 +43,8 @@ const FilesTableSkeleton = () => {
 					<SkeletonRow width="50px" />
 					<SkeletonRow width="100px" />
 				</tbody>
-			</Table>
-		</Box>
+			</table>
+		</div>
 	);
 };
 

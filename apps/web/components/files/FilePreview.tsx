@@ -1,21 +1,3 @@
-import {
-	Box,
-	Button,
-	ButtonGroup,
-	Center,
-	Flex,
-	Image,
-	Link,
-	Spinner,
-	Table,
-	Tbody,
-	Td,
-	Text,
-	Th,
-	Thead,
-	Tr,
-	useColorMode,
-} from "@chakra-ui/react";
 import useKeys from "@hooks/useKeys";
 import { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -24,6 +6,8 @@ import "@uiw/react-textarea-code-editor/dist.css";
 import { download } from "@util/helpers";
 import { DriveFile, Provider } from "@util/types";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import Link from "next/link";
 import "node_modules/video-react/dist/video-react.css";
 import Papa from "papaparse";
 import React, { useEffect, useMemo, useState } from "react";
@@ -54,18 +38,17 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 	const [loading, setLoading] = useState(false);
 
 	const extension = file.name.split(".").pop();
-	const { colorMode } = useColorMode();
 
 	const codeEditorStyles: React.CSSProperties = useMemo(
 		() => ({
 			height: "98%",
-			color: colorMode === "light" ? "#2D3748" : "#FFFFFF",
+			color: "#2D3748",
 			fontSize: 13,
-			backgroundColor: colorMode === "light" ? "#FFFFFF" : "#2D3748",
+			backgroundColor: "#FFFFFF",
 			overflowY: "auto",
 			fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
 		}),
-		[colorMode]
+		[]
 	);
 
 	useEffect(() => {
@@ -91,18 +74,18 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
 	} else if (file?.contentType?.startsWith("video")) {
 		return (
-			<Box
+			<div
 				children={<Player fluid={false} playsInline src={url} onError={() => setIsError(true)} />}
 			/>
 		);
 	} else if (file?.contentType?.startsWith("audio")) {
 		return (
-			<Flex p="6" align="center" justify="center">
+			<div className="flex items-center justify-center p-6">
 				<audio controls onError={() => setIsError(true)}>
 					<source src={url} type={file?.contentType} />
 					Your browser does not support playing audio.
 				</audio>
-			</Flex>
+			</div>
 		);
 	} else if (file?.contentType === "application/pdf") {
 		return (
@@ -127,14 +110,12 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 		return (
 			<>
 				{loading || !text ? (
-					<Center m="20">
-						<Spinner size="xl" />
-					</Center>
+					"Loading..."
 				) : (
-					<Box height="600px">
-						<Button variant="ghost" m="1" onClick={() => setRawMd(!rawMd)}>
+					<div className="h-[600px]">
+						<button className="m-1" onClick={() => setRawMd(!rawMd)}>
 							{!rawMd ? "View Raw" : "View Parsed"}
-						</Button>
+						</button>
 						{!rawMd ? (
 							<MarkdownPreview
 								source={text}
@@ -154,7 +135,7 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 								style={codeEditorStyles}
 							/>
 						)}
-					</Box>
+					</div>
 				)}
 			</>
 		);
@@ -166,11 +147,9 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 		return (
 			<>
 				{loading || !text ? (
-					<Center m="20">
-						<Spinner size="xl" />
-					</Center>
+					"Loading..."
 				) : (
-					<Box height="600px">
+					<div className="h-[600px]">
 						<CodeEditor
 							value={text}
 							disabled
@@ -181,7 +160,7 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 								marginTop: 40,
 							}}
 						/>
-					</Box>
+					</div>
 				)}
 			</>
 		);
@@ -193,72 +172,57 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 const Error = ({ file, url }) => {
 	const { keys } = useKeys();
 	return (
-		<Flex flexDir="column" align="center" justify="center" p="6">
-			<Text as="h1" fontSize="2xl" mb="4" align="center">
-				Failed to preview the file
-			</Text>
+		<div className="flex flex-col items-center justify-center p-6">
+			<h1 className="text-2xl mb-4 text-center">Failed to preview the file</h1>
 			{(Provider[keys.type] as Provider) === Provider.firebase && (
-				<Text as="p" mb="2">
+				<p className="mb-2">
 					Make sure you've{" "}
-					<Link
-						href="https://firefiles.app/docs/firebase/03-cors"
-						target="_blank"
-						textDecor="underline"
-					>
+					<Link href="https://firefiles.app/docs/firebase/03-cors" target="_blank">
 						configured CORS correctly.
 					</Link>
-				</Text>
+				</p>
 			)}
-			<ButtonGroup>
-				<Button leftIcon={<ExternalLink />} onClick={() => window.open(url, "_blank")}>
-					Open in new tab
-				</Button>
-				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
-					Download
-				</Button>
-			</ButtonGroup>
-		</Flex>
+
+			<button onClick={() => window.open(url, "_blank")}>
+				<ExternalLink /> Open in new tab
+			</button>
+			<button onClick={() => download(file)}>
+				<FileDownload /> Download
+			</button>
+		</div>
 	);
 };
 
 const NoPreview = ({ file, setShowRaw }) => {
 	return (
-		<Flex flexDir="column" align="center" justify="center" p="6">
-			<Text as="h1" fontSize="2xl" mb="4" align="center">
-				Preview not available
-			</Text>
-			<ButtonGroup>
-				<Button onClick={() => setShowRaw(true)}>Show Raw</Button>
-				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
-					Download
-				</Button>
-			</ButtonGroup>
-		</Flex>
+		<div className="flex flex-col items-center justify-center p-6">
+			<h1 className="text-2xl mb-4 text-center">Preview not available</h1>
+			<button onClick={() => setShowRaw(true)}>Show Raw</button>
+			<button onClick={() => download(file)}>
+				<FileDownload /> Download
+			</button>
+		</div>
 	);
 };
 
 const GoogleDocsViewer = ({ file, url }) => {
 	return (
-		<Flex flexDir="column" align="center" justify="center" p="6">
-			<Text as="h1" fontSize="2xl" align="center" fontWeight="semibold" mb="4">
-				Couldn't preview the file
-			</Text>
-			<ButtonGroup>
-				<Button
-					onClick={() =>
-						window.open(
-							`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`,
-							"_blank"
-						)
-					}
-				>
-					Open with Google Docs Viewer
-				</Button>
-				<Button leftIcon={<FileDownload />} onClick={() => download(file)}>
-					Download
-				</Button>
-			</ButtonGroup>
-		</Flex>
+		<div className="flex flex-col items-center justify-center p-6">
+			<h1 className="text-2xl mb-4 text-center">Couldn't preview the file</h1>
+			<button
+				onClick={() =>
+					window.open(
+						`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`,
+						"_blank"
+					)
+				}
+			>
+				Open with Google Docs Viewer
+			</button>
+			<button onClick={() => download(file)}>
+				<FileDownload /> Download
+			</button>
+		</div>
 	);
 };
 
@@ -291,32 +255,30 @@ const CsvViewer = ({ file, url }) => {
 	};
 
 	return (
-		<Box maxH="700px" overflowY="auto" overflowX="auto">
+		<div className="max-h-[700px] overflow-auto">
 			{columns.length > 0 ? (
-				<Table variant="simple" size="sm">
-					<Thead>
-						<Tr>
+				<table>
+					<thead>
+						<tr>
 							{columns.map((column) => (
-								<Th key={column.Header}>{column.Header.replaceAll('"', "")}</Th>
+								<th key={column.Header}>{column.Header.replaceAll('"', "")}</th>
 							))}
-						</Tr>
-					</Thead>
-					<Tbody>
+						</tr>
+					</thead>
+					<tbody>
 						{data.map((row, i) => (
-							<Tr key={row.id}>
+							<tr key={row.id}>
 								{columns.map((column) => (
-									<Td key={column.accessor}>{row[column.accessor]}</Td>
+									<td key={column.accessor}>{row[column.accessor]}</td>
 								))}
-							</Tr>
+							</tr>
 						))}
-					</Tbody>
-				</Table>
+					</tbody>
+				</table>
 			) : (
-				<Center m="20">
-					<Spinner size="xl" />
-				</Center>
+				"Loading..."
 			)}
-		</Box>
+		</div>
 	);
 };
 

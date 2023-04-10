@@ -1,7 +1,4 @@
-import { IconButton, Input, useColorModeValue } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
-import useKeys from "@hooks/useKeys";
-import { Provider } from "@util/types";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef } from "react";
 import { FileUpload } from "tabler-icons-react";
@@ -30,7 +27,7 @@ const UploadFileButton: React.FC<Props> = ({ filesToUpload, setFilesToUpload }) 
 
 	return (
 		<>
-			<Input
+			<input
 				type="file"
 				ref={fileInput}
 				hidden={true}
@@ -38,28 +35,16 @@ const UploadFileButton: React.FC<Props> = ({ filesToUpload, setFilesToUpload }) 
 				key={nanoid()}
 				multiple
 			/>
-			<IconButton
+			<button
 				disabled={
 					uploadingFiles.filter((uploadingFile) => !uploadingFile.error).length > 0 || loading
 				}
-				pos="fixed"
-				p="4"
-				borderRadius="50%"
-				w="60px"
-				h="60px"
-				bottom="2rem"
-				right="2rem"
-				variant="outline"
-				bgColor={useColorModeValue("white", "#1a202c")}
-				_focus={{ outline: "none" }}
-				_hover={{ opacity: 1 }}
-				boxShadow="4.2px 4px 6.5px -1.7px rgba(0, 0, 0, 0.4)"
-				colorScheme="green"
+				className="transition-all duration-200 fixed p-4 rounded-full w-16 h-16 bottom-8 right-8 outline-none hover:opacity-100 shadow-lg"
 				aria-label="upload file"
 				onClick={() => fileInput.current.click()}
 			>
 				<FileUpload size="42px" />
-			</IconButton>
+			</button>
 		</>
 	);
 };
