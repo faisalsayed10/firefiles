@@ -22,7 +22,7 @@ import {
 } from "firebase/storage";
 import { nanoid } from "nanoid";
 import router from "next/router";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
@@ -35,7 +35,7 @@ type Props = {
 	fullPath?: string;
 };
 
-export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) => {
+export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath, children }) => {
 	const [app, setApp] = useState<FirebaseApp>();
 	const [appUser, setAppUser] = useState<FirebaseUser>();
 	const [loading, setLoading] = useState(true);

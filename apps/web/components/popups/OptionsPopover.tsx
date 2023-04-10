@@ -1,13 +1,13 @@
 import { Popover, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { Fragment } from "react";
+import { Fragment, PropsWithChildren } from "react";
 
 interface Props {
 	header: string;
 	footer?: string;
 }
 
-const OptionsPopover: React.FC<Props> = ({ header, footer, children }) => {
+const OptionsPopover: React.FC<PropsWithChildren<Props>> = ({ header, footer, children }) => {
 	return (
 		<div className="fixed top-16 w-full max-w-sm px-4">
 			<Popover className="relative">

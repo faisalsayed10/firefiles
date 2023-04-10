@@ -1,5 +1,4 @@
 import Link from "next/link";
-import CenterContainer from "@components/ui/CenterContainer";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";

@@ -12,7 +12,7 @@ import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
@@ -25,7 +25,7 @@ type Props = {
 	fullPath?: string;
 };
 
-export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
+export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath, children }) => {
 	const [s3Client, setS3Client] = useState<S3Client>(
 		new S3Client({
 			region: data.keys.region,
