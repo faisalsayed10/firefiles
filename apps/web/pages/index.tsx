@@ -56,9 +56,9 @@ const Dashboard = () => {
             </div>
             <div className="flex items-baseline">
               <strong>Current Plan: </strong>
-              {/* <Tag variant="solid" colorScheme="purple" ml="1">
+              <span className="inline-block bg-purple-500 text-white rounded-full py-1 px-3 ml-1">
                 {user?.plan} Plan
-              </Tag> */}
+              </span>
               <button className="ml-1">
                 Upgrade
               </button>
