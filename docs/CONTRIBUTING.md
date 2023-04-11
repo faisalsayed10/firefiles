@@ -23,17 +23,15 @@ To develop locally:
    ```
    git checkout -b MY_BRANCH_NAME
    ```
-3. Install yarn:
-   ```
-   npm install -g yarn
-   ```
+3. Install pnpm:
+   https://pnpm.io/installation
 4. Install the dependencies with:
    ```
-   yarn
+   pnpm install
    ```
 5. Start developing and watch for code changes:
    ```
-   yarn dev
+   pnpm dev
    ```
 
 ## Environment variables
@@ -55,7 +53,7 @@ DEPLOY_URL=http://localhost:3000
 To format your code:
 
 ```sh
-yarn lint
+pnpm lint
 ```
 
 ## Adding cloud providers
