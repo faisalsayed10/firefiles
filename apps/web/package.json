@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"license": "MIT",
+	"license": "AGPLv3",
 	"scripts": {
 		"dev": "next",
 		"build": "next build",
