@@ -8,7 +8,7 @@ class MyDocument extends Document {
 
 	render() {
 		return (
-			<Html>
+			<Html className="h-full bg-white">
 				<Head>
 					<link rel="icon" href="/logo.png" type="image/png" />
 					<meta name="title" content="Firefiles" />
@@ -23,10 +23,7 @@ class MyDocument extends Document {
 						property="og:description"
 						content="The open-source alternative to Dropbox. Firefiles gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
-					<meta
-						property="og:image"
-						content="https://usefirefiles.app/firefiles-preview.png"
-					/>
+					<meta property="og:image" content="https://usefirefiles.app/firefiles-preview.png" />
 					<meta property="twitter:card" content="summary_large_image" />
 					<meta property="twitter:url" content="https://usefirefiles.app" />
 					<meta property="twitter:title" content="Firefiles" />
@@ -34,12 +31,9 @@ class MyDocument extends Document {
 						property="twitter:description"
 						content="The open-source alternative to Dropbox. Firefiles gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
-					<meta
-						property="twitter:image"
-						content="https://usefirefiles.app/firefiles-preview.png"
-					/>
+					<meta property="twitter:image" content="https://usefirefiles.app/firefiles-preview.png" />
 				</Head>
-				<body>
+				<body className="h-full">
 					<Main />
 					<NextScript />
 				</body>
