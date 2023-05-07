@@ -17,21 +17,21 @@ class MyDocument extends Document {
 						content="The open-source alternative to Dropbox. Firefiles gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
 					<meta property="og:type" content="website" />
-					<meta property="og:url" content="https://usefirefiles.app" />
+					<meta property="og:url" content="https://beta.firefiles.app" />
 					<meta property="og:title" content="Firefiles" />
 					<meta
 						property="og:description"
 						content="The open-source alternative to Dropbox. Firefiles gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
-					<meta property="og:image" content="https://usefirefiles.app/firefiles-preview.png" />
+					<meta property="og:image" content="https://beta.firefiles.app/firefiles-preview.png" />
 					<meta property="twitter:card" content="summary_large_image" />
-					<meta property="twitter:url" content="https://usefirefiles.app" />
+					<meta property="twitter:url" content="https://beta.firefiles.app" />
 					<meta property="twitter:title" content="Firefiles" />
 					<meta
 						property="twitter:description"
 						content="The open-source alternative to Dropbox. Firefiles gives you the freedom to bring your own cloud and provides you with a modern file-system interface."
 					/>
-					<meta property="twitter:image" content="https://usefirefiles.app/firefiles-preview.png" />
+					<meta property="twitter:image" content="https://beta.firefiles.app/firefiles-preview.png" />
 				</Head>
 				<body className="h-full">
 					<Main />
