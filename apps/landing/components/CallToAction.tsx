@@ -13,7 +13,7 @@ const CallToAction = () => {
 			</p>
 			<div className="flex sm:flex-row flex-col justify-center gap-5 z-10">
 				<a
-					href="https://usefirefiles.vercel.app"
+					href="https://beta.firefiles.app"
 					className="px-7 py-3.5 rounded-lg relative group text-white font-medium inline-block"
 				>
 					<span className="absolute top-0 left-0 w-full h-full rounded-lg opacity-50 filter blur-sm bg-gradient-to-br from-purple-600 to-blue-500"></span>
