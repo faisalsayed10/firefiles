@@ -29,7 +29,7 @@ const Hero = () => {
 					className="mt-5 sm:mt-8 mb-10 sm:flex sm:justify-center lg:justify-start z-10"
 				>
 					<a
-						href="https://usefirefiles.vercel.app"
+						href="https://beta.firefiles.app"
 						className="px-7 py-3.5 rounded-lg relative group text-white font-medium inline-block"
 					>
 						<span className="absolute top-0 left-0 w-full h-full rounded-lg opacity-50 filter blur-sm bg-gradient-to-br from-purple-600 to-blue-500"></span>

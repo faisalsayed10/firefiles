@@ -71,7 +71,7 @@ const FilePreview: React.FC<Props> = ({ url, file }) => {
 	if (isError) {
 		return <Error file={file} url={url} />;
 	} else if (file?.contentType?.startsWith("image")) {
-		return <Image src={url} alt={file.name} onError={() => setIsError(true)} />;
+		return <img src={url} alt={file.name} onError={() => setIsError(true)} />;
 	} else if (file?.contentType?.startsWith("video")) {
 		return (
 			<div
