@@ -4,7 +4,7 @@ import {
 	PutBucketCorsCommand,
 	PutBucketCorsCommandInput,
 	PutPublicAccessBlockCommand,
-	S3Client
+	S3Client,
 } from "@aws-sdk/client-s3";
 import { NextApiRequest, NextApiResponse } from "next";
 
