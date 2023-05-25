@@ -3,6 +3,8 @@ import SambaClient from "samba-client";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import { Drive } from "@prisma/client";
 import { DriveFile, DriveFolder, UploadingFile } from "@util/types";
+import toast from "react-hot-toast";
+import { Upload } from "@util/upload";
 
 const SambaContext = createContext<ContextValue>(null);
 export default () => useContext(SambaContext);
@@ -52,5 +54,27 @@ export const SambaProvider: React.FC<Props> = ({ data, fullPath, children }) => 
             localStorage.setItem(`local_folders_${data.id}`, JSON.stringify(filtered));
         }
         await sambaClient.deleteFile(folder.fullPath)
+    }
+
+    const addFile = async (filesToUpload: File[] | FileList) => {
+        Array.from(filesToUpload).forEach(async (file) => {
+            if (/[#\$\[\]\*/]/.test(file.name))
+                return toast.error("File name cannot contain special characters (#$[]*/).");
+
+            const Key =
+                currentFolder === ROOT_FOLDER
+                    ? file.name
+                    : `${decodeURIComponent(currentFolder.fullPath)}${file.name}`;
+            if (await sambaClient.fileExists(file.name, Key)) {
+                return toast.error("File with same name already exists.");
+            }
+            await sambaClient.sendFile(file.name, Key)
+        })
+    }
+
+    const removeFile = async (file: DriveFile) => {
+        setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
+        await sambaClient.deleteFile(file.fullPath);
+        return true;
     }
 };
