@@ -1,10 +1,11 @@
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import SambaClient from "samba-client";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import { Drive } from "@prisma/client";
 import { DriveFile, DriveFolder, UploadingFile } from "@util/types";
 import toast from "react-hot-toast";
-import { Upload } from "@util/upload";
+import useUser from "./useUser";
+import mime from "mime";
 
 const SambaContext = createContext<ContextValue>(null);
 export default () => useContext(SambaContext);
@@ -21,6 +22,7 @@ export const SambaProvider: React.FC<Props> = ({ data, fullPath, children }) => 
         domain: "WORKGROUP" || data.keys.domain,
         maxProtocol: "SMB3",
     })
+    const { user } = useUser();
     const [loading, setLoading] = useState(false);
     const [currentFolder, setCurrentFolder] = useState<DriveFolder>(null);
     const [folders, setFolders] = useState<DriveFolder[]>(null);
@@ -77,4 +79,72 @@ export const SambaProvider: React.FC<Props> = ({ data, fullPath, children }) => 
         await sambaClient.deleteFile(file.fullPath);
         return true;
     }
+
+    useEffect(() => {
+        if (!user?.email) return;
+        setFiles(null);
+        setFolders(null);
+
+        if (fullPath === "" || !fullPath) {
+            setCurrentFolder(ROOT_FOLDER);
+            return;
+        }
+
+        setCurrentFolder({
+            fullPath: fullPath + "/",
+            name: fullPath.split("/").pop(),
+            parent: fullPath.split("/").shift() + "/",
+        });
+    }, [fullPath, user]);
+
+    // get files and folders
+    useEffect(() => {
+        if (!user?.email || !currentFolder) return;
+        setLoading(true);
+
+        (async () => {
+            try {
+                if (!files) {
+                    var results = await sambaClient.list(currentFolder.fullPath)
+                    results.forEach(async (result) => {
+                        const driveFile: DriveFile = {
+                            fullPath: currentFolder.fullPath + "/" + result.name,
+                            name: result.name.split("/").pop(),
+                            parent: currentFolder.fullPath,
+                            createdAt: result.modifyTime.toISOString(),
+                            size: result.size.toString(),
+                            contentType: mime.lookup(result.type) || "",
+                        };
+
+                        setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
+                    });
+
+                    const localFolders = localStorage.getItem(`local_folders_${data.id}`);
+                    setLoading(false);
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
+        })
+    }, [currentFolder, user]);
+
+    return (
+        <SambaContext.Provider
+            value={{
+                loading,
+                currentFolder,
+                files,
+                folders,
+                uploadingFiles,
+                setUploadingFiles,
+                addFile,
+                addFolder,
+                removeFile,
+                removeFolder,
+            }}
+        >
+            {children}
+        </SambaContext.Provider>
+    );
 };
