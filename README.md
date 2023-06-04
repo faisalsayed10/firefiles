@@ -34,3 +34,7 @@ Firefiles is an open-source project. If you want to support the project, you can
 - [Ko-fi](https://ko-fi.com/faisalsayed10)
 - [liberapay](https://en.liberapay.com/faisalsayed10/)
 - [Buy me a Coffee](https://www.buymeacoffee.com/faisalsayed10)
+
+## Our Sponsors
+
+[![Foss United](apps/landing/public/fossunited-badge.svg)](https://fossunited.org)

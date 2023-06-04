@@ -3,7 +3,13 @@ import { BrandDiscord, BrandGithub, BrandTwitter, Coin } from "tabler-icons-reac
 const Footer = () => {
 	return (
 		<footer className="text-gray-400 bg-gray-900 body-font relative z-10">
-			<div className="container px-5 py-24 mx-auto flex md:items-center lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col">
+			<div className="container px-5 pt-12 mx-auto flex flex-col items-center justify-center gap-4">
+				<h1 className="text-center text-xl">Our Sponsors</h1>
+				<a href="https://fossunited.org" target="_blank">
+					<img alt="fossunited" src="/fossunited-badge.svg" />
+				</a>
+			</div>
+			<div className="container px-5 py-12 mx-auto flex md:items-center lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col">
 				<div className="w-64 flex-sh`	rink-0 md:mx-0 mx-auto text-center md:text-left">
 					<a className="flex title-font font-medium items-center md:justify-start justify-center text-white">
 						<img src="/logo.png" className="w-10 h-10" />
