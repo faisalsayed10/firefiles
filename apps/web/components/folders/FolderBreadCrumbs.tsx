@@ -10,6 +10,9 @@ interface Props {
 
 const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 	const router = useRouter();
+
+	if (!currentFolder) return null;
+
 	return (
 		<nav className="flex border-b border-gray-200 bg-white" aria-label="Breadcrumb">
 			<ol

@@ -10,7 +10,7 @@ interface Props {
 }
 
 const AddFolderButton: React.FC<Props> = ({ currentFolder }) => {
-	const [open, setOpen] = useState(true);
+	const [open, setOpen] = useState(false);
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const cancelButtonRef = useRef(null);

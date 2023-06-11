@@ -2,7 +2,6 @@ import OptionsPopover from "@components/popups/OptionsPopover";
 import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
 import Image from "next/image";
-import prettyBytes from "pretty-bytes";
 import React from "react";
 import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
@@ -42,28 +41,24 @@ const FileGrid: React.FC<Props> = (props) => {
 						{props.file.name}
 					</p>
 					<OptionsPopover
-						header={props.file.name}
-						footer={`Size: ${props.file.size && prettyBytes(parseInt(props.file.size) || 0)}`}
-					>
-						{!props.file ? (
-							<p>Loading</p>
-						) : (
-							<div className="flex items-stretch flex-col">
-								<div className="flex" {...optionProps} onClick={props.copyFile}>
-									<Copy />
-									<p className="ml-2">Share</p>
-								</div>
-								<div className="flex" {...optionProps} onClick={() => download(props.file)}>
-									<FileDownload />
-									<p className="ml-2">Download</p>
-								</div>
-								<div className="flex" {...optionProps} onClick={() => props.setIsOpen(true)}>
-									<FileMinus />
-									<p className="ml-2">Delete</p>
-								</div>
-							</div>
-						)}
-					</OptionsPopover>
+						options={[
+							{
+								name: "Share",
+								icon: <Copy />,
+								onClick: props.copyFile,
+							},
+							{
+								name: "Download",
+								icon: <FileDownload />,
+								onClick: () => download(props.file),
+							},
+							{
+								name: "Delete",
+								icon: <FileMinus />,
+								onClick: () => props.setIsOpen(true),
+							},
+						]}
+					/>
 				</div>
 			</div>
 		</>

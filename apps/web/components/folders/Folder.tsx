@@ -55,32 +55,25 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
 					>
 						{folder.name}
 					</p>
-					<OptionsPopover header={folder.name}>
-						<div className="flex items-stretch flex-col">
-							<div
-								className="flex"
-								{...optionProps}
-								onClick={() => router.push(`${router.asPath}/${folder.name}`)}
-							>
-								<Plus />
-								<p className="ml-2">Open</p>
-							</div>
-							<hr />
-							<div
-								className="flex"
-								{...optionProps}
-								onClick={() => window.open(`${router.asPath}/${folder.name}`, "_blank")}
-							>
-								<ExternalLink />
-								<p className="ml-2">Open in new tab</p>
-							</div>
-							<hr />
-							<div className="flex" {...optionProps} onClick={() => setIsOpen(true)}>
-								<FolderMinus />
-								<p className="ml-2">Delete Folder</p>
-							</div>
-						</div>
-					</OptionsPopover>
+					<OptionsPopover
+						options={[
+							{
+								name: "Open",
+								onClick: () => router.push(`${router.asPath}/${folder.name}`),
+								icon: <Plus />,
+							},
+							{
+								name: "Open in new tab",
+								onClick: () => window.open(`${router.asPath}/${folder.name}`, "_blank"),
+								icon: <ExternalLink />,
+							},
+							{
+								name: "Delete Folder",
+								onClick: () => setIsOpen(true),
+								icon: <FolderMinus />,
+							},
+						]}
+					/>
 				</div>
 			</div>
 		</>
