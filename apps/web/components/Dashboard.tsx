@@ -4,7 +4,7 @@ import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
 import { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
-import LoadingOverlay from "react-loading-overlay";
+import LoadingOverlay from "react-loading-overlay-ts";
 import GridView from "./GridView";
 import ListView from "./ListView";
 import UploadProgress from "./files/UploadProgress";
