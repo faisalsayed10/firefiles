@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
 import validator from "validator";
+import Layout from "@components/Layout";
+import Listbox from "@components/shared/Listbox";
 
 const NewS3 = () => {
 	const { user } = useUser();
@@ -68,16 +70,13 @@ const NewS3 = () => {
 			)
 				throw new Error("Endpoint URL does not match the required format!");
 
-			if ((selectedBucket === "Not Selected" && !bucketName.trim()) || !endpoint.trim())
+			if ((selectedBucket === "" && !bucketName.trim()) || !endpoint.trim())
 				throw new Error("Select an existing bucket or enter a new bucket name!");
 
-			if (
-				(selectedBucket === "Not Selected" && bucketName.trim().length < 3) ||
-				bucketName.trim().length > 63
-			)
+			if ((selectedBucket === "" && bucketName.trim().length < 3) || bucketName.trim().length > 63)
 				throw new Error("Bucket name must be between 3 and 63 characters!");
 
-			const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
+			const Bucket = selectedBucket !== "" ? selectedBucket : bucketName.trim();
 
 			await axios.post("/api/drive", {
 				data: {
@@ -103,79 +102,96 @@ const NewS3 = () => {
 	};
 
 	return (
-		<>
+		<Layout>
 			<Head>
 				<title>Backblaze | Firefiles</title>
 			</Head>
-			<div className="flex flex-col items-center justify-center min-h-screen py-2">
-				<button aria-label="back" className="mr-3" onClick={() => router.push("/new")}>
-					<ArrowNarrowLeft />
-				</button>
-				<h3 className="text-lg">Enter your Backblaze keys</h3>
-			</div>
-			<div className="flex min-h-screen flex-col items-center justify-center max-w-lg">
-				<form className="flex flex-col w-full" onSubmit={listBuckets}>
+
+			<div className="flex items-center justify-center flex-1">
+				<form className="border shadow p-4 rounded-lg max-w-sm w-full" onSubmit={listBuckets}>
+					<label className="block text-sm font-medium text-gray-700 mb-2">
+						Enter your Backblaze credentials
+					</label>
 					<input
+						required
 						placeholder="Key ID"
 						type="text"
 						value={keyId}
+						className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-2"
 						onChange={(e) => setKeyId(e.target.value)}
-						required
 					/>
 					<input
+						required
 						placeholder="Application Key"
 						type="text"
 						value={applicationKey}
+						className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-2"
 						onChange={(e) => setApplicationKey(e.target.value)}
-						required
 					/>
 					<input
+						required
 						placeholder="Endpoint - https://s3.<your-region>.backblazeb2.com"
 						type="text"
 						value={endpoint}
+						className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
 						onChange={(e) => setEndpoint(e.target.value)}
-						required
 					/>
-					<VideoModal src="/backblaze-keys-tutorial.mov" />
-					<button type="submit" disabled={loading}>
-						{loading ? "Loading" : "Next"}
-					</button>
+
+					<div className="flex items-center justify-between mt-4">
+						<VideoModal src="" />
+						<button
+							type="submit"
+							disabled={loading}
+							className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+						>
+							{loading ? "Loading" : "Next"}
+						</button>
+					</div>
+
+					{buckets?.length > 0 ? (
+						<>
+							<hr className="my-3" />
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									Found {buckets.length} buckets
+								</label>
+								<Listbox
+									value={selectedBucket}
+									onChange={setSelectedBucket}
+									label={selectedBucket || "Choose a bucket"}
+									options={buckets.map((bucket) => ({ label: bucket.Name, value: bucket.Name }))}
+								/>
+								<label className="block text-sm font-medium text-gray-700 my-2">
+									Or create a new bucket:
+								</label>
+								<input
+									required
+									type="text"
+									value={bucketName}
+									placeholder="Bucket Name"
+									className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+									onChange={(e) => {
+										// Bucket name must not contain spaces or uppercase letters
+										const text = e.target.value.replace(" ", "").toLowerCase();
+										setBucketName(text);
+									}}
+								/>
+								<div className="flex items-center justify-between mt-4">
+									<div />
+									<button
+										disabled={loading}
+										className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+										onClick={createBucket}
+									>
+										{loading ? "Loading" : "Create"}
+									</button>
+								</div>
+							</div>
+						</>
+					) : null}
 				</form>
-				{buckets?.length > 0 ? (
-					<>
-						<hr className="my-6" />
-						<div>
-							<h4 className="text-md mb-2">Found {buckets.length} buckets:</h4>
-							<p className="text-sm">Choose a bucket:</p>
-							{/* <Select value={selectedBucket} onChange={(e) => setSelectedBucket(e.target.value)}>
-								<option>Not Selected</option>
-								{buckets.map((bucket) => (
-									<option key={bucket.CreationDate.toString()} value={bucket.Name}>
-										{bucket.Name}
-									</option>
-								))}
-							</Select> */}
-							<p className="text-lg align-center my-2">OR</p>
-							<p className="text-sm">Create New:</p>
-							<input
-								placeholder="Bucket Name"
-								type="text"
-								value={bucketName}
-								onChange={(e) => {
-									// Bucket name must not contain spaces or uppercase letters
-									const text = e.target.value.replace(" ", "").toLowerCase();
-									setBucketName(text);
-								}}
-								required
-							/>
-							<button className="w-full mt-2" disabled={loading} onClick={createBucket}>
-								{loading ? "Loading" : "Create"}
-							</button>
-						</div>
-					</>
-				) : null}
 			</div>
-		</>
+		</Layout>
 	);
 };
 
