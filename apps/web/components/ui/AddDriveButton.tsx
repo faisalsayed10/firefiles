@@ -44,7 +44,7 @@ const AddDriveButton = () => {
 							/>
 							<p className="align-center mt-2">{p.name}</p>
 							{p.isComingSoon ? (
-								<div className="rounded-full bg-purple-500 px-2 py-1 text-xs">COMING SOON</div>
+								<div className="rounded-full bg-purple-300 px-2 py-1 text-xs">Coming Soon</div>
 							) : null}
 						</div>
 					))}

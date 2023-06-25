@@ -25,7 +25,7 @@ const Dashboard = () => {
 				<title>Your Drives | Firefiles</title>
 				<meta charSet="utf-8" />
 			</Head>
-			<div className="flex flex-col">
+			<div className="flex flex-col flex-1">
 				<h1 className="text-3xl font-semibold my-3">Your Drives</h1>
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
 					{!data && isValidating ? (
