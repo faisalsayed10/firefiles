@@ -1,3 +1,4 @@
+import Layout from "@components/Layout";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
@@ -59,46 +60,67 @@ const NewFirebase = () => {
 	};
 
 	return (
-		<>
+		<Layout>
 			<Head>
 				<title>Firebase | Firefiles</title>
 			</Head>
-			<div className="px-4 pt-3">
-				<button aria-label="back" className="mr-3" onClick={() => router.push("/new")}>
-					<ArrowNarrowLeft />
-				</button>
-				<h3 className="text-lg">Paste your Firebase config</h3>
-			</div>
-			<div className="flex min-h-screen flex-col items-center justify-center max-w-lg">
-				<form className="flex flex-col w-full" onSubmit={createBucket}>
+			<div className="flex-1 flex items-center justify-center">
+				<form className="border shadow p-4 rounded-lg max-w-sm w-full" onSubmit={createBucket}>
+					<label htmlFor="credentials" className="block text-sm font-medium text-gray-700 mb-2">
+						Paste your credentials
+					</label>
 					<textarea
+						rows={10}
 						value={raw}
+						name="credentials"
 						onChange={(e) => setRaw(e.target.value)}
-						className="w-full p-2 border border-gray-300 rounded-md"
+						className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 ring-1 ring-inset ring-gray-100 focus:ring-indigo-600"
 						placeholder={jsonPlaceholder}
 						required
 					/>
-					{/* <Alert status="info" mt="2">
+					<div className="flex items-center justify-between mt-4">
+						<VideoModal src="/firebase-config-tutorial.mov" />
+						<button
+							type="submit"
+							disabled={loading}
+							className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+						>
+							{loading ? "Loading" : "Create"}
+						</button>
+					</div>
+				</form>
+			</div>
+		</Layout>
+	);
+};
+
+{
+	/* <form className="flex flex-col max-w-4xl" onSubmit={createBucket}>
+	<textarea
+		value={raw}
+		onChange={(e) => setRaw(e.target.value)}
+		className="w-full p-2 border border-gray-300 rounded-md"
+		placeholder={jsonPlaceholder}
+		required
+	/>
+	{/* <Alert status="info" mt="2">
 						<AlertIcon />
 						<span>
 							Make sure you've followed all the{" "}
 							<a
-								href="https://firefiles.app/docs/firebase/01-setup"
+								href=""
 								target="_blank"
 								style={{ textDecoration: "underline" }}
 							>
 								steps!
 							</a>
 						</span>
-					</Alert> */}
-					<VideoModal src="/firebase-config-tutorial.mov" />
-					<button type="submit" disabled={loading}>
-						{loading ? "Loading" : "Create"}
-					</button>
-				</form>
-			</div>
-		</>
-	);
-};
+					</Alert> */
+}
+// 	<VideoModal src="/firebase-config-tutorial.mov" />
+// 	<button type="submit" disabled={loading}>
+// 		{loading ? "Loading" : "Create"}
+// 	</button>
+// </form>; */}
 
 export default NewFirebase;
