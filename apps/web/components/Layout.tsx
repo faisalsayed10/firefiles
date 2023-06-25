@@ -1,5 +1,5 @@
-import { Fragment, PropsWithChildren, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
+import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
 	Bars3Icon,
 	BellIcon,
@@ -12,13 +12,13 @@ import {
 	UsersIcon,
 	XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import Image from "next/image";
-import Avatar from "boring-avatars";
 import useUser from "@hooks/useUser";
+import Avatar from "boring-avatars";
+import Link from "next/link";
+import { Fragment, PropsWithChildren, useState } from "react";
 
 const navigation = [
-	{ name: "Dashboard", href: "#", icon: HomeIcon, current: true },
+	{ name: "Dashboard", href: "/", icon: HomeIcon, current: true },
 	{ name: "Team", href: "#", icon: UsersIcon, current: false },
 	{ name: "Projects", href: "#", icon: FolderIcon, current: false },
 	{ name: "Calendar", href: "#", icon: CalendarIcon, current: false },
@@ -106,7 +106,7 @@ export default function Layout({ children }: PropsWithChildren) {
 													<ul role="list" className="-mx-2 space-y-1">
 														{navigation.map((item) => (
 															<li key={item.name}>
-																<a
+																<Link
 																	href={item.href}
 																	className={classNames(
 																		item.current
@@ -125,7 +125,7 @@ export default function Layout({ children }: PropsWithChildren) {
 																		aria-hidden="true"
 																	/>
 																	{item.name}
-																</a>
+																</Link>
 															</li>
 														))}
 													</ul>
@@ -137,7 +137,7 @@ export default function Layout({ children }: PropsWithChildren) {
 													<ul role="list" className="-mx-2 mt-2 space-y-1">
 														{teams.map((team) => (
 															<li key={team.name}>
-																<a
+																<Link
 																	href={team.href}
 																	className={classNames(
 																		team.current
@@ -157,14 +157,14 @@ export default function Layout({ children }: PropsWithChildren) {
 																		{team.initial}
 																	</span>
 																	<span className="truncate">{team.name}</span>
-																</a>
+																</Link>
 															</li>
 														))}
 													</ul>
 												</li>
 												<li className="mt-auto">
-													<a
-														href="#"
+													<Link
+														href="/settings"
 														className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
 													>
 														<Cog6ToothIcon
@@ -172,7 +172,7 @@ export default function Layout({ children }: PropsWithChildren) {
 															aria-hidden="true"
 														/>
 														Settings
-													</a>
+													</Link>
 												</li>
 											</ul>
 										</nav>
@@ -190,12 +190,7 @@ export default function Layout({ children }: PropsWithChildren) {
 							<Menu.Button className="flex items-center w-full">
 								<span className="sr-only">Open user menu</span>
 								<div className="avatar">
-									<Avatar
-										square
-										size={28}
-										name={user?.email}
-										variant="beam"
-									/>
+									<Avatar square size={28} name={user?.email} variant="beam" />
 								</div>
 								<span className="hidden lg:flex lg:items-center justify-between w-full">
 									<span
@@ -220,7 +215,7 @@ export default function Layout({ children }: PropsWithChildren) {
 									{userNavigation.map((item) => (
 										<Menu.Item key={item.name}>
 											{({ active }) => (
-												<a
+												<Link
 													href={item.href}
 													className={classNames(
 														active ? "bg-gray-50" : "",
@@ -228,7 +223,7 @@ export default function Layout({ children }: PropsWithChildren) {
 													)}
 												>
 													{item.name}
-												</a>
+												</Link>
 											)}
 										</Menu.Item>
 									))}
@@ -242,7 +237,7 @@ export default function Layout({ children }: PropsWithChildren) {
 									<ul role="list" className="-mx-2 space-y-1">
 										{navigation.map((item) => (
 											<li key={item.name}>
-												<a
+												<Link
 													href={item.href}
 													className={classNames(
 														item.current
@@ -261,7 +256,7 @@ export default function Layout({ children }: PropsWithChildren) {
 														aria-hidden="true"
 													/>
 													{item.name}
-												</a>
+												</Link>
 											</li>
 										))}
 									</ul>
@@ -271,7 +266,7 @@ export default function Layout({ children }: PropsWithChildren) {
 									<ul role="list" className="-mx-2 mt-2 space-y-1">
 										{teams.map((team) => (
 											<li key={team.name}>
-												<a
+												<Link
 													href={team.href}
 													className={classNames(
 														team.current
@@ -291,14 +286,14 @@ export default function Layout({ children }: PropsWithChildren) {
 														{team.initial}
 													</span>
 													<span className="truncate">{team.name}</span>
-												</a>
+												</Link>
 											</li>
 										))}
 									</ul>
 								</li>
 								<li className="mt-auto">
-									<a
-										href="#"
+									<Link
+										href="/settings"
 										className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
 									>
 										<Cog6ToothIcon
@@ -306,14 +301,14 @@ export default function Layout({ children }: PropsWithChildren) {
 											aria-hidden="true"
 										/>
 										Settings
-									</a>
+									</Link>
 								</li>
 							</ul>
 						</nav>
 					</div>
 				</div>
 
-				<div className="lg:pl-60">
+				<div className="lg:pl-60 min-h-screen flex flex-col">
 					<div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
 						<button
 							type="button"
@@ -348,16 +343,11 @@ export default function Layout({ children }: PropsWithChildren) {
 									<span className="sr-only">View notifications</span>
 									<BellIcon className="h-6 w-6" aria-hidden="true" />
 								</button>
-
-								{/* Separator */}
-								{/* <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" aria-hidden="true" /> */}
 							</div>
 						</div>
 					</div>
 
-					<main className="py-10">
-						<div className="px-4 sm:px-6 lg:px-8">{children}</div>
-					</main>
+					<main className="py-10 px-4 sm:px-6 h-full lg:px-8 flex-1 flex">{children}</main>
 				</div>
 			</div>
 		</>
