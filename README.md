@@ -7,6 +7,8 @@
 
 Firefiles is an open‑source alternative to Dropbox which lets you setup a cloud drive with the backend of your choice and lets you seamlessly manage your files across multiple providers.
 
+Join Discord: https://discord.gg/qZxDmmWWUs
+
 # Features
 
 - A modern file-system interface for your storage buckets.
