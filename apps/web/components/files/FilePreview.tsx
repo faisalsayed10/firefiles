@@ -201,7 +201,7 @@ const Error = ({ file, url }) => {
 				<Text as="p" mb="2">
 					Make sure you've{" "}
 					<Link
-						href="https://firefiles.vercel.app/docs/firebase/03-cors"
+						href="https://firefiles.app/docs/firebase/03-cors"
 						target="_blank"
 						textDecor="underline"
 					>
