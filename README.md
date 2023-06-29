@@ -3,6 +3,8 @@
      </div>
 <p align="center"> <a href="https://firefiles.vercel.app" target="_blank"><img alt="" src="https://img.shields.io/badge/Website-EA4C89?style=normal&logo=dribbble&logoColor=white" style="vertical-align:center" /></a> <a href="https://twitter.com/faisal_sayed05" target="_blank"><img alt="" src="https://img.shields.io/badge/Twitter-1DA1F2?style=normal&logo=twitter&logoColor=white" style="vertical-align:center" /></a></p>
 
+Join Discord: https://discord.gg/qZxDmmWWUs
+
 # Description
 
 Firefiles is an open‑source alternative to Dropbox which lets you setup a cloud drive with the backend of your choice and lets you seamlessly manage your files across multiple providers.
