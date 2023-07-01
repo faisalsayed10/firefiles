@@ -1,4 +1,4 @@
-import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
+import { Box, Center, Divider, Text, useColorMode, Button, Grid } from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
@@ -11,6 +11,7 @@ import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
+import { DriveFile } from "@util/types";
 
 const baseStyle = {
 	outline: "none",
@@ -33,15 +34,41 @@ const Dashboard = () => {
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
+	const [fileSort, setFileSort] = useState("name");
+	const [isAscending, setIsAscending] = useState(true);
 
 	useEffect(() => {
 		const storedView = localStorage.getItem("grid_view");
+		const storedSort = localStorage.getItem("file_sort");
+		const storedOrder = localStorage.getItem("is_ascending");
+
 		if (storedView) setGridView(storedView === "true");
+		if (storedSort) setFileSort(storedSort);
+		if (storedOrder) setIsAscending(storedOrder === "true");
 	}, []);
 
 	useEffect(() => {
 		localStorage.setItem("grid_view", gridView.toString());
 	}, [gridView]);
+
+	useEffect(() => {
+		localStorage.setItem("file_sort", fileSort.toString());
+	}, [fileSort]);
+
+	useEffect(() => {
+		localStorage.setItem("is_ascending", isAscending.toString());
+	}, [isAscending]);
+
+	const sortByProperty = () => {
+		const sortOrder = isAscending ? 1 : -1;
+		files?.sort((a: DriveFile, b: DriveFile) => {
+			return a[fileSort] < b[fileSort]
+				? -1 * sortOrder
+				: a[fileSort] > b[fileSort]
+				? 1 * sortOrder
+				: 0;
+		});
+	};
 
 	return (
 		<>
@@ -88,6 +115,24 @@ const Dashboard = () => {
 							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
 							<Divider />
+							{/* Temporary buttons/elements used for logic dev */}
+							<Grid
+								templateColumns={[
+									"repeat(auto-fill, minmax(140px, 1fr))",
+									"repeat(auto-fill, minmax(160px, 1fr))",
+									"repeat(auto-fill, minmax(160px, 1fr))",
+								]}
+								gap={[2, 6, 6]}
+							>
+								<Button onClick={() => setFileSort("name")}>Name</Button>
+								<Button onClick={() => setFileSort("size")}>Size</Button>
+								<Button onClick={() => setFileSort("createdAt")}>Created At</Button>
+								<Button onClick={() => setIsAscending((prevIsAscending) => !prevIsAscending)}>
+									{isAscending ? "DESC" : "ASC"}
+								</Button>
+							</Grid>
+							{/* This is likely where the sort will be done? */}
+							{files?.length > 0 && sortByProperty()}
 							{!gridView ? (
 								<ListView
 									loading={loading}
