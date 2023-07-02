@@ -3,6 +3,7 @@ import { DriveFolder } from "@util/types";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { ChevronLeft } from "tabler-icons-react";
 
 interface Props {
 	currentFolder: DriveFolder;
@@ -14,24 +15,24 @@ const FolderBreadCrumbs: React.FC<Props> = ({ currentFolder }) => {
 	if (!currentFolder) return null;
 
 	return (
-		<nav className="flex border-b border-gray-200 bg-white" aria-label="Breadcrumb">
-			<ol
-				role="list"
-				className="mx-auto flex w-full max-w-screen-xl space-x-4 px-4 sm:px-6 lg:px-8"
-			>
-				<li className="flex">
-					<div className="flex items-center">
-						<Link
-							href={router.asPath.replace(
-								currentFolder.fullPath.slice(0, -1).replace(" ", "%20"),
-								""
-							)}
-							className="text-gray-400 hover:text-gray-500"
-						>
-							<HomeIcon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-							<span className="sr-only">Home</span>
-						</Link>
-					</div>
+		<nav className="flex border-b border-gray-200 bg-white p-5" aria-label="Breadcrumb">
+			<ol role="list" className="flex w-full space-x-4">
+				<li className="flex gap-2 items-center justify-center">
+					<Link href="/" className="text-gray-400 hover:text-gray-500">
+						<ChevronLeft className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+						<span className="sr-only">Home</span>
+					</Link>
+
+					<Link
+						href={router.asPath.replace(
+							currentFolder.fullPath.slice(0, -1).replace(" ", "%20"),
+							""
+						)}
+						className="text-gray-400 hover:text-gray-500"
+					>
+						<HomeIcon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+						<span className="sr-only">Home</span>
+					</Link>
 				</li>
 				{currentFolder?.name !== "" &&
 					currentFolder?.fullPath

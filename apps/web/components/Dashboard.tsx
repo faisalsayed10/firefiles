@@ -65,9 +65,8 @@ const Dashboard = () => {
 							>
 								DROP FILES ANYWHERE ON THE SCREEN
 							</h1>
-							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
-							<hr />
+
 							{!gridView ? (
 								<ListView
 									loading={loading}

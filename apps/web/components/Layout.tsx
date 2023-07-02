@@ -19,20 +19,20 @@ import { Fragment, PropsWithChildren, useState } from "react";
 
 const navigation = [
 	{ name: "Dashboard", href: "/", icon: HomeIcon, current: true },
-	{ name: "Team", href: "#", icon: UsersIcon, current: false },
-	{ name: "Projects", href: "#", icon: FolderIcon, current: false },
-	{ name: "Calendar", href: "#", icon: CalendarIcon, current: false },
-	{ name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
-	{ name: "Reports", href: "#", icon: ChartPieIcon, current: false },
+	// { name: "Team", href: "#", icon: UsersIcon, current: false },
+	// { name: "Projects", href: "#", icon: FolderIcon, current: false },
+	// { name: "Calendar", href: "#", icon: CalendarIcon, current: false },
+	// { name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
+	// { name: "Reports", href: "#", icon: ChartPieIcon, current: false },
 ];
 const teams = [
-	{ id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
-	{ id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
-	{ id: 3, name: "Workcation", href: "#", initial: "W", current: false },
+	// { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
+	// { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
+	// { id: 3, name: "Workcation", href: "#", initial: "W", current: false },
 ];
 const userNavigation = [
-	{ name: "Your profile", href: "#" },
-	{ name: "Sign out", href: "#" },
+	{ name: "Your profile", href: "/" },
+	{ name: "Sign out", href: "/logout" },
 ];
 
 function classNames(...classes) {
@@ -164,7 +164,7 @@ export default function Layout({ children }: PropsWithChildren) {
 												</li>
 												<li className="mt-auto">
 													<Link
-														href="/settings"
+														href="/"
 														className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
 													>
 														<Cog6ToothIcon
@@ -293,7 +293,7 @@ export default function Layout({ children }: PropsWithChildren) {
 								</li>
 								<li className="mt-auto">
 									<Link
-										href="/settings"
+										href="/"
 										className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
 									>
 										<Cog6ToothIcon
