@@ -22,7 +22,14 @@ import {
 } from "firebase/storage";
 import { nanoid } from "nanoid";
 import router from "next/router";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+	createContext,
+	PropsWithChildren,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
@@ -35,7 +42,11 @@ type Props = {
 	fullPath?: string;
 };
 
-export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) => {
+export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
+	data,
+	fullPath,
+	children,
+}) => {
 	const [app, setApp] = useState<FirebaseApp>();
 	const [appUser, setAppUser] = useState<FirebaseUser>();
 	const [loading, setLoading] = useState(true);
@@ -63,26 +74,38 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 		setFolders((folders) => [...folders, newFolder]);
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
 		const folders: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
-		localStorage.setItem(`local_folders_${data.id}`, JSON.stringify([...folders, newFolder]));
+		localStorage.setItem(
+			`local_folders_${data.id}`,
+			JSON.stringify([...folders, newFolder]),
+		);
 	};
 
 	const removeFolder = async (folder: DriveFolder) => {
 		if (!app) return;
 
 		// remove from local state
-		setFolders((folders) => folders.filter((f) => f.fullPath !== folder.fullPath));
+		setFolders((folders) =>
+			folders.filter((f) => f.fullPath !== folder.fullPath),
+		);
 
 		// delete from localStorage
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
 		if (localFolders) {
 			const folders = JSON.parse(localFolders);
-			const filtered = folders.filter((f) => !f.fullPath.includes(folder.fullPath));
-			localStorage.setItem(`local_folders_${data.id}`, JSON.stringify(filtered));
+			const filtered = folders.filter(
+				(f) => !f.fullPath.includes(folder.fullPath),
+			);
+			localStorage.setItem(
+				`local_folders_${data.id}`,
+				JSON.stringify(filtered),
+			);
 		}
 
 		// recursively delete children
 		const storage = getStorage(app);
-		const res = await listAll(ref(storage, decodeURIComponent(folder.fullPath) + "/"));
+		const res = await listAll(
+			ref(storage, decodeURIComponent(folder.fullPath) + "/"),
+		);
 		recursiveDelete(storage, res.prefixes, res.items);
 	};
 
@@ -104,7 +127,9 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 			const filePath =
 				currentFolder === ROOT_FOLDER
 					? filesToUpload[i].name
-					: `${decodeURIComponent(currentFolder.fullPath)}/${filesToUpload[i].name}`;
+					: `${decodeURIComponent(currentFolder.fullPath)}/${
+							filesToUpload[i].name
+					  }`;
 
 			const fileRef = ref(getStorage(app), filePath);
 			const uploadTask = uploadBytesResumable(fileRef, filesToUpload[i]);
@@ -119,7 +144,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 						progress: 0,
 						error: false,
 					},
-				])
+				]),
 			);
 
 			uploadTask.on(
@@ -131,7 +156,9 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 								return {
 									...uploadFile,
 									state: snapshot.state,
-									progress: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+									progress: Math.round(
+										(snapshot.bytesTransferred / snapshot.totalBytes) * 100,
+									),
 								};
 
 							return uploadFile;
@@ -148,7 +175,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 				},
 				async () => {
 					setUploadingFiles((prevUploadingFiles) =>
-						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+						prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id),
 					);
 
 					const newFile: DriveFile = {
@@ -163,7 +190,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 					};
 					setFiles((files) => [...files, newFile]);
 					toast.success("File uploaded successfully.");
-				}
+				},
 			);
 		}
 	};
@@ -199,7 +226,8 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	};
 
 	useEffect(() => {
-		if (!appUser || !files || !allFilesFetched || !allFilesFetched.current) return;
+		if (!appUser || !files || !allFilesFetched || !allFilesFetched.current)
+			return;
 
 		for (let i = 0; i < files.length; i++) {
 			getFileMetadata(files[i], i);
@@ -219,9 +247,12 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 	useEffect(() => {
 		if (!user?.email) return;
 		setLoading(true);
-		const has_initialized = getApps().filter((app) => app.name === data.id).length > 0;
+		const has_initialized =
+			getApps().filter((app) => app.name === data.id).length > 0;
 		(async () => {
-			!has_initialized ? await initializeAppAndLogin(data, user, setApp) : setApp(getApp(data.id));
+			!has_initialized
+				? await initializeAppAndLogin(data, user, setApp)
+				: setApp(getApp(data.id));
 		})();
 
 		// setLoading(false);
@@ -298,11 +329,13 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 					allFilesFetched.current = true;
 
 					const localFolders = localStorage.getItem(`local_folders_${data.id}`);
-					let localFoldersArray: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
+					let localFoldersArray: DriveFolder[] = localFolders
+						? JSON.parse(localFolders)
+						: [];
 					localFoldersArray = localFoldersArray.filter(
 						(folder) =>
 							folder.parent === currentFolder.fullPath &&
-							!results.prefixes.find((prefix) => prefix.name === folder.name)
+							!results.prefixes.find((prefix) => prefix.name === folder.name),
 					);
 
 					setFolders(localFoldersArray);
@@ -352,7 +385,7 @@ export const FirebaseProvider: React.FC<Props> = ({ data, fullPath, children }) 
 const recursiveDelete = async (
 	storage: FirebaseStorage,
 	prefixes: StorageReference[],
-	items: StorageReference[]
+	items: StorageReference[],
 ) => {
 	for (const file of items) {
 		deleteObject(ref(storage, file.fullPath));
@@ -368,7 +401,8 @@ const recursiveDelete = async (
 };
 
 const initializeAppAndLogin = async (data: Drive, user: User, setApp: any) => {
-	const has_logged_in = window.localStorage.getItem(`has_logged_in_${data.id}`) === "true" || false;
+	const has_logged_in =
+		window.localStorage.getItem(`has_logged_in_${data.id}`) === "true" || false;
 	const initialize = initializeApp(data.keys as any, data.id);
 	setApp(initialize);
 
@@ -380,8 +414,10 @@ const initializeAppAndLogin = async (data: Drive, user: User, setApp: any) => {
 const loginTheirUser = async (app: FirebaseApp, user: User, data: Drive) => {
 	const auth = getAuth(app);
 	const config = app.options as Config;
-	const setLoggedIn = () => window.localStorage.setItem(`has_logged_in_${data.id}`, "true");
-	const email = user.email.split("@")[0] + "+firefiles@" + user.email.split("@")[1];
+	const setLoggedIn = () =>
+		window.localStorage.setItem(`has_logged_in_${data.id}`, "true");
+	const email =
+		user.email.split("@")[0] + "+firefiles@" + user.email.split("@")[1];
 	let password: string;
 
 	if (config.password) {
@@ -394,11 +430,14 @@ const loginTheirUser = async (app: FirebaseApp, user: User, data: Drive) => {
 		.then(() => setLoggedIn())
 		.catch(async (err) => {
 			if (err.message.includes("auth/user-not-found")) {
-				await createUserWithEmailAndPassword(auth, email, password).then(() => setLoggedIn());
+				await createUserWithEmailAndPassword(auth, email, password).then(() =>
+					setLoggedIn(),
+				);
 			} else {
 				router.push("/error?message=" + err.message);
 			}
 		});
 
-	if (!config.password) await axios.put(`/api/drive?id=${data.id}`, { ...config, password });
+	if (!config.password)
+		await axios.put(`/api/drive?id=${data.id}`, { ...config, password });
 };
