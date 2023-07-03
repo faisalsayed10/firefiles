@@ -3,7 +3,10 @@ import Router from "next/router";
 import useSWR from "swr";
 import { User } from "@prisma/client";
 
-export default function useUser({ redirectTo = "", redirectIfFound = false } = {}) {
+export default function useUser({
+	redirectTo = "",
+	redirectIfFound = false,
+} = {}) {
 	const { data: user, mutate: mutateUser } = useSWR<User>("/api/auth/user");
 
 	useEffect(() => {
