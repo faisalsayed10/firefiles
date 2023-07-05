@@ -11,6 +11,8 @@ import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
+import { DriveFile } from "@util/types";
+import { sortBy, each, has } from "underscore";
 
 const baseStyle = {
 	outline: "none",
@@ -25,6 +27,11 @@ const activeStyle = {
 	backgroundColor: "rgba(0, 0, 0, 0.25)",
 };
 
+export type FileSortConfig = {
+	property: "name" | "size" | "createdAt";
+	isAscending: boolean;
+}
+
 const Dashboard = () => {
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
@@ -33,15 +40,36 @@ const Dashboard = () => {
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
+	const [fileSort, setFileSort] = useState<FileSortConfig>({property: "name", isAscending: true});
 
 	useEffect(() => {
 		const storedView = localStorage.getItem("grid_view");
+		const storedFileSort = localStorage.getItem("file_sort");
+
 		if (storedView) setGridView(storedView === "true");
+		if (storedFileSort) {
+			setFileSort(JSON.parse(storedFileSort));
+			console.log(storedFileSort);
+		}
 	}, []);
 
 	useEffect(() => {
 		localStorage.setItem("grid_view", gridView.toString());
 	}, [gridView]);
+
+	useEffect(() => {
+		localStorage.setItem("file_sort", JSON.stringify(fileSort));
+	}, [fileSort]);
+
+	const sortByProperty = () => {
+		// console.log(files);
+		if (files.some((item) => !has(item, fileSort.property))) return;
+
+		const sortedFiles = sortBy(files, fileSort.property);
+		if (!fileSort.isAscending) sortedFiles.reverse();
+		each(files, (_item, i) => {files[i] = {...sortedFiles[i]}});
+		// console.log('sorted on ' + fileSort.property);
+	};
 
 	return (
 		<>
@@ -88,6 +116,7 @@ const Dashboard = () => {
 							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
 							<Divider />
+							{files?.length > 0 && sortByProperty()}
 							{!gridView ? (
 								<ListView
 									loading={loading}
@@ -96,6 +125,8 @@ const Dashboard = () => {
 									folders={folders}
 									setGridView={setGridView}
 									setIsFolderDeleting={setIsFolderDeleting}
+									setFileSort={setFileSort}
+									fileSort={fileSort}
 								/>
 							) : (
 								<GridView
@@ -105,6 +136,8 @@ const Dashboard = () => {
 									folders={folders}
 									setGridView={setGridView}
 									setIsFolderDeleting={setIsFolderDeleting}
+									setFileSort={setFileSort}
+									fileSort={fileSort}
 								/>
 							)}
 						</Box>
