@@ -32,6 +32,12 @@ export const PROVIDERS = [
 		logo: "/git.png",
 		isComingSoon: true,
 	},
+	{
+		id: "wasabi",
+		name: "Wasabi",
+		logo: "/git.png",
+		isComingSoon: true,
+	},
 ];
 
 export const FILE_TYPES = [
