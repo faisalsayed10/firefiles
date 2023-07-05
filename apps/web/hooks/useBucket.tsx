@@ -2,7 +2,6 @@ import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
 import useFirebase from "./useFirebase";
 import useKeys from "./useKeys";
 import useS3 from "./useS3";
-import { useWasabi } from './useWasabi';
 
 export type ContextValue = {
 	loading: boolean;
@@ -35,7 +34,7 @@ export default function useBucket(): ContextValue {
 	} else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
 		return useS3();
 	} else if ((Provider[keys.type] as Provider) === Provider.wasabi) {
-		return useWasabi();
+		return useS3();
 	}
 
 	return null;
