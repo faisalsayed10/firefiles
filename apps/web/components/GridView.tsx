@@ -3,7 +3,7 @@ import Folder from "@components/folders/Folder";
 import { DriveFile, DriveFolder } from "@util/types";
 import React from "react";
 import { LayoutList } from "tabler-icons-react";
-import { FileSortConfig } from "./Dashboard";
+import { FileSortConfig } from "@util/types";
 import File from "./files/File";
 import AddFolderButton from "./folders/AddFolderButton";
 import FileSortMenu from "./ui/FileSortMenu";

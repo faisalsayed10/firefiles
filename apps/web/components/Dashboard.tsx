@@ -4,7 +4,7 @@ import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { Provider } from "@util/types";
+import { Provider, FileSortConfig } from "@util/types";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
@@ -25,11 +25,6 @@ const activeStyle = {
 	borderColor: "#2196f3",
 	backgroundColor: "rgba(0, 0, 0, 0.25)",
 };
-
-export type FileSortConfig = {
-	property: "name" | "size" | "createdAt";
-	isAscending: boolean;
-}
 
 const Dashboard = () => {
 	const [draggedFilesToUpload, setDraggedFilesToUpload] = useState<File[]>([]);

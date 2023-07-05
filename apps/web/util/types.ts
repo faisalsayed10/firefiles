@@ -25,6 +25,11 @@ export enum Provider {
 	git,
 }
 
+export type FileSortConfig = {
+	property: "name" | "size" | "createdAt";
+	isAscending: boolean;
+}
+
 export type DriveFile = {
 	name: string;
 	url?: string;

@@ -7,7 +7,7 @@ import {
 	MenuButton,
 } from "@chakra-ui/react";
 import React from "react";
-import { FileSortConfig } from "@components/Dashboard";
+import { FileSortConfig } from "@util/types";
 import { ChevronDown, ArrowsSort } from "tabler-icons-react";
 
 

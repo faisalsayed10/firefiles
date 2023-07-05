@@ -12,10 +12,9 @@ import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
 import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
-import { DriveFile, DriveFolder } from "@util/types";
+import { DriveFile, DriveFolder, FileSortConfig } from "@util/types";
 import React from "react";
 import { LayoutGrid } from "tabler-icons-react";
-import { FileSortConfig } from "./Dashboard";
 import FileSortMenu from "@components/ui/FileSortMenu";
 
 
