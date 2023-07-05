@@ -1,23 +1,12 @@
-import {
-	Box,
-	Flex,
-	Grid,
-	IconButton,
-	Skeleton,
-	Text,
-	Menu,
-	MenuItem,
-	MenuButton,
-	MenuList,
-	Button,
-} from "@chakra-ui/react";
+import { Box, Flex, Grid, IconButton, Skeleton, Text } from "@chakra-ui/react";
 import Folder from "@components/folders/Folder";
 import { DriveFile, DriveFolder } from "@util/types";
 import React from "react";
-import { LayoutList, ChevronDown, ArrowsSort } from "tabler-icons-react";
+import { LayoutList } from "tabler-icons-react";
 import { FileSortConfig } from "./Dashboard";
 import File from "./files/File";
 import AddFolderButton from "./folders/AddFolderButton";
+import FileSortMenu from "./ui/FileSortMenu";
 
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,25 +27,7 @@ const GridView: React.FC<Props> = (props) => {
 					Your Files
 				</Text>
 				<Box>
-					<Menu>
-						<MenuButton size="sm" as={Button} variant="ghost" rightIcon={<ChevronDown size="16" />}>
-							{ props.fileSort.property }
-						</MenuButton>
-						<MenuList>
-							<MenuItem onClick={() => {props.setFileSort({property: "name", isAscending:props.fileSort.isAscending})}}>
-								Name
-							</MenuItem>
-							<MenuItem onClick={() => {props.setFileSort({property: "size", isAscending:props.fileSort.isAscending})}}>
-								Size
-							</MenuItem>
-							<MenuItem onClick={() => {props.setFileSort({property: "createdAt", isAscending:props.fileSort.isAscending})}}>
-								Created At
-							</MenuItem>
-						</MenuList>
-					</Menu>
-					<IconButton aria-label="change-view" onClick={() => props.setFileSort({property: props.fileSort.property, isAscending: !props.fileSort.isAscending})}>
-						<ArrowsSort />
-					</IconButton>
+					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
 					<IconButton aria-label="change-view" onClick={() => props.setGridView(false)}>
 						<LayoutList />
 					</IconButton>

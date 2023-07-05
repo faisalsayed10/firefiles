@@ -11,7 +11,6 @@ import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import { DriveFile } from "@util/types";
 import { sortBy, each, has } from "underscore";
 
 const baseStyle = {
@@ -62,13 +61,11 @@ const Dashboard = () => {
 	}, [fileSort]);
 
 	const sortByProperty = () => {
-		// console.log(files);
 		if (files.some((item) => !has(item, fileSort.property))) return;
 
 		const sortedFiles = sortBy(files, fileSort.property);
 		if (!fileSort.isAscending) sortedFiles.reverse();
 		each(files, (_item, i) => {files[i] = {...sortedFiles[i]}});
-		// console.log('sorted on ' + fileSort.property);
 	};
 
 	return (
