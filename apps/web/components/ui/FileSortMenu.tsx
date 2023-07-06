@@ -11,35 +11,31 @@ import { FileSortConfig } from "@util/types";
 import { ChevronDown, ArrowsSort } from "tabler-icons-react";
 
 
-type Props = {
+const FileSortMenu: React.FC<{
   setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
-	fileSort: FileSortConfig;
-}
-
-const FileSortMenu: React.FC<Props>= (props) => {
-  return (
-    <>
-      <Menu>
-        <MenuButton size="sm" as={Button} variant="ghost" rightIcon={<ChevronDown size="16" />}>
-          { props.fileSort.property }
-        </MenuButton>
-        <MenuList>
-          <MenuItem onClick={() => {props.setFileSort({property: "name", isAscending:props.fileSort.isAscending})}}>
-            Name
-          </MenuItem>
-          <MenuItem onClick={() => {props.setFileSort({property: "size", isAscending:props.fileSort.isAscending})}}>
-            Size
-          </MenuItem>
-          <MenuItem onClick={() => {props.setFileSort({property: "createdAt", isAscending:props.fileSort.isAscending})}}>
-            Created At
-          </MenuItem>
-        </MenuList>
-      </Menu>
-      <IconButton aria-label="change-view" onClick={() => props.setFileSort({property: props.fileSort.property, isAscending: !props.fileSort.isAscending})}>
-        <ArrowsSort />
-      </IconButton>
-    </>
-  );
-}
+  fileSort: FileSortConfig;
+}> = ({ fileSort, setFileSort }) => (
+  <>
+    <Menu>
+      <MenuButton size="sm" as={Button} variant="ghost" rightIcon={<ChevronDown size="16" />}>
+        {fileSort.property}
+      </MenuButton>
+      <MenuList>
+        <MenuItem onClick={() => { setFileSort({ property: "name", isAscending: fileSort.isAscending }); }}>
+          Name
+        </MenuItem>
+        <MenuItem onClick={() => { setFileSort({ property: "size", isAscending: fileSort.isAscending }); }}>
+          Size
+        </MenuItem>
+        <MenuItem onClick={() => { setFileSort({ property: "createdAt", isAscending: fileSort.isAscending }); }}>
+          Created At
+        </MenuItem>
+      </MenuList>
+    </Menu>
+    <IconButton aria-label="change-view" onClick={() => setFileSort({ property: fileSort.property, isAscending: !fileSort.isAscending })}>
+      <ArrowsSort />
+    </IconButton>
+  </>
+)
 
 export default FileSortMenu;
