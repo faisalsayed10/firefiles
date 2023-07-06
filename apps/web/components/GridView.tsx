@@ -15,7 +15,7 @@ type Props = {
 	folders: DriveFolder[];
 	files: DriveFile[];
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
-	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>; // change this file path/type location to a util?
+	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
 	fileSort: FileSortConfig;
 };
 
