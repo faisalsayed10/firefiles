@@ -11,7 +11,8 @@ import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import { sortBy, each, has } from "underscore";
+import { sortBy } from "underscore";
+import { DriveFile } from "@util/types";
 
 const baseStyle = {
 	outline: "none",
@@ -35,16 +36,14 @@ const Dashboard = () => {
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
 	const [fileSort, setFileSort] = useState<FileSortConfig>({property: "name", isAscending: true});
+	const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
 
 	useEffect(() => {
 		const storedView = localStorage.getItem("grid_view");
 		const storedFileSort = localStorage.getItem("file_sort");
 
 		if (storedView) setGridView(storedView === "true");
-		if (storedFileSort) {
-			setFileSort(JSON.parse(storedFileSort));
-			console.log(storedFileSort);
-		}
+		if (storedFileSort) setFileSort(JSON.parse(storedFileSort));
 	}, []);
 
 	useEffect(() => {
@@ -55,13 +54,14 @@ const Dashboard = () => {
 		localStorage.setItem("file_sort", JSON.stringify(fileSort));
 	}, [fileSort]);
 
-	const sortByProperty = () => {
-		if (files.some((item) => !has(item, fileSort.property))) return;
+	useEffect(() => {
+		if (!files) return;
 
 		const sortedFiles = sortBy(files, fileSort.property);
 		if (!fileSort.isAscending) sortedFiles.reverse();
-		each(files, (_item, i) => {files[i] = {...sortedFiles[i]}});
-	};
+
+		setSortedFiles(sortedFiles);
+	}, [fileSort, files])
 
 	return (
 		<>
@@ -108,12 +108,11 @@ const Dashboard = () => {
 							<Navbar />
 							<FolderBreadCrumbs currentFolder={currentFolder} />
 							<Divider />
-							{files?.length > 0 && sortByProperty()}
 							{!gridView ? (
 								<ListView
 									loading={loading}
 									currentFolder={currentFolder}
-									files={files}
+									files={sortedFiles}
 									folders={folders}
 									setGridView={setGridView}
 									setIsFolderDeleting={setIsFolderDeleting}
@@ -124,7 +123,7 @@ const Dashboard = () => {
 								<GridView
 									loading={loading}
 									currentFolder={currentFolder}
-									files={files}
+									files={sortedFiles}
 									folders={folders}
 									setGridView={setGridView}
 									setIsFolderDeleting={setIsFolderDeleting}
