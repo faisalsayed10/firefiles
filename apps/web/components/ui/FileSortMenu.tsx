@@ -17,8 +17,8 @@ const FileSortMenu: React.FC<{
 }> = ({ fileSort, setFileSort }) => (
   <>
     <Menu>
-      <MenuButton size="sm" as={Button} variant="ghost" rightIcon={<ChevronDown size="16" />}>
-        {fileSort.property}
+      <MenuButton size="md" as={Button} rightIcon={<ChevronDown size="16" />}>
+        {fileSort.property === "name" ? "Name" : fileSort.property === "size" ? "Size" : "Created At"}
       </MenuButton>
       <MenuList>
         <MenuItem onClick={() => { setFileSort({ property: "name", isAscending: fileSort.isAscending }); }}>
@@ -32,7 +32,7 @@ const FileSortMenu: React.FC<{
         </MenuItem>
       </MenuList>
     </Menu>
-    <IconButton aria-label="change-view" onClick={() => setFileSort({ property: fileSort.property, isAscending: !fileSort.isAscending })}>
+    <IconButton aria-label="change-sort-direction" mx={1} onClick={() => setFileSort({ property: fileSort.property, isAscending: !fileSort.isAscending })}>
       <ArrowsSort />
     </IconButton>
   </>
