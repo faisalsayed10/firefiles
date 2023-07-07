@@ -23,9 +23,8 @@ const sortByName = (files: DriveFile[]) => {
   const collator = new Intl.Collator(undefined, {
     numeric: true,
     sensitivity: 'base',
-    caseFirst: 'upper'
   });
   return [...files].sort((a: DriveFile, b: DriveFile) => {
-    return collator.compare(a.name.toLowerCase(), b.name.toLowerCase())
+    return collator.compare(a.name, b.name)
   });
 }
