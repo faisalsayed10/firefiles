@@ -35,7 +35,7 @@ const Dashboard = () => {
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
-	const [fileSort, setFileSort] = useState<FileSortConfig>({property: "name", isAscending: true});
+	const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
 	const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
 
 	useEffect(() => {
@@ -60,7 +60,12 @@ const Dashboard = () => {
 			return;
 		}
 
-		const sortedFiles = sortBy(files, fileSort.property);
+		const sortedFiles = sortBy(files, file => {
+			return fileSort.property === "name" ? file.name.toLowerCase() :
+				fileSort.property === "size" ? Number(file.size) :
+					file.createdAt;
+		});
+
 		if (!fileSort.isAscending) sortedFiles.reverse();
 
 		setSortedFiles(sortedFiles);
