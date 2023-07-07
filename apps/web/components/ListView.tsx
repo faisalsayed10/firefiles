@@ -1,12 +1,22 @@
-import { Divider, Flex, Grid, IconButton, Skeleton, Text } from "@chakra-ui/react";
+import {
+	Divider,
+	Flex,
+	Grid,
+	IconButton,
+	Skeleton,
+	Text,
+	Box,
+} from "@chakra-ui/react";
 import FilesEmptyState from "@components/files/FilesEmptyState";
 import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
 import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
-import { DriveFile, DriveFolder } from "@util/types";
+import { DriveFile, DriveFolder, FileSortConfig } from "@util/types";
 import React from "react";
 import { LayoutGrid } from "tabler-icons-react";
+import FileSortMenu from "@components/ui/FileSortMenu";
+
 
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,6 +25,8 @@ type Props = {
 	folders: DriveFolder[];
 	files: DriveFile[];
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
+	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
+	fileSort: FileSortConfig;
 };
 
 const ListView: React.FC<Props> = (props) => {
@@ -58,9 +70,12 @@ const ListView: React.FC<Props> = (props) => {
 				<Text fontSize="3xl" fontWeight="600">
 					Your Files
 				</Text>
-				<IconButton aria-label="change-view" onClick={() => props.setGridView(true)}>
-					<LayoutGrid />
-				</IconButton>
+				<Box>
+					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
+					<IconButton aria-label="change-view" onClick={() => props.setGridView(true)}>
+						<LayoutGrid />
+					</IconButton>
+				</Box>
 			</Flex>
 			{props.files === null && props.loading ? (
 				<FilesTableSkeleton />
