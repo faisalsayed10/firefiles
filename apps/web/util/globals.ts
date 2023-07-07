@@ -35,7 +35,7 @@ export const PROVIDERS = [
 	{
 		id: "wasabi",
 		name: "Wasabi",
-		logo: "/git.png",
+		logo: "/wasabi.png",
 		isComingSoon: true,
 	},
 ];
