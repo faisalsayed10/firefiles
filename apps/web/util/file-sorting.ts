@@ -20,15 +20,12 @@ export function sortDriveFiles(
 }
 
 const sortByName = (files: DriveFile[]) => {
-  const digitSorted = sortBy(files, file => {
-    const regex = /^(\d+)?(.*)$/;
-    const [, num, _] = regex.exec(file.name);
-    return num ? parseInt(num, 10) : Number.POSITIVE_INFINITY;
+  const collator = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: 'base',
+    caseFirst: 'upper'
   });
-  const nameSorted = sortBy(digitSorted, file => {
-    const regex = /^(\d+)?(.*)$/;
-    const [, _, text] = regex.exec(file.name);
-    return text;
-  })
-  return nameSorted;
+  return [...files].sort((a: DriveFile, b: DriveFile) => {
+    return collator.compare(a.name.toLowerCase(), b.name.toLowerCase())
+  });
 }
