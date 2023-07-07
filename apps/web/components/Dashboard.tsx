@@ -1,4 +1,4 @@
-import { Box, Center, Divider, Text, useColorMode, Button, Grid } from "@chakra-ui/react";
+import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
