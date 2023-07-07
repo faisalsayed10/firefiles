@@ -11,8 +11,8 @@ import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import { sortBy } from "underscore";
 import { DriveFile } from "@util/types";
+import { sortDriveFiles } from "@util/file-sorting";
 
 const baseStyle = {
 	outline: "none",
@@ -59,15 +59,7 @@ const Dashboard = () => {
 			setSortedFiles([]);
 			return;
 		}
-
-		const sortedFiles = sortBy(files, file => {
-			return fileSort.property === "name" ? file.name.toLowerCase() :
-				fileSort.property === "size" ? Number(file.size) :
-					file.createdAt;
-		});
-
-		if (!fileSort.isAscending) sortedFiles.reverse();
-
+		const sortedFiles = sortDriveFiles(files, fileSort);
 		setSortedFiles(sortedFiles);
 	}, [fileSort, files])
 
