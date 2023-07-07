@@ -55,7 +55,10 @@ const Dashboard = () => {
 	}, [fileSort]);
 
 	useEffect(() => {
-		if (!files) return;
+		if (!files) {
+			setSortedFiles([]);
+			return;
+		}
 
 		const sortedFiles = sortBy(files, fileSort.property);
 		if (!fileSort.isAscending) sortedFiles.reverse();
