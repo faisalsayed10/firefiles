@@ -11,8 +11,8 @@ import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import { sortBy } from "underscore";
 import { DriveFile } from "@util/types";
+import { sortDriveFiles } from "@util/file-sorting";
 
 const baseStyle = {
 	outline: "none",
@@ -35,7 +35,7 @@ const Dashboard = () => {
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
-	const [fileSort, setFileSort] = useState<FileSortConfig>({property: "name", isAscending: true});
+	const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
 	const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
 
 	useEffect(() => {
@@ -59,10 +59,7 @@ const Dashboard = () => {
 			setSortedFiles([]);
 			return;
 		}
-
-		const sortedFiles = sortBy(files, fileSort.property);
-		if (!fileSort.isAscending) sortedFiles.reverse();
-
+		const sortedFiles = sortDriveFiles(files, fileSort);
 		setSortedFiles(sortedFiles);
 	}, [fileSort, files])
 
