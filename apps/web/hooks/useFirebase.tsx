@@ -188,7 +188,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 						bucketName: uploadTask.snapshot.metadata.bucket,
 						url: await getDownloadURL(fileRef),
 					};
-					setFiles((files) => [...files, newFile]);
+					setFiles((files) => [...(files || []), newFile]);
 					toast.success("File uploaded successfully.");
 				},
 			);
