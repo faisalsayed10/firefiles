@@ -38,6 +38,12 @@ export const PROVIDERS = [
 		logo: "/wasabi.png",
 		isComingSoon: false,
 	},
+	{
+		id: "digitalocean",
+		name: "Digital Ocean",
+		logo: "/digitalocean.png",
+		isComingSoon: false,
+	}
 ];
 
 export const FILE_TYPES = [

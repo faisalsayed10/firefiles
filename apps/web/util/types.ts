@@ -24,6 +24,7 @@ export enum Provider {
 	deta,
 	git,
 	wasabi,
+	digitalocean,
 }
 
 export type FileSortConfig = {

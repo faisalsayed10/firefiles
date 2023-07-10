@@ -69,6 +69,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.backblazeb2.com`;
 		} else if ((Provider[data.type] as Provider) === Provider.wasabi) {
 			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.wasabisys.com`;
+		} else if ((Provider[data.type] as Provider) === Provider.digitalocean) {
+			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.digitalocean.com`;
 		}
 
 		return () => {
