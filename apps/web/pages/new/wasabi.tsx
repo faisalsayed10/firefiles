@@ -160,7 +160,7 @@ const NewS3 = () => {
 						onChange={(e) => setEndpoint(e.target.value)}
 						required
 					/>
-					<VideoModal src="/backblaze-keys-tutorial.mov" />
+					<VideoModal src="/wasabi-keys-tutorial.mov" />
 					<Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
 						Next
 					</Button>
