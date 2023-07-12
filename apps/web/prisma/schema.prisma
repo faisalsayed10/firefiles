@@ -9,34 +9,37 @@ datasource db {
 }
 
 model User {
-  id           String      @id @unique @default(uuid())
-  lastSignedIn DateTime    @map("last_signed_in")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  email        String      @unique
-  verified     Boolean     @default(false)
-  plan         PricingPlan @default(FREE)
-  drives       BucketsOnUsers[] 
+  id           String           @id @unique @default(uuid())
+  lastSignedIn DateTime         @map("last_signed_in")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  email        String           @unique
+  verified     Boolean          @default(false)
+  plan         PricingPlan      @default(FREE)
+  drives       BucketsOnUsers[]
+  Drive        Drive[]
 }
 
 model Drive {
-  id        String   @id @unique @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String           @id @unique @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
   name      String
-  keys      String   @db.LongText
+  keys      String           @db.LongText
   type      String
-  users     BucketsOnUsers[]
+  others    BucketsOnUsers[]
+  owner     User             @relation(fields: [userId], references: [id])
+  userId    String
 
+  @@index([userId])
 }
 
 model BucketsOnUsers {
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  bucket     Drive    @relation(fields: [bucketId], references: [id])
-  bucketId   String 
-  createdAt  DateTime @default(now()) @map("created_at")
-  isPending  Boolean  @default(true) @map("is_pending")
-  role       Role     @default(VIEWER)
-
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  bucket    Drive    @relation(fields: [bucketId], references: [id])
+  bucketId  String
+  createdAt DateTime @default(now()) @map("created_at")
+  isPending Boolean  @default(true) @map("is_pending")
+  role      Role     @default(VIEWER)
 
   @@id([userId, bucketId])
   @@index([userId])

@@ -1,14 +1,11 @@
 /*
   Warnings:
 
-  - You are about to drop the column `userId` on the `Drive` table. All the data in the column will be lost.
+  - Made the column `userId` on table `Drive` required. This step will fail if there are existing NULL values in that column.
 
 */
--- DropIndex
-DROP INDEX `Drive_userId_idx` ON `Drive`;
-
 -- AlterTable
-ALTER TABLE `Drive` DROP COLUMN `userId`;
+ALTER TABLE `Drive` MODIFY `userId` VARCHAR(191) NOT NULL;
 
 -- CreateTable
 CREATE TABLE `BucketsOnUsers` (
