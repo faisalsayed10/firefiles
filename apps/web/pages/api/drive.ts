@@ -16,6 +16,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 			return res.status(200).json(drives);
 			// CREATE
 		} else if (req.method === "POST") {
+			
 			const { data, name, type } = req.body;
 			if (!data || !name || !type) return res.status(400).json({ error: "Invalid request." });
 			const { success, error } = await beforeCreatingDoc(req, res, req.body);
