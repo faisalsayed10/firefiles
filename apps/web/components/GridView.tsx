@@ -3,8 +3,10 @@ import Folder from "@components/folders/Folder";
 import { DriveFile, DriveFolder } from "@util/types";
 import React from "react";
 import { LayoutList } from "tabler-icons-react";
+import { FileSortConfig } from "@util/types";
 import File from "./files/File";
 import AddFolderButton from "./folders/AddFolderButton";
+import FileSortMenu from "./ui/FileSortMenu";
 
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
@@ -13,6 +15,8 @@ type Props = {
 	folders: DriveFolder[];
 	files: DriveFile[];
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
+	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
+	fileSort: FileSortConfig;
 };
 
 const GridView: React.FC<Props> = (props) => {
@@ -22,9 +26,12 @@ const GridView: React.FC<Props> = (props) => {
 				<Text fontSize="3xl" fontWeight="600">
 					Your Files
 				</Text>
-				<IconButton aria-label="change-view" onClick={() => props.setGridView(false)}>
-					<LayoutList />
-				</IconButton>
+				<Box>
+					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
+					<IconButton aria-label="change-view" onClick={() => props.setGridView(false)}>
+						<LayoutList />
+					</IconButton>
+				</Box>
 			</Flex>
 			{props.loading ? (
 				<Grid

@@ -27,6 +27,11 @@ export enum Provider {
 	digitalocean,
 }
 
+export type FileSortConfig = {
+	property: "name" | "size" | "createdAt";
+	isAscending: boolean;
+}
+
 export type DriveFile = {
 	name: string;
 	url?: string;

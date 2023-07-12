@@ -4,13 +4,15 @@ import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { Provider } from "@util/types";
+import { Provider, FileSortConfig } from "@util/types";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
+import { DriveFile } from "@util/types";
+import { sortDriveFiles } from "@util/file-sorting";
 
 const baseStyle = {
 	outline: "none",
@@ -33,15 +35,33 @@ const Dashboard = () => {
 	const { colorMode } = useColorMode();
 	const style = useMemo(() => ({ ...baseStyle, ...(isDragging ? activeStyle : {}) }), [isDragging]);
 	const [gridView, setGridView] = useState(false);
+	const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
+	const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
 
 	useEffect(() => {
 		const storedView = localStorage.getItem("grid_view");
+		const storedFileSort = localStorage.getItem("file_sort");
+
 		if (storedView) setGridView(storedView === "true");
+		if (storedFileSort) setFileSort(JSON.parse(storedFileSort));
 	}, []);
 
 	useEffect(() => {
 		localStorage.setItem("grid_view", gridView.toString());
 	}, [gridView]);
+
+	useEffect(() => {
+		localStorage.setItem("file_sort", JSON.stringify(fileSort));
+	}, [fileSort]);
+
+	useEffect(() => {
+		if (!files) {
+			setSortedFiles([]);
+			return;
+		}
+		const sortedFiles = sortDriveFiles(files, fileSort);
+		setSortedFiles(sortedFiles);
+	}, [fileSort, files])
 
 	return (
 		<>
@@ -92,19 +112,23 @@ const Dashboard = () => {
 								<ListView
 									loading={loading}
 									currentFolder={currentFolder}
-									files={files}
+									files={sortedFiles}
 									folders={folders}
 									setGridView={setGridView}
 									setIsFolderDeleting={setIsFolderDeleting}
+									setFileSort={setFileSort}
+									fileSort={fileSort}
 								/>
 							) : (
 								<GridView
 									loading={loading}
 									currentFolder={currentFolder}
-									files={files}
+									files={sortedFiles}
 									folders={folders}
 									setGridView={setGridView}
 									setIsFolderDeleting={setIsFolderDeleting}
+									setFileSort={setFileSort}
+									fileSort={fileSort}
 								/>
 							)}
 						</Box>
