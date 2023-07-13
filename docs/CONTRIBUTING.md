@@ -41,7 +41,7 @@ There are some environment variables that need to be set in order to run the app
 ```
 COOKIE_PASSWORD=A 32 character long secret password used to encrypt cookies.
 CIPHER_KEY=A randomly generated secret key used to encrypt and decrypt credentials.
-SENDGRID_API_KEY=SendGrid API key used to send emails for passwordless login.
+RESEND_API_KEY=API key obtained from **resend.com** used to send emails for passwordless login.
 EMAIL_FROM=The email address which will be used as the sender of the email (This email should be added and verified on the SendGrid dashboard).
 JWT_SECRET=A randomly generated secret key to sign and verify JWT tokens (used for paswordless logins).
 DATABASE_URL=A local mysql database url.
