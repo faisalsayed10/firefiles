@@ -44,18 +44,18 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 			});
 
 			const corsOptions = {
-				Bucket: data.Bucket,
-				CORSConfiguration: {
-					CORSRules: [
-						{
-							AllowedHeaders: ["*"],
-							AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-							AllowedOrigins: [process.env.DEPLOY_URL],
-							ExposeHeaders: ["ETag"],
-						},
-					],
-				},
-			};
+        Bucket: data.Bucket,
+        CORSConfiguration: {
+          CORSRules: [
+            {
+              AllowedHeaders: ["*"],
+              AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
+              AllowedOrigins: [process.env.VERCEL_URL || process.env.DEPLOY_URL],
+              ExposeHeaders: ["ETag"],
+            },
+          ],
+        },
+      };
 
 			try {
 				await client.send(new GetBucketCorsCommand({ Bucket: data.Bucket })); // Get CORS
