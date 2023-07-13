@@ -16,7 +16,6 @@ model User {
   verified     Boolean          @default(false)
   plan         PricingPlan      @default(FREE)
   drives       BucketsOnUsers[]
-  Drive        Drive[]
 }
 
 model Drive {
@@ -25,11 +24,7 @@ model Drive {
   name      String
   keys      String           @db.LongText
   type      String
-  others    BucketsOnUsers[]
-  owner     User             @relation(fields: [userId], references: [id])
-  userId    String
-
-  @@index([userId])
+  users    BucketsOnUsers[]
 }
 
 model BucketsOnUsers {
