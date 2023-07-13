@@ -1,10 +1,10 @@
 import {
-	Modal,
-	ModalCloseButton,
-	ModalContent,
-	ModalOverlay,
-	Text,
-	useDisclosure,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalOverlay,
+  Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
@@ -19,78 +19,78 @@ import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
 
 interface Props {
-	file: DriveFile;
-	gridView?: boolean;
+  file: DriveFile;
+  gridView?: boolean;
 }
 
 const File: React.FC<Props> = ({ file, gridView = false }) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const { removeFile } = useBucket();
-	const [id] = useState(nanoid());
-	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
-	const cancelRef = useRef();
+  const [isOpen, setIsOpen] = useState(false);
+  const { removeFile } = useBucket();
+  const [id] = useState(nanoid());
+  const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
+  const cancelRef = useRef();
 
-	const copyFile = () => {
-		copy(file.url);
-		toast.success("File URL copied to clipboard!");
-	};
+  const copyFile = () => {
+    copy(file.url);
+    toast.success("File URL copied to clipboard!");
+  };
 
-	const deleteFile = async () => {
-		try {
-			const success = await removeFile(file);
-			if (!success) return;
+  const deleteFile = async () => {
+    try {
+      const success = await removeFile(file);
+      if (!success) return;
 
-			setIsOpen(false);
-			toast.success("File deleted successfully!");
-		} catch (err) {
-			setIsOpen(false);
-			console.error(err);
-			toast.error(() => (
-				<>
-					<Text fontWeight="bold">Error deleting file!</Text>
-					<Text as="p" fontSize="sm">
-						{err.message}
-					</Text>
-				</>
-			));
-		}
-	};
+      setIsOpen(false);
+      toast.success("File deleted successfully!");
+    } catch (err) {
+      setIsOpen(false);
+      console.error(err);
+      toast.error(() => (
+        <>
+          <Text fontWeight="bold">Error deleting file!</Text>
+          <Text as="p" fontSize="sm">
+            {err.message}
+          </Text>
+        </>
+      ));
+    }
+  };
 
-	return (
-		<>
-			{gridView ? (
-				<FileGrid
-					copyFile={copyFile}
-					file={file}
-					id={id}
-					onPreviewOpen={onPreviewOpen}
-					setIsOpen={setIsOpen}
-				/>
-			) : (
-				<FileRow
-					copyFile={copyFile}
-					file={file}
-					id={id}
-					onPreviewOpen={onPreviewOpen}
-					setIsOpen={setIsOpen}
-				/>
-			)}
+  return (
+    <>
+      {gridView ? (
+        <FileGrid
+          copyFile={copyFile}
+          file={file}
+          id={id}
+          onPreviewOpen={onPreviewOpen}
+          setIsOpen={setIsOpen}
+        />
+      ) : (
+        <FileRow
+          copyFile={copyFile}
+          file={file}
+          id={id}
+          onPreviewOpen={onPreviewOpen}
+          setIsOpen={setIsOpen}
+        />
+      )}
 
-			<DeleteAlert
-				isOpen={isOpen}
-				onClose={() => setIsOpen(false)}
-				cancelRef={cancelRef}
-				onClick={deleteFile}
-			/>
-			<Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
-				<ModalOverlay />
-				<ModalContent p="0" w="auto" maxH="700px">
-					<ModalCloseButton _focus={{ outline: "none", border: "none" }} zIndex="100" />
-					<FilePreview url={file.url} file={file} />
-				</ModalContent>
-			</Modal>
-		</>
-	);
+      <DeleteAlert
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        cancelRef={cancelRef}
+        onClick={deleteFile}
+      />
+      <Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered size="xl">
+        <ModalOverlay />
+        <ModalContent p="0" w="auto" maxH="700px">
+          <ModalCloseButton _focus={{ outline: "none", border: "none" }} zIndex="100" />
+          <FilePreview url={file.url} file={file} />
+        </ModalContent>
+      </Modal>
+    </>
+  );
 };
 
 export default File;
