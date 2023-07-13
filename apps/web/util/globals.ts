@@ -15,6 +15,11 @@ export const PROVIDERS = [
 		logo: "/backblaze.png",
 	},
 	{
+		id: "wasabi",
+		name: "Wasabi",
+		logo: "/wasabi.png",
+	},
+	{
 		id: "minio",
 		name: "Min.io",
 		logo: "/minio.png",
@@ -32,6 +37,12 @@ export const PROVIDERS = [
 		logo: "/git.png",
 		isComingSoon: true,
 	},
+	{
+		id: "digitalocean",
+		name: "Digital Ocean",
+		logo: "/digitalocean.png",
+		isComingSoon: false,
+	}
 ];
 
 export const FILE_TYPES = [

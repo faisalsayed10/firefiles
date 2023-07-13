@@ -33,7 +33,12 @@ export default function useBucket(): ContextValue {
 		return useS3();
 	} else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
 		return useS3();
+	} else if ((Provider[keys.type] as Provider) === Provider.wasabi) {
+		return useS3();
+	} else if ((Provider[keys.type] as Provider) === Provider.digitalocean) {
+		return useS3();
 	}
 
 	return null;
 }
+

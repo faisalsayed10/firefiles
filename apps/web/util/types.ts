@@ -23,6 +23,8 @@ export enum Provider {
 	backblaze,
 	deta,
 	git,
+	wasabi,
+	digitalocean,
 }
 
 export type FileSortConfig = {
