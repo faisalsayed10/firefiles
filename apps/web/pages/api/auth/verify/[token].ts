@@ -20,6 +20,6 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 		console.error(err);
 		res.json({ error: err.message });
 	} finally {
-		res.redirect(process.env.DEPLOY_URL);
+		res.redirect(process.env.VERCEL_URL || process.env.DEPLOY_URL);
 	}
 }, sessionOptions);

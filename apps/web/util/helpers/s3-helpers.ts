@@ -75,7 +75,6 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 						return { success: false, error: e.message };
 					}
 				}
-
 				console.error(err);
 				return { success: false, error: err.message };
 			}
