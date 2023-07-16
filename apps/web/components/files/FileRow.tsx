@@ -3,8 +3,10 @@ import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
-import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
+import { Copy, FileDownload, FileMinus, Tags } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
+import TagsPopup from "../popups/TagsPopup";
+
 
 interface Props {
 	file: DriveFile;
@@ -12,10 +14,23 @@ interface Props {
 	copyFile: () => void;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	id: string;
+	onTagsOpen: () => void;
 }
 
 const FileRow: React.FC<Props> = (props) => {
+
+	const [isTagsOpen, setIsTagsOpen] = React.useState(false);
+
+	const onTagsOpen = () => {
+		setIsTagsOpen(true);
+	};
+
+	const onTagsClose = () => {
+		setIsTagsOpen(false);
+	};
+
 	return (
+		<>
 		<Tr>
 			<Td maxW="36px">
 				<FileIcon extension={props.file.name.split(".").pop()} id={props.id} />
@@ -61,7 +76,18 @@ const FileRow: React.FC<Props> = (props) => {
 					colorScheme="red"
 				/>
 			</Td>
+			<Td textAlign="center">
+				<IconButton
+					aria-label="Tags"
+					icon={<Tags />} 
+					onClick={onTagsOpen}
+					variant="outline"
+					colorScheme="black"
+				/>
+			</Td>
 		</Tr>
+		<TagsPopup isOpen={isTagsOpen} onClose={onTagsClose} file={props.file} />
+		</>
 	);
 };
 

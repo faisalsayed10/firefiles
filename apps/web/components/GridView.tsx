@@ -8,6 +8,7 @@ import File from "./files/File";
 import AddFolderButton from "./folders/AddFolderButton";
 import FileSortMenu from "./ui/FileSortMenu";
 
+
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
 	loading: boolean;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 const GridView: React.FC<Props> = (props) => {
+
 	return (
 		<Box mx="4" mb="6">
 			<Flex align="center" justify="space-between" my="4">

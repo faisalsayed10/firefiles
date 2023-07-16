@@ -1,11 +1,13 @@
 import { Box, Flex, Image, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import { download } from "@util/helpers";
-import { DriveFile } from "@util/types";
+import { DriveFile} from "@util/types"; 
 import prettyBytes from "pretty-bytes";
 import React from "react";
-import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
+import { Copy, FileDownload, FileMinus, Tags } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
+import TagsPopup from "../popups/TagsPopup";
+
 
 interface Props {
 	file: DriveFile;
@@ -13,6 +15,7 @@ interface Props {
 	copyFile: () => void;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	id: string;
+	onTagsOpen: () => void;
 }
 
 const FileGrid: React.FC<Props> = (props) => {
@@ -21,7 +24,15 @@ const FileGrid: React.FC<Props> = (props) => {
 		cursor: "pointer",
 		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
 	};
+	const [isTagsPopupOpen, setIsTagsPopupOpen] = React.useState(false);
 
+	const openTagsPopup = () => {
+		setIsTagsPopupOpen(true);
+	};
+
+	const closeTagsPopup = () => {
+		setIsTagsPopupOpen(false);
+	};
 	return (
 		<>
 			<Flex
@@ -78,11 +89,16 @@ const FileGrid: React.FC<Props> = (props) => {
 									<FileMinus />
 									<Text ml="2">Delete</Text>
 								</Flex>
+								<Flex {...optionProps} onClick={openTagsPopup}>
+									<Tags />
+									<Text ml="2">Tags</Text>
+								</Flex>
 							</Flex>
 						)}
 					</OptionsPopover>
 				</Flex>
 			</Flex>
+			<TagsPopup isOpen={isTagsPopupOpen} onClose={closeTagsPopup} file={props.file} />
 		</>
 	);
 };

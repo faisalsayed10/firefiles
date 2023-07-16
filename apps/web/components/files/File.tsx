@@ -17,6 +17,7 @@ import DeleteAlert from "../popups/DeleteAlert";
 import FileGrid from "./FileGrid";
 import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
+import TagsPopup from "../popups/TagsPopup";
 
 interface Props {
 	file: DriveFile;
@@ -29,6 +30,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 	const [id] = useState(nanoid());
 	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 	const cancelRef = useRef();
+	const { isOpen: isTagsOpen, onOpen: onTagsOpen, onClose: onTagsClose } = useDisclosure();
 
 	const copyFile = () => {
 		copy(file.url);
@@ -55,6 +57,9 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 			));
 		}
 	};
+	const handleTagsOpen = () => {
+		onTagsOpen();
+	};
 
 	return (
 		<>
@@ -65,6 +70,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 					id={id}
 					onPreviewOpen={onPreviewOpen}
 					setIsOpen={setIsOpen}
+					onTagsOpen={handleTagsOpen}
 				/>
 			) : (
 				<FileRow
@@ -73,6 +79,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 					id={id}
 					onPreviewOpen={onPreviewOpen}
 					setIsOpen={setIsOpen}
+					onTagsOpen={handleTagsOpen}
 				/>
 			)}
 
@@ -89,6 +96,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 					<FilePreview url={file.url} file={file} />
 				</ModalContent>
 			</Modal>
+			<TagsPopup isOpen={isTagsOpen} onClose={onTagsClose} file={file} />
 		</>
 	);
 };
