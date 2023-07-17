@@ -79,29 +79,9 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 				return { success: false, error: err.message };
 			}
 		case "wasabi":
-			try {
-				await client.send(new GetBucketCorsCommand({ Bucket: data.Bucket })); // Get CORS
-				await client.send(new PutBucketCorsCommand(corsOptions)); // Update CORS anyway
-				return { success: true, error: null };
-			} catch (err) {
-				if (
-					err.name.toLowerCase() === "invalidbucketname" ||
-					err.name.toLowerCase() === "nosuchbucket"
-				) {
-					await createNewBucket(client, data.Bucket, corsOptions); // Bucket doesn't exist, so created a new bucket
-					return { success: true, error: null };
-				} else if (err.name.toLowerCase() === "nosuchcorsconfiguration") {
-					try {
-						await client.send(new PutBucketCorsCommand(corsOptions));
-						return { success: true, error: null };
-					} catch (e) {
-						return { success: false, error: e.message };
-					}
-				}
-
-				console.error(err);
-				return { success: false, error: err.message };
-			}
+			return {success: true}
+		case "digitalocean":
+			return {success: true}
 		default:
 			break;
 	}

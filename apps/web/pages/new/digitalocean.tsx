@@ -43,12 +43,6 @@ const NewS3 = () => {
 			if (!keyId.trim() || !applicationKey.trim() || !endpoint.trim())
 				throw new Error("One or more fields are missing!");
 
-			if (
-				!validator.isURL(endpoint, { require_protocol: true, protocols: ["https"] }) ||
-				!/^(https:\/\/s3\.).+(\.digitalocean.com)$/g.test(endpoint)
-			)
-				throw new Error("Endpoint URL does not match the required format!");
-
 			const { data } = await axios.post<ListBucketsCommandOutput>("/api/s3/list-buckets", {
 				accessKey: keyId,
 				secretKey: applicationKey,
@@ -74,12 +68,6 @@ const NewS3 = () => {
 			if (!keyId.trim() || !applicationKey.trim())
 				throw new Error("One or more fields are missing!");
 
-			if (
-				!validator.isURL(endpoint, { require_protocol: true, protocols: ["https"] }) ||
-				!/^(https:\/\/s3\.).+(\.digitalocean.com)$/g.test(endpoint)
-			)
-				throw new Error("Endpoint URL does not match the required format!");
-
 			if ((selectedBucket === "Not Selected" && !bucketName.trim()) || !endpoint.trim())
 				throw new Error("Select an existing bucket or enter a new bucket name!");
 
@@ -96,7 +84,7 @@ const NewS3 = () => {
 					accessKey: keyId,
 					secretKey: applicationKey,
 					Bucket,
-					bucketUrl: `https://${Bucket}.s3.${endpoint.split(".")[1]}.digitalocean.com`,
+					bucketUrl: `https://${Bucket}.${endpoint.split(".")[1]}.digitaloceanspaces.com`,
 					endpoint,
 					region: endpoint.split(".")[1],
 				},
@@ -154,7 +142,7 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Endpoint - https://s3.<your-region>.digitalocean.com"
+						placeholder="Endpoint - https://<your-region>.digitaloceanspaces.com"
 						type="text"
 						value={endpoint}
 						onChange={(e) => setEndpoint(e.target.value)}

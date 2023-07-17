@@ -1,4 +1,3 @@
-require('dotenv').config();
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import "@styles/index.css";
 import theme from "@util/theme";
