@@ -5,7 +5,9 @@ import jwt from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import validator from "validator";
 import { Resend } from "resend";
+import sendgrid from "@sendgrid/mail";
 
+sendgrid.setApiKey(process.env.SENDGRID_API_KEY as string);
 const resend = new Resend(process.env.RESEND_API_KEY);
 const url = process.env.VERCEL_URL || process.env.DEPLOY_URL;
 
@@ -28,19 +30,33 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
   try {
     const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: email,
-      html: html(`${url}/api/auth/verify/${token}`, email),
-      text: text(`${url}/api/auth/verify/${token}`, email),
-      subject: "Log in to Firefiles",
-      tags: [{ name: "firefiles", value: "login_link" }],
-      reply_to: "fayd@firefiles.app",
-    });
+    if (process.env.RESEND_API_KEY) {
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        html: html(`${url}/api/auth/verify/${token}`, email),
+        text: text(`${url}/api/auth/verify/${token}`, email),
+        subject: "Log in to Firefiles",
+        tags: [{ name: "firefiles", value: "login_link" }],
+      });
 
-    return res.json({
-      message: `An email has been sent to you. Click the link to log in or sign up.`,
-    });
+      return res.json({
+        message: `An email has been sent to you. Click the link to log in or sign up.`,
+      });
+    } else {
+      await sendgrid.send({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        html: html(`${url}/api/auth/verify/${token}`, email),
+        text: text(`${url}/api/auth/verify/${token}`, email),
+        subject: "Log in to Firefiles",
+        categories: ["firefiles", "login_link"],
+      });
+
+      return res.json({
+        message: `An email has been sent to you. Click the link to log in or sign up.`,
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
