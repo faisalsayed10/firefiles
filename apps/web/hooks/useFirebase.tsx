@@ -22,17 +22,11 @@ import {
 } from "firebase/storage";
 import { nanoid } from "nanoid";
 import router from "next/router";
-import {
-	createContext,
-	PropsWithChildren,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import { createContext, PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
+import { getMetadata, updateMetadata } from "@firebase/storage";
 
 const FirebaseContext = createContext<ContextValue>(null);
 export default () => useContext(FirebaseContext);
@@ -201,6 +195,31 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => {});
 		return true;
 	};
+
+	const listTags = async (file: DriveFile) => {
+		if (!app) return;
+		return getMetadata(ref(getStorage(app), file.fullPath))
+			.then((metadata) => {
+				// convert customMetadata object to array of objects in the format: {key: tagKey, value: tagValue}
+				return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
+			}).catch(() => {});
+	}
+
+	const addTags = async (file: DriveFile, key: string, value: string) => {
+		if (!app) return;
+		await updateMetadata(ref(getStorage(app), file.fullPath),  {
+			customMetadata: {
+				[key]:value,
+			} }).catch(() => {});
+	}
+
+	const removeTags = async (file: DriveFile, key:string) => {
+		if (!app) return;
+		await updateMetadata(ref(getStorage(app), file.fullPath),  {
+			customMetadata: {
+				[key]:null,
+			} }).catch(() => {});
+	}
 
 	const getFileMetadata = async (file: DriveFile, i: number) => {
 		const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${
@@ -375,6 +394,9 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+				listTags,
+				addTags,
+				removeTags
 			}}
 		>
 			{children}

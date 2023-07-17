@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
-  Button,
   Flex,
   IconButton,
   Input,
@@ -10,10 +9,11 @@ import {
   ModalContent,
   ModalOverlay,
   Text,
-  Center
 } from "@chakra-ui/react";
 import { X, Plus, Check, Minus } from "tabler-icons-react";
 import { DriveFile } from "@util/types";
+import useBucket from "@hooks/useBucket";
+import toast from "react-hot-toast";
 
 interface Props {
   isOpen: boolean;
@@ -22,21 +22,32 @@ interface Props {
 }
 
 const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
-  const [tags, setTags] = useState([]);
+  const { listTags, addTags, removeTags } = useBucket();
+  const [tags, setTags] = useState<{key: string, value: string}[]>( []);
   const [addingTag, setAddingTag] = useState(false);
   const [newTagKey, setNewTagKey] = useState("");
   const [newTagValue, setNewTagValue] = useState("");
+
+  const getTags = async () => {
+    const tagList = await listTags(file);
+    if (tagList) {
+      setTags(tagList);
+    } else {
+      setTags([])
+    }
+  }
 
   const handleAddTag = () => {
     setAddingTag(true);
   };
 
-  const handleSaveTag = () => {
-    const newTag = { key: newTagKey, value: newTagValue };
-    setTags([...tags, newTag]);
+  const handleSaveTag = async () => {
+    await addTags(file, newTagKey, newTagValue);
+    await getTags();
     setNewTagKey("");
     setNewTagValue("");
     setAddingTag(false);
+    toast.success(`Tag successfully added.`)
   };
 
   const handleCancelTag = () => {
@@ -45,11 +56,16 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
     setAddingTag(false);
   };
 
-  const handleRemoveTag = (index) => {
-    const updatedTags = [...tags];
-    updatedTags.splice(index, 1);
-    setTags(updatedTags);
+  const handleRemoveTag = async (key) => {
+    await removeTags(file, key);
+    await getTags();
+    toast.success(`Tag successfully deleted.`)
   };
+
+  // fetch tags on first render
+  useEffect(() => {
+    getTags()
+  }, [])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -57,7 +73,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
       <ModalContent p="0">
         <Flex align="center" justify="space-between" p="4">
           <Text fontSize="2xl" fontWeight="600">
-            TAGS
+            Tags for {file.name}
           </Text>
           <ModalCloseButton size='md'/>
         </Flex>
@@ -70,8 +86,8 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
             </Text>
         </Flex>
         <Box p="4">
-          {tags.map((tag, index) => (
-            <Flex key={index} mb="2">
+          {tags.map((tag) => (
+            <Flex key={tag.key} mb="2">
               <Text flex="1">{tag.key}</Text>
               <Text flex="1" ml="4">
                 {tag.value}
@@ -81,7 +97,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                 icon={<Minus width={38}/>}
                 variant="unstyled"
                 _focus={{ outline: "none" }}
-                onClick={() => handleRemoveTag(index)}
+                onClick={() => handleRemoveTag(tag.key)}
                 _hover={{ bg: "hsl(60, 0%, 95%)" }}
               />
             </Flex>

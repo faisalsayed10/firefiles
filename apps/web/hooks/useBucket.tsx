@@ -14,6 +14,9 @@ export type ContextValue = {
 	removeFolder: (folder: DriveFolder) => Promise<void>;
 	addFile: (files: File[] | FileList) => Promise<any>;
 	removeFile: (file: DriveFile) => Promise<boolean>;
+	listTags?: (file: DriveFile) => Promise<void | any[] >;
+	addTags?: (file: DriveFile, key: string, value: string) => Promise<void>;
+	removeTags?: (file: DriveFile, key: string) => Promise<void>;
 };
 
 export const ROOT_FOLDER: DriveFolder = {
