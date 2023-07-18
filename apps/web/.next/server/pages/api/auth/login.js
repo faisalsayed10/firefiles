@@ -77,11 +77,8 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_uti
 
 
 
-if (typeof process.env.SENDGRID_API_KEY === "undefined") {
-    const resend = new resend__WEBPACK_IMPORTED_MODULE_5__.Resend(process.env.RESEND_API_KEY);
-} else {
-    _sendgrid_mail__WEBPACK_IMPORTED_MODULE_6___default().setApiKey(process.env.SENDGRID_API_KEY);
-}
+_sendgrid_mail__WEBPACK_IMPORTED_MODULE_6___default().setApiKey(process.env.SENDGRID_API_KEY);
+const resend = new resend__WEBPACK_IMPORTED_MODULE_5__.Resend(process.env.RESEND_API_KEY);
 const url = process.env.VERCEL_URL || process.env.DEPLOY_URL;
 const limiter = (0,_util_rate_limit__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)({
     interval: 5 * 60 * 1000,
@@ -105,7 +102,7 @@ const limiter = (0,_util_rate_limit__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
         }, process.env.JWT_SECRET, {
             expiresIn: "1h"
         });
-        if (process.env.RESEND_API_KEY) {
+        if (process.env.RESEND_API_KEY !== "undefined") {
             await resend.emails.send({
                 from: process.env.EMAIL_FROM,
                 to: email,

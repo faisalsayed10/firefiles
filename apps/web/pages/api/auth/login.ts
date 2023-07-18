@@ -30,7 +30,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
   try {
     const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    if (process.env.RESEND_API_KEY) {
+    if (process.env.RESEND_API_KEY !== "undefined") {
       await resend.emails.send({
         from: process.env.EMAIL_FROM,
         to: email,
