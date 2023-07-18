@@ -1,49 +1,65 @@
-import sgMail from "@sendgrid/mail";
 import rateLimit from "@util/rate-limit";
 import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import jwt from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import validator from "validator";
+import { Resend } from "resend";
+import sendgrid from "@sendgrid/mail";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sendgrid.setApiKey(process.env.SENDGRID_API_KEY as string);
+const resend = new Resend(process.env.RESEND_API_KEY);
+const url = process.env.VERCEL_URL || process.env.DEPLOY_URL;
 
 const limiter = rateLimit({
-	interval: 5 * 60 * 1000, // 5 minutes
-	uniqueTokenPerInterval: 500, // Max 500 users per second
+  interval: 5 * 60 * 1000, // 5 minutes
+  uniqueTokenPerInterval: 500, // Max 500 users per second
 });
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
-	try {
-		await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per 5 minutes
-	} catch (error) {
-		return res.status(429).json({ error: "Too many requests. Please try again after 5 minutes." });
-	}
+  try {
+    await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per 5 minutes
+  } catch (error) {
+    return res.status(429).json({ error: "Too many requests. Please try again after 5 minutes." });
+  }
 
-	const { email } = req.body;
-	if (!validator.isEmail(email))
-		return res.status(400).json({ error: "The email you provided is invalid." });
+  const { email } = req.body;
+  if (!validator.isEmail(email))
+    return res.status(400).json({ error: "The email you provided is invalid." });
 
-	try {
-		const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  try {
+    const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-		const response = await sgMail.send({
-			to: email,
-			from: process.env.EMAIL_FROM,
-			subject: "Log in to Firefiles",
-			text: text(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
-			html: html(`${process.env.DEPLOY_URL}/api/auth/verify/${token}`, email),
-			hideWarnings: false,
-			mailSettings: { spamCheck: { enable: false } },
-		});
+    if (process.env.RESEND_API_KEY) {
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        html: html(`${url}/api/auth/verify/${token}`, email),
+        text: text(`${url}/api/auth/verify/${token}`, email),
+        subject: "Log in to Firefiles",
+        tags: [{ name: "firefiles", value: "login_link" }],
+      });
 
-		return res.json({
-			message: `An email has been sent to you. Click the link to log in or sign up.`,
-			response,
-		});
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
+      return res.json({
+        message: `An email has been sent to you. Click the link to log in or sign up.`,
+      });
+    } else {
+      await sendgrid.send({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        html: html(`${url}/api/auth/verify/${token}`, email),
+        text: text(`${url}/api/auth/verify/${token}`, email),
+        subject: "Log in to Firefiles",
+        categories: ["firefiles", "login_link"],
+      });
+
+      return res.json({
+        message: `An email has been sent to you. Click the link to log in or sign up.`,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }, sessionOptions);
 
 export const text = (url: string, email: string) => `
