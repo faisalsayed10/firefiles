@@ -2,6 +2,9 @@ import {
 	DeleteObjectCommand,
 	DeleteObjectsCommand,
 	GetObjectCommand,
+	PutObjectTaggingCommand,
+	GetObjectTaggingCommand,
+	DeleteObjectTaggingCommand,
 	ListObjectsV2Command,
 	S3Client,
 } from "@aws-sdk/client-s3";
@@ -248,6 +251,81 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
+
+	const listTags = async (file: DriveFile) => {
+		try {
+			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
+			
+		} catch (err) {
+			console.log("Error", err);
+			throw err;
+		}
+	}
+
+	
+
+	// add tag to existing object
+	const addTags = async (file: DriveFile, key:string, value:string) => {
+		
+		const currentTagsResponse = await s3Client.send(new GetObjectTaggingCommand({
+			Bucket: data.keys.Bucket,
+			Key: file.fullPath
+		}));
+
+		
+		let currentTags = currentTagsResponse.TagSet;
+		if (currentTags.length >= 10) {
+			toast.error("Cannot associate more than 10 tags with an object");
+		}
+
+		for (let i = 0; i < currentTags.length; i++) {
+			if (currentTags[i].Key === key) {
+				toast.error("Tag key already exists on this resource");
+			}
+		}
+
+		currentTags.push({Key: key, Value: value});
+
+		const params = {
+			Bucket: data.keys.Bucket,
+			Key: file.fullPath,
+			Tagging: {TagSet: currentTags}
+		};
+
+		try {
+			const data = await s3Client.send(new PutObjectTaggingCommand(params));
+			console.log("Success, tag added to object", data);
+		} catch (err) {
+			if (err.name === 'InvalidTagError') {
+				console.log("Invalid Tag Error: ", err.message);
+        		toast.error(`Invalid Tag Error: ${err.message}`);
+			} else {
+				console.log("Error: ", err);
+        		toast.error(`Error: ${err.message}`);
+			}
+		}
+
+	};
+
+
+
+	// To remove tag set from an object
+	const removeTags = async (file: DriveFile, key:string) => {
+		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+		let existingTags = getTagging.TagSet
+
+		const updatedTags = existingTags.filter(tag => tag.Key !== key);
+
+		const putTagging = {
+			Bucket: data.keys.Bucket, 
+			Key: file.fullPath,
+			Tagging: {TagSet: updatedTags}
+		}
+		await s3Client.send(new PutObjectTaggingCommand(putTagging));
+	};
+
+
 	// set currentFolder
 	useEffect(() => {
 		if (!user?.email) return;
@@ -397,6 +475,9 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+				listTags,
+				addTags,
+				removeTags
 			}}
 		>
 			{children}
