@@ -275,15 +275,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 
 		
 		let currentTags = currentTagsResponse.TagSet;
-		if (currentTags.length >= 10) {
-			toast.error("Cannot associate more than 10 tags with an object");
-		}
-
-		for (let i = 0; i < currentTags.length; i++) {
-			if (currentTags[i].Key === key) {
-				toast.error("Tag key already exists on this resource");
-			}
-		}
+		
 
 		currentTags.push({Key: key, Value: value});
 
@@ -297,13 +289,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			const data = await s3Client.send(new PutObjectTaggingCommand(params));
 			console.log("Success, tag added to object", data);
 		} catch (err) {
-			if (err.name === 'InvalidTagError') {
-				console.log("Invalid Tag Error: ", err.message);
-        		toast.error(`Invalid Tag Error: ${err.message}`);
-			} else {
-				console.log("Error: ", err);
-        		toast.error(`Error: ${err.message}`);
-			}
+			console.log("Error: ", err);
+        	toast.error(`Error: ${err.message}`);
 		}
 
 	};
