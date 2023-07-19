@@ -41,14 +41,14 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       if (!id) return res.status(400).json({ error: "Drive ID not found." });
       // await prisma.drive.deleteMany({ where: { id, userId: user.id } });
       return res.status(200).json("ok");
-      // TODO: UPDATE
+      // UPDATE
     } else if (req.method === "PUT") {
       const id = req.query.id as string;
       const data = req.body;
 
       if (!id || !data) return res.status(400).json({ error: "Data / Drive ID not found." });
       const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
-      // await prisma.drive.updateMany({ where: { id, userId: user.id }, data: { keys } });
+      await prisma.drive.updateMany({ where: { id }, data: { keys } });
       return res.status(200).json("ok");
     }
   } catch (err) {
