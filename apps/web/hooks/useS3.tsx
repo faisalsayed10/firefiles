@@ -4,7 +4,6 @@ import {
 	GetObjectCommand,
 	PutObjectTaggingCommand,
 	GetObjectTaggingCommand,
-	DeleteObjectTaggingCommand,
 	ListObjectsV2Command,
 	S3Client,
 } from "@aws-sdk/client-s3";
@@ -59,6 +58,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const isMounted = useRef(false);
+	// enable tags if s3. add new providers with tag support here
+	const enableTags = (Provider[data.type] as Provider) === Provider.s3;
 
 	// Fallback for old buckets not already having the bucketUrl.
 	useEffect(() => {
@@ -251,34 +252,24 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
-
 	const listTags = async (file: DriveFile) => {
 		try {
 			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
 			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
-			
 		} catch (err) {
 			console.log("Error", err);
-			throw err;
+			toast.error(`Error: ${err.message}`);
 		}
 	}
 
-	
-
 	// add tag to existing object
-	const addTags = async (file: DriveFile, key:string, value:string) => {
-		
+	const addTags = async (file: DriveFile, key:string, value:string): Promise<boolean> => {
 		const currentTagsResponse = await s3Client.send(new GetObjectTaggingCommand({
 			Bucket: data.keys.Bucket,
 			Key: file.fullPath
 		}));
-
-		
-		let currentTags = currentTagsResponse.TagSet;
-		
-
+		const currentTags = currentTagsResponse.TagSet;
 		currentTags.push({Key: key, Value: value});
-
 		const params = {
 			Bucket: data.keys.Bucket,
 			Key: file.fullPath,
@@ -288,20 +279,18 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		try {
 			const data = await s3Client.send(new PutObjectTaggingCommand(params));
 			console.log("Success, tag added to object", data);
+			return true;
 		} catch (err) {
 			console.log("Error: ", err);
-        	toast.error(`Error: ${err.message}`);
+			toast.error(`Error: ${err.message}`);
+			return false;
 		}
-
 	};
 
-
-
-	// To remove tag set from an object
-	const removeTags = async (file: DriveFile, key:string) => {
+	// To remove tag from an object
+	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
 		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
 		let existingTags = getTagging.TagSet
-
 		const updatedTags = existingTags.filter(tag => tag.Key !== key);
 
 		const putTagging = {
@@ -309,7 +298,14 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			Key: file.fullPath,
 			Tagging: {TagSet: updatedTags}
 		}
-		await s3Client.send(new PutObjectTaggingCommand(putTagging));
+
+		try {
+			await s3Client.send(new PutObjectTaggingCommand(putTagging));
+			return true;
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+			return false;
+		}
 	};
 
 
@@ -462,6 +458,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+				enableTags,
 				listTags,
 				addTags,
 				removeTags

@@ -3,9 +3,11 @@ import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
-import { Copy, FileDownload, FileMinus, Tags } from "tabler-icons-react";
+import { Copy, FileDownload, FileMinus, Tags, TagsOff } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
 import TagsPopup from "../popups/TagsPopup";
+import useBucket from "@hooks/useBucket";
+import toast from "react-hot-toast";
 
 
 interface Props {
@@ -20,6 +22,7 @@ interface Props {
 const FileRow: React.FC<Props> = (props) => {
 
 	const [isTagsOpen, setIsTagsOpen] = React.useState(false);
+	const { enableTags } = useBucket();
 
 	const onTagsOpen = () => {
 		setIsTagsOpen(true);
@@ -76,15 +79,24 @@ const FileRow: React.FC<Props> = (props) => {
 					colorScheme="red"
 				/>
 			</Td>
-			<Td textAlign="center">
+			{/*disable tags depending on provider*/}
+			{enableTags ? (<Td textAlign="center">
 				<IconButton
 					aria-label="Tags"
-					icon={<Tags />} 
+					icon={<Tags />}
 					onClick={onTagsOpen}
 					variant="outline"
 					colorScheme="black"
 				/>
-			</Td>
+			</Td>) : (<Td textAlign="center">
+				<IconButton
+					aria-label="Tags"
+					icon={<TagsOff color={'gray'}/>}
+					onClick={() => {toast.error('Tags not supported for this provider.')}}
+					variant="outline"
+					colorScheme="gray"
+				/>
+			</Td>)}
 		</Tr>
 		<TagsPopup isOpen={isTagsOpen} onClose={onTagsClose} file={props.file} />
 		</>

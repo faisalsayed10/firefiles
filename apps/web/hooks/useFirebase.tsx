@@ -51,6 +51,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
+  const enableTags = true;
 
 	const addFolder = (name: string) => {
 		const path =
@@ -202,23 +203,43 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			.then((metadata) => {
 				// convert customMetadata object to array of objects in the format: {key: tagKey, value: tagValue}
 				return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
-			}).catch(() => {});
+			}).catch((err) => {
+					toast.error(`${err.message}`);
+			});
 	}
 
-	const addTags = async (file: DriveFile, key: string, value: string) => {
-		if (!app) return;
+	const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
+		if (!app) return false;
+		const tagList = await listTags(file);
+		// check for existing tag key, since same tag key will overwrite the previous value
+		if (tagList) {
+			for (const tag of tagList) {
+				if (tag.key === key) {
+					toast.error('Tag key already exists.')
+					return false;
+				}
+			}
+		}
 		await updateMetadata(ref(getStorage(app), file.fullPath),  {
 			customMetadata: {
 				[key]:value,
-			} }).catch(() => {});
+			} }).catch((err) => {
+				toast.error(`${err.message}`);
+				return false;
+			});
+		return true;
 	}
 
-	const removeTags = async (file: DriveFile, key:string) => {
-		if (!app) return;
+	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
+		if (!app) return false;
 		await updateMetadata(ref(getStorage(app), file.fullPath),  {
 			customMetadata: {
 				[key]:null,
-			} }).catch(() => {});
+			} }).catch((err) => {
+				toast.error(`${err.message}`);
+				return false;
+			});
+		return true;
 	}
 
 	const getFileMetadata = async (file: DriveFile, i: number) => {
@@ -394,6 +415,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+        enableTags,
 				listTags,
 				addTags,
 				removeTags

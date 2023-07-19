@@ -42,12 +42,13 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
   };
 
   const handleSaveTag = async () => {
-    await addTags(file, newTagKey, newTagValue);
-    await getTags();
-    setNewTagKey("");
-    setNewTagValue("");
-    setAddingTag(false);
-    toast.success(`Tag successfully added.`)
+    if (await addTags(file, newTagKey, newTagValue)) {
+      await getTags();
+      setNewTagKey("");
+      setNewTagValue("");
+      setAddingTag(false);
+      toast.success(`Tag successfully added.`)
+    }
   };
 
   const handleCancelTag = () => {
@@ -57,9 +58,10 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
   };
 
   const handleRemoveTag = async (key) => {
-    await removeTags(file, key);
-    await getTags();
-    toast.success(`Tag successfully deleted.`)
+    if (await removeTags(file, key)) {
+      await getTags();
+      toast.success(`Tag successfully deleted.`)
+    }
   };
 
   // fetch tags on first render
