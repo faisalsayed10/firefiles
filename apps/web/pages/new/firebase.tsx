@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
+import { Role } from "@prisma/client";
 import axios from "axios";
 import toObject from "convert-to-object";
 import Head from "next/head";

@@ -28,7 +28,7 @@ import { X } from "tabler-icons-react";
 const Dashboard = () => {
 	const router = useRouter();
 	const { user } = useUser({ redirectTo: "/login" });
-	const { data, isValidating, mutate } = useSWR<Drive[]>(`/api/drive`);
+	const { data, isValidating, mutate } = useSWR<Drive[]>(`/api/drive?role=CREATOR&isPending=false`);
 
 	const optionProps = {
 		p: 2,
