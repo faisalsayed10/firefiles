@@ -1,15 +1,16 @@
 import {
-	Alert,
-	AlertIcon,
-	Button,
-	Container,
-	Flex,
-	Heading,
-	IconButton,
-	Textarea,
+  Alert,
+  AlertIcon,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  IconButton,
+  Textarea,
 } from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
+import { Role } from "@prisma/client";
 import axios from "axios";
 import toObject from "convert-to-object";
 import Head from "next/head";
@@ -28,99 +29,108 @@ const jsonPlaceholder = `{
 }`;
 
 const NewFirebase = () => {
-	const [raw, setRaw] = useState("");
-	const { user } = useUser();
-	const [loading, setLoading] = useState(false);
-	const router = useRouter();
+  const [raw, setRaw] = useState("");
+  const { user } = useUser();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-	const createBucket = async (e: React.FormEvent<HTMLDivElement>) => {
-		e.preventDefault();
-		setLoading(true);
+  const createBucket = async (e: React.FormEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setLoading(true);
 
-		try {
-			if (!user?.email) throw new Error("You need to login to perform this action!");
+    try {
+      if (!user?.email) throw new Error("You need to login to perform this action!");
 
-			const data = toObject(raw);
-			if (
-				!data ||
-				!data.apiKey ||
-				!data.projectId ||
-				!data.appId ||
-				!data.authDomain ||
-				!data.storageBucket
-			)
-				throw new Error("One or more fields are missing!");
+      const data = toObject(raw);
+      if (
+        !data ||
+        !data.apiKey ||
+        !data.projectId ||
+        !data.appId ||
+        !data.authDomain ||
+        !data.storageBucket
+      )
+        throw new Error("One or more fields are missing!");
 
-			const promise = axios.post("/api/drive", { data, name: data.projectId, type: "firebase" });
+      const promise = axios
+        .post("/api/drive", { data, name: data.projectId, type: "firebase" })
+        .then((res) => {
+          axios.post("/api/bucketsOnUsers", {
+            id: res.data.driveId,
+            userId: user.id,
+            isPending: false,
+            role: Role.CREATOR,
+          });
+        });
 
-			toast.promise(promise, {
-				loading: "Creating drive...",
-				success: "Drive created successfully.",
-				error: "An error occurred while creating the drive.",
-			});
+      toast.promise(promise, {
+        loading: "Creating drive...",
+        success: "Drive created successfully.",
+        error: "An error occurred while creating the drive.",
+      });
 
-			promise.then(() => router.push("/"));
-		} catch (err) {
-			console.error(err);
-			toast.error(err.message);
-		}
+      router.push("/");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
 
-		setLoading(false);
-	};
+    setLoading(false);
+  };
 
-	return (
-		<>
-			<Head>
-				<title>Firebase | Firefiles</title>
-			</Head>
-			<Flex px="16px" pt="3">
-				<IconButton
-					variant="ghost"
-					aria-label="back"
-					icon={<ArrowNarrowLeft />}
-					mr="3"
-					onClick={() => router.push("/new")}
-				/>
-				<Heading as="h3" size="lg">
-					Paste your Firebase config
-				</Heading>
-			</Flex>
-			<Container display="flex" minH="90vh" alignItems="center" maxW="lg">
-				<Flex as="form" onSubmit={createBucket} flexDir="column" w="full">
-					<Textarea
-						value={raw}
-						onChange={(e) => setRaw(e.target.value)}
-						minH="200px"
-						placeholder={jsonPlaceholder}
-						required
-					/>
-					<Alert status="info" mt="2">
-						<AlertIcon />
-						<span>
-							Make sure you've followed all the{" "}
-							<a
-								href="https://firefiles.vercel.app/docs/firebase/01-setup"
-								target="_blank"
-								style={{ textDecoration: "underline" }}
-							>
-								steps!
-							</a>
-						</span>
-					</Alert>
-					<VideoModal src="/firebase-config-tutorial.mov" />
-					<Button
-						type="submit"
-						isLoading={loading}
-						loadingText="Creating"
-						colorScheme="green"
-						variant="solid"
-					>
-						Create
-					</Button>
-				</Flex>
-			</Container>
-		</>
-	);
+  return (
+    <>
+      <Head>
+        <title>Firebase | Firefiles</title>
+      </Head>
+      <Flex px="16px" pt="3">
+        <IconButton
+          variant="ghost"
+          aria-label="back"
+          icon={<ArrowNarrowLeft />}
+          mr="3"
+          onClick={() => router.push("/new")}
+        />
+        <Heading as="h3" size="lg">
+          Paste your Firebase config
+        </Heading>
+      </Flex>
+      <Container display="flex" minH="90vh" alignItems="center" maxW="lg">
+        <Flex as="form" onSubmit={createBucket} flexDir="column" w="full">
+          <Textarea
+            value={raw}
+            onChange={(e) => setRaw(e.target.value)}
+            minH="200px"
+            placeholder={jsonPlaceholder}
+            required
+          />
+          <Alert status="info" mt="2">
+            <AlertIcon />
+            <span>
+              Make sure you've followed all the{" "}
+              <a
+                href="https://firefiles.vercel.app/docs/firebase/01-setup"
+                target="_blank"
+                style={{ textDecoration: "underline" }}
+              >
+                steps!
+              </a>
+            </span>
+          </Alert>
+          <VideoModal src="/firebase-config-tutorial.mov" />
+          <Button
+            type="submit"
+            isLoading={loading}
+            loadingText="Creating"
+            colorScheme="green"
+            variant="solid"
+          >
+            Create
+          </Button>
+        </Flex>
+      </Container>
+    </>
+  );
 };
 
 export default NewFirebase;
