@@ -15,7 +15,7 @@ import {
   MenuItem,
 } from "@chakra-ui/react";
 import { X, Plus, Check, Edit, DotsVertical, Minus } from "tabler-icons-react";
-import { DriveFile } from "@util/types";
+import { DriveFile, Tag } from "@util/types";
 import useBucket from "@hooks/useBucket";
 import toast from "react-hot-toast";
 
@@ -26,13 +26,13 @@ interface Props {
 }
 
 const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
-  const { listTags, addTags, removeTags } = useBucket();
-  const [tags, setTags] = useState<{ key: string; value: string }[]>([]);
+  const { listTags, addTags, editTags, removeTags } = useBucket();
+  const [tags, setTags] = useState<Tag[]>([]);
   const [addingTag, setAddingTag] = useState(false);
-  const [editingTag, setEditingTag] = useState<{ key: string; value: string } | null>(null);
+  const [tagBeingEdited, setTagBeingEdited] = useState<Tag | null>(null);
   const [newTagKey, setNewTagKey] = useState("");
   const [newTagValue, setNewTagValue] = useState("");
-  const [editedTag, setEditedTag] = useState<{ key: string; value: string } | null>(null);
+  const [editedTag, setEditedTag] = useState<Tag | null>(null);
 
   const getTags = async () => {
     const tagList = await listTags(file);
@@ -63,14 +63,24 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
     setAddingTag(false);
   };
 
+  const handleEditTag = async (tag: Tag) => {
+    if (await editTags(file, tag.key, editedTag)) {
+      await getTags();
+      setTagBeingEdited(null);
+      setEditedTag(null);
+      toast.success(`Tag successfully edited.`);
+    }
+  };
+
   const handleRemoveTag = async (key: string) => {
     if (await removeTags(file, key)) {
       await getTags();
-      setEditingTag(null);
+      setTagBeingEdited(null);
       toast.success(`Tag successfully deleted.`);
     }
   };
 
+  // load tags on first render
   useEffect(() => {
     getTags();
   }, []);
@@ -96,7 +106,8 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
         <Box p="4">
           {tags.map((tag) => (
             <Flex key={tag.key} mb="2" align="center">
-              {editingTag === tag ? (
+              {/*change interface if editing tag*/}
+              {tagBeingEdited === tag ? (
                 <>
                   <Input
                     flex="1"
@@ -114,7 +125,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                     icon={<X width={38}/>}
                     variant="unstyled"
                     _focus={{ outline: "none" }}
-                    onClick={() => setEditingTag(null)}
+                    onClick={() => setTagBeingEdited(null)}
                     _hover={{ bg: "hsl(60, 0%, 95%)" }}
                   />
                   <IconButton
@@ -122,30 +133,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                     icon={<Check width={38}/>}
                     variant="unstyled"
                     _focus={{ outline: "none" }}
-                    onClick={async () => {
-                      // if (await addTags(file, editingTag.key, editingTag.value)) {
-                      //   await removeTags(file, tag.key);
-                      //   await getTags();
-                      //   setEditingTag(null);
-                      //   toast.success(`Tag successfully edited.`);
-                      // }
-                      if (editingTag.key !== tag.key) {
-                        // Key has been changed, remove the old tag and add the new one
-                        if (await addTags(file, editingTag.key, editingTag.value)) {
-                          await removeTags(file, tag.key);
-                          await getTags();
-                          setEditingTag(null);
-                          toast.success(`Tag successfully edited.`);
-                        } 
-                      } else {
-                        // Key is unchanged, simply update the value
-                        if (await addTags(file, editingTag.key, editingTag.value)) {
-                          await getTags();
-                          setEditingTag(null);
-                          toast.success(`Tag successfully edited.`);
-                        }
-                      }
-                    }}
+                    onClick={() => handleEditTag(tag)}
                     _hover={{ bg: "hsl(60, 0%, 95%)" }}
                   />  
                 </>
@@ -158,7 +146,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                   <Menu>
                     <MenuButton as={IconButton} aria-label="Tag Options" icon={<DotsVertical width={38}/>} variant="unstyled" _hover={{ bg: "hsl(60, 0%, 95%)" }}/>
                     <MenuList>
-                      <MenuItem icon={<Edit width={38}/>} onClick={() => setEditingTag(tag)}>
+                      <MenuItem icon={<Edit width={38}/>} onClick={() => {setTagBeingEdited(tag); setEditedTag(tag)}}>
                         Edit
                       </MenuItem>
                       <MenuItem icon={<Minus width={38}/>} onClick={() => handleRemoveTag(tag.key)}>
@@ -170,6 +158,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
               )}
             </Flex>
           ))}
+          {/*change interface if adding tag*/}
           {addingTag ? (
             <Flex mb="2">
               <Input

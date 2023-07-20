@@ -53,4 +53,9 @@ export type DriveFolder = {
 	updatedAt?: string;
 };
 
+export type Tag = {
+	key: string;
+	value: string;
+}
+
   

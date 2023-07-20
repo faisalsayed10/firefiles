@@ -10,7 +10,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive } from "@prisma/client";
 import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
@@ -252,7 +252,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
-	const listTags = async (file: DriveFile) => {
+	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
 		try {
 			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
 			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));

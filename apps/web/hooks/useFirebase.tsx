@@ -1,5 +1,5 @@
 import { Drive, User } from "@prisma/client";
-import { Config, DriveFile, DriveFolder, UploadingFile } from "@util/types";
+import { Config, DriveFile, DriveFolder, Tag, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
@@ -197,12 +197,14 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
-	const listTags = async (file: DriveFile) => {
+	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
 		if (!app) return;
 		return getMetadata(ref(getStorage(app), file.fullPath))
 			.then((metadata) => {
 				// convert customMetadata object to array of objects in the format: {key: tagKey, value: tagValue}
-				return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
+				if (metadata.customMetadata) {
+					return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
+				}
 			}).catch((err) => {
 					toast.error(`${err.message}`);
 			});
@@ -226,6 +228,25 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			} }).catch((err) => {
 				toast.error(`${err.message}`);
 				return false;
+			});
+		return true;
+	}
+
+	const editTags = async (file: DriveFile, prevKey: string, newTag: Tag): Promise<boolean> => {
+		if (!app) return false;
+		// if the key has been edited, delete the old tag
+		if (newTag.key != prevKey) {
+			if (!await removeTags(file, prevKey)) {
+				return false;
+			}
+		}
+		// update the tag
+		await updateMetadata(ref(getStorage(app), file.fullPath),  {
+			customMetadata: {
+				[newTag.key]: newTag.value,
+				}}).catch((err) => {
+					toast.error(`${err.message}`);
+					return false;
 			});
 		return true;
 	}
@@ -418,6 +439,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
         enableTags,
 				listTags,
 				addTags,
+				editTags,
 				removeTags
 			}}
 		>

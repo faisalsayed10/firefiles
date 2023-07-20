@@ -1,4 +1,4 @@
-import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/types";
 import useFirebase from "./useFirebase";
 import useKeys from "./useKeys";
 import useS3 from "./useS3";
@@ -15,8 +15,9 @@ export type ContextValue = {
 	addFile: (files: File[] | FileList) => Promise<any>;
 	removeFile: (file: DriveFile) => Promise<boolean>;
 	enableTags: boolean;
-	listTags?: (file: DriveFile) => Promise<void | any[] >;
+	listTags?: (file: DriveFile) => Promise<void | Tag[] >;
 	addTags?: (file: DriveFile, key: string, value: string) => Promise<boolean>;
+	editTags?: (file: DriveFile, prevKey: string, newTag: Tag) => Promise<boolean>;
 	removeTags?: (file: DriveFile, key: string) => Promise<boolean>;
 };
 
