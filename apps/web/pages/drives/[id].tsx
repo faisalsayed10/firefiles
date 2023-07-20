@@ -3,20 +3,23 @@ import { FirebaseProvider } from "@hooks/useFirebase";
 import { KeysProvider } from "@hooks/useKeys";
 import { S3Provider } from "@hooks/useS3";
 import useUser from "@hooks/useUser";
-import { Drive } from "@prisma/client";
+import { Drive, Role } from "@prisma/client";
 import prisma from "@util/prisma";
 import { sessionOptions } from "@util/session";
 import { AES, enc } from "crypto-js";
 import { withIronSessionSsr } from "iron-session/next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 type Props = {
   data: Drive;
+  role: Role;
 };
 
-const DrivePage: React.FC<Props> = ({ data }) => {
+export const RoleContext: React.Context<Role> = createContext(Role.VIEWER);
+
+const DrivePage: React.FC<Props> = ({ data, role }) => {
   const router = useRouter();
   const [folderPath, setFolderPath] = useState("");
   const { user } = useUser({ redirectTo: "/login" });
@@ -32,17 +35,19 @@ const DrivePage: React.FC<Props> = ({ data }) => {
         <title>Your Files | Firefiles</title>
       </Head>
       <KeysProvider data={data}>
-        {data.type === "firebase" ? (
-          <FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
-            <Dashboard />
-          </FirebaseProvider>
-        ) : data.type === "s3" || data.type === "backblaze" || data.type === "cloudflare" ? (
-          <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
-            <Dashboard />
-          </S3Provider>
-        ) : (
-          <p>No provider found.</p>
-        )}
+        <RoleContext.Provider value={role}>
+          {data.type === "firebase" ? (
+            <FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+              <Dashboard />
+            </FirebaseProvider>
+          ) : data.type === "s3" || data.type === "backblaze" || data.type === "cloudflare" ? (
+            <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
+              <Dashboard />
+            </S3Provider>
+          ) : (
+            <p>No provider found.</p>
+          )}
+        </RoleContext.Provider>
       </KeysProvider>
     </>
   );
@@ -60,7 +65,12 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
     drive.createdAt = drive.createdAt.toString() as any;
 
-    return { props: { data: drive } };
+    const bucketOnUser = await prisma.bucketsOnUsers.findFirst({
+      where: { userId: user.id, bucketId: drive.id },
+    });
+    if (!bucketOnUser?.role) throw new Error("User's access privilege not found");
+
+    return { props: { data: drive, role: bucketOnUser.role } };
   } catch (err) {
     return { redirect: { permanent: false, destination: "/" }, props: {} };
   }

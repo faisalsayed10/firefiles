@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { beforeCreatingDoc } from "@util/helpers/s3-helpers";
 import prisma from "@util/prisma";
 import { sessionOptions } from "@util/session";
