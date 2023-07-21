@@ -257,7 +257,6 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
 			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
 		} catch (err) {
-			console.log("Error", err);
 			toast.error(`Error: ${err.message}`);
 		}
 	}
@@ -277,11 +276,9 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		};
 
 		try {
-			const data = await s3Client.send(new PutObjectTaggingCommand(params));
-			console.log("Success, tag added to object", data);
+			await s3Client.send(new PutObjectTaggingCommand(params));
 			return true;
 		} catch (err) {
-			console.log("Error: ", err);
 			toast.error(`Error: ${err.message}`);
 			return false;
 		}
@@ -322,7 +319,6 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			}
 		}
     };
-
 
 	// set currentFolder
 	useEffect(() => {

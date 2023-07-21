@@ -1,7 +1,7 @@
 import { Box, Flex, Image, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import { download } from "@util/helpers";
-import { DriveFile} from "@util/types"; 
+import { DriveFile } from "@util/types";
 import prettyBytes from "pretty-bytes";
 import React from "react";
 import { Copy, FileDownload, FileMinus, Tags, TagsOff } from "tabler-icons-react";
