@@ -17,7 +17,7 @@ export type ContextValue = {
 	enableTags: boolean;
 	listTags?: (file: DriveFile) => Promise<void | Tag[] >;
 	addTags?: (file: DriveFile, key: string, value: string) => Promise<boolean>;
-	editTags?: (file: DriveFile, prevKey: string, newTag: Tag) => Promise<boolean>;
+	editTags?: (file: DriveFile, prevTag: Tag, newTag: Tag) => Promise<boolean>;
 	removeTags?: (file: DriveFile, key: string) => Promise<boolean>;
 };
 

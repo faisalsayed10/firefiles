@@ -64,12 +64,13 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
   };
 
   const handleEditTag = async (tag: Tag) => {
-    if (await editTags(file, tag.key, editedTag)) {
-      await getTags();
+    if (await editTags(file, tag, editedTag)) {
       setTagBeingEdited(null);
       setEditedTag(null);
       toast.success(`Tag successfully edited.`);
     }
+    // rerender outside if in case tag needed to be removed and added again while editing
+    await getTags();
   };
 
   const handleRemoveTag = async (key: string) => {

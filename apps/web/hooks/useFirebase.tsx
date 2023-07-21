@@ -217,7 +217,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		if (tagList) {
 			for (const tag of tagList) {
 				if (tag.key === key) {
-					toast.error('Tag key already exists.')
+					toast.error('Error: Tag key already exists.')
 					return false;
 				}
 			}
@@ -232,23 +232,23 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	}
 
-	const editTags = async (file: DriveFile, prevKey: string, newTag: Tag): Promise<boolean> => {
+	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
 		if (!app) return false;
 		// if the key has been edited, delete the old tag
-		if (newTag.key != prevKey) {
-			if (!await removeTags(file, prevKey)) {
+		if (newTag.key != prevTag.key) {
+			if (!await removeTags(file, prevTag.key)) {
 				return false;
 			}
 		}
 		// update the tag
-		await updateMetadata(ref(getStorage(app), file.fullPath),  {
-			customMetadata: {
-				[newTag.key]: newTag.value,
-				}}).catch((err) => {
-					toast.error(`${err.message}`);
-					return false;
-			});
-		return true;
+		if (await addTags(file, newTag.key, newTag.value)){
+			return true;
+		} else {
+			// if new tag values are invalid, add back the previous tag
+			await addTags(file, prevTag.key, prevTag.value)
+			toast.error(`Error: Tag not edited.`);
+			return false;
+		}
 	}
 
 	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {

@@ -305,20 +305,22 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		}
 	};
 
-	const editTags = async (file: DriveFile, prevKey: string, newTag: Tag): Promise<boolean> => {
-		
-		if (! await removeTags(file, prevKey)){
+	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+		// remove previous tag in order to edit
+		if (!await removeTags(file, prevTag.key)){
 			return false;
 		} else {
-			try {
-				await addTags(file, newTag.key, newTag.value);
-				return true;
-			} catch (error) {
-				toast.error(`Error: ${error.message}`);
-				return false;
+				// add the new tag
+				if (await addTags(file, newTag.key, newTag.value)){
+					return true;
+				} else {
+					// if new tag values are invalid, add back the previous tag
+					await addTags(file, prevTag.key, prevTag.value)
+					toast.error(`Error: Tag not edited.`);
+					return false;
 			}
 		}
-    };
+	};
 
 	// set currentFolder
 	useEffect(() => {
