@@ -7,9 +7,9 @@ import validator from "validator";
 import { Resend } from "resend";
 import sendgrid from "@sendgrid/mail";
 
-sendgrid.setApiKey(process.env.SENDGRID_API_KEY as string);
-const resend = new Resend(process.env.RESEND_API_KEY);
-const url = process.env.VERCEL_URL || process.env.DEPLOY_URL;
+sendgrid.setApiKey(process.env.SENDGRID_API_KEY || "SG.empty");
+const resend = new Resend(process.env.RESEND_API_KEY || "re_123");
+const url = process.env.DEPLOY_URL || process.env.VERCEL_URL;
 
 const limiter = rateLimit({
   interval: 5 * 60 * 1000, // 5 minutes
@@ -141,7 +141,7 @@ export const html = (url: string, email: string) => `<!DOCTYPE html>
 <table border="0" cellpadding="0" cellspacing="0" class="image_block" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
 <tr>
 <td style="width:100%;padding-right:0px;padding-left:0px;">
-<div style="line-height:10px"><img src="https://firefiles.vercel.app/logo.png" style="display: block; height: auto; border: 0; width: 100px; max-width: 100%;" width="100"/></div>
+<div style="line-height:10px"><img src="https://firefiles.app/logo.png" style="display: block; height: auto; border: 0; width: 100px; max-width: 100%;" width="100"/></div>
 </td>
 </tr>
 </table>
