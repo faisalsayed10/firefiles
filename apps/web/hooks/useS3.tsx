@@ -308,6 +308,21 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		}
 	};
 
+	const editTags = async (file: DriveFile, prevKey: string, newTag: Tag): Promise<boolean> => {
+		
+		if (! await removeTags(file, prevKey)){
+			return false;
+		} else {
+			try {
+				await addTags(file, newTag.key, newTag.value);
+				return true;
+			} catch (error) {
+				toast.error(`Error: ${error.message}`);
+				return false;
+			}
+		}
+    };
+
 
 	// set currentFolder
 	useEffect(() => {
@@ -461,7 +476,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 				enableTags,
 				listTags,
 				addTags,
-				removeTags
+				removeTags,
+				editTags
 			}}
 		>
 			{children}
