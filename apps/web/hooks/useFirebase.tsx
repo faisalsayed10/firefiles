@@ -213,6 +213,10 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
 		if (!app) return false;
 		const tagList = await listTags(file);
+		if (!key){
+			toast.error('Error: Tag key is blank.')
+			return false;
+		}
 		// check for existing tag key, since same tag key will overwrite the previous value
 		if (tagList) {
 			for (const tag of tagList) {
