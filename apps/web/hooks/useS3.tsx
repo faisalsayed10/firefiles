@@ -263,6 +263,10 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 
 	// add tag to existing object
 	const addTags = async (file: DriveFile, key:string, value:string): Promise<boolean> => {
+		if (!key.trim()){
+			toast.error('Error: Tag key is blank.')
+			return false;
+		}
 		const currentTagsResponse = await s3Client.send(new GetObjectTaggingCommand({
 			Bucket: data.keys.Bucket,
 			Key: file.fullPath
