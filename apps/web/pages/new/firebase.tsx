@@ -54,7 +54,7 @@ const NewFirebase = () => {
 
       const promise = axios.post("/api/drive", { data, name: data.projectId, type: "firebase" });
 
-      toast.promise(promise, {
+      toast.promise(createAndSetupDrive, {
         loading: "Creating drive...",
         success: "Drive created successfully.",
         error: "An error occurred while creating the drive.",
