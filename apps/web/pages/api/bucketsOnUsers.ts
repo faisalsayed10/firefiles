@@ -9,7 +9,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     const user = req.session.user || JSON.parse(req.query.user as string);
     if (!user?.email) return res.status(403).json({ error: "You are not logged in." });
 
-    // READ => Gets all of the bucketsOnUsers records for the session's user
+    // READ
     if (req.method === "GET") {
       const { role, isPending } = req.query;
       const bucketsOnUser = await prisma.bucketsOnUsers.findMany({
@@ -22,8 +22,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       return res.status(200).json(bucketsOnUser);
       // CREATE
     } else if (req.method === "POST") {
-      // create the record in BucketsOnUsers:
-      const { id, userId, isPending, role } = req.body; // comes from the creating drive action OR invite access action
+      const { id, userId, isPending, role } = req.body;
       if (!id || !userId || isPending === null || role === null)
         return res.status(400).json({ error: "Invalid request." });
       await prisma.bucketsOnUsers.create({
