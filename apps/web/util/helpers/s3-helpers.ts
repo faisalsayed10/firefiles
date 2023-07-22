@@ -38,6 +38,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
       return { success: true };
     case "s3":
     case "backblaze":
+    case "cloudflare":
       const client = new S3Client({
         region: data.region,
         maxAttempts: 1,
@@ -52,7 +53,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
             {
               AllowedHeaders: ["*"],
               AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-              AllowedOrigins: [process.env.DEPLOY_URL || process.env.VERCEL_URL],
+              AllowedOrigins: [process.env.DEPLOY_URL, process.env.VERCEL_URL],
               ExposeHeaders: ["Access-Control-Allow-Origin"],
             },
           ],
@@ -83,7 +84,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
         return { success: false, error: err.message };
       }
     default:
-      break;
+      return { success: false, error: "Invalid provider." };
   }
 };
 
