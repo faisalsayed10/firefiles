@@ -31,6 +31,19 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       await prisma.bucketsOnUsers.create({
         data: { userId: userId, bucketId: id, isPending, role },
       });
+
+      // await prisma.bucketsOnUsers.create({
+      //   data: {
+      //     user: {
+      //       connect: { id: userId }, // Connect to an existing User by its ID
+      //     },
+      //     bucket: {
+      //       connect: { id: id }, // Connect to an existing Drive by its ID
+      //     },
+      //     isPending,
+      //     role,
+      //   },
+      // });
       return res.status(200).json("ok");
       // DELETE
     }
