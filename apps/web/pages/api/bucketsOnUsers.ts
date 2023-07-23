@@ -25,6 +25,9 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       const { id, userId, isPending, role } = req.body;
       if (!id || !userId || isPending === null || role === null)
         return res.status(400).json({ error: "Invalid request." });
+
+      const user = await prisma.user.findFirst({ where: { id: userId } });
+      if (!user) return res.status(400).json({ error: "User not found." });
       await prisma.bucketsOnUsers.create({
         data: { userId: userId, bucketId: id, isPending, role },
       });

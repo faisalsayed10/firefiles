@@ -45,6 +45,17 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       const id = req.query.id as string;
       if (!id) return res.status(400).json({ error: "Drive ID not found." });
       // await prisma.drive.deleteMany({ where: { id, userId: user.id } });
+
+      // Delete all rows in the "BucketsOnUsers" table that contain the specified "id"
+      await prisma.bucketsOnUsers.deleteMany({
+        where: { bucketId: id },
+      });
+
+      // Delete the Drive row from the "Drive" table
+      await prisma.drive.deleteMany({
+        where: { id: id },
+      });
+
       return res.status(200).json("ok");
       // UPDATE
     } else if (req.method === "PUT") {
