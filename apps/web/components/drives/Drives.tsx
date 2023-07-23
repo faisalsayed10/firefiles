@@ -100,6 +100,7 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
               >
                 {driveRole === Role.CREATOR ? drive.name : `${driveRole} ${drive.name}`}
               </Text>
+<<<<<<< HEAD
               <OptionsPopover header={drive.name}>
                 <Flex alignItems="stretch" flexDirection="column">
                   <Flex
@@ -131,6 +132,25 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                   )}
                 </Flex>
               </OptionsPopover>
+=======
+              {driveRole === Role.CREATOR && (
+                <OptionsPopover header={drive.name}>
+                  <Flex alignItems="stretch" flexDirection="column">
+                    <Flex
+                      {...optionProps}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await deleteDrive(Provider[drive.type], drive.id);
+                        mutate(data.filter((b) => b.id !== drive.id));
+                      }}
+                    >
+                      <X />
+                      <Text ml="2">Delete Drive</Text>
+                    </Flex>
+                  </Flex>
+                </OptionsPopover>
+              )}
+>>>>>>> c68d0a8 (update Drive tsx)
             </Flex>
           </Flex>
         ))
