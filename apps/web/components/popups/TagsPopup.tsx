@@ -91,7 +91,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
       <ModalOverlay />
       <ModalContent p="0">
         <Flex align="center" justify="space-between" p="4">
-          <Text fontSize="2xl" fontWeight="600">
+          <Text fontSize="2xl" fontWeight="600" overflow="hidden">
             Tags for {file.name}
           </Text>
           <ModalCloseButton size="md" />
@@ -140,8 +140,8 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                 </>
               ) : (
                 <>
-                  <Text flex="1">{tag.key}</Text>
-                  <Text flex="1" ml="4">
+                  <Text flex="1" overflow="hidden">{tag.key}</Text>
+                  <Text flex="1" ml="4" overflow="hidden">
                     {tag.value}
                   </Text>
                   <Menu>
