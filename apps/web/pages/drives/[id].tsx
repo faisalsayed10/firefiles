@@ -28,10 +28,6 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
     const pathArray = router.asPath.split("/drives/")[1].split("/");
     setFolderPath(pathArray.slice(1).join("/"));
   }, [router.asPath]);
-  useEffect(() => {
-    const pathArray = router.asPath.split("/drives/")[1].split("/");
-    setFolderPath(pathArray.slice(1).join("/"));
-  }, [router.asPath]);
 
   return (
     <>
@@ -61,8 +57,8 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     const id = params.id as string;
     if (!user?.email) throw new Error("User not logged in");
 
-		const drive = await prisma.drive.findFirst({ where: { id, userId: user.id } });
-		if (!drive?.keys) throw new Error("Drive not found");
+    const drive = await prisma.drive.findFirst({ where: { id } });
+    if (!drive?.keys) throw new Error("Drive not found");
 
     drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
     drive.createdAt = drive.createdAt.toString() as any;
