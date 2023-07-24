@@ -252,6 +252,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
+	// get array of tags
 	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
 		try {
 			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
@@ -288,7 +289,25 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		}
 	};
 
-	// To remove tag from an object
+	// edit existing tag
+	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+		// remove previous tag in order to edit
+		if (!await removeTags(file, prevTag.key)){
+			return false;
+		} else {
+			// add the new tag
+			if (await addTags(file, newTag.key, newTag.value)){
+				return true;
+			} else {
+				// if new tag values are invalid, add back the previous tag
+				await addTags(file, prevTag.key, prevTag.value)
+				toast.error(`Error: Tag not edited.`);
+				return false;
+			}
+		}
+	};
+
+	// remove tag from an object
 	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
 		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
 		let existingTags = getTagging.TagSet
@@ -306,23 +325,6 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		} catch (err) {
 			toast.error(`Error: ${err.message}`);
 			return false;
-		}
-	};
-
-	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
-		// remove previous tag in order to edit
-		if (!await removeTags(file, prevTag.key)){
-			return false;
-		} else {
-				// add the new tag
-				if (await addTags(file, newTag.key, newTag.value)){
-					return true;
-				} else {
-					// if new tag values are invalid, add back the previous tag
-					await addTags(file, prevTag.key, prevTag.value)
-					toast.error(`Error: Tag not edited.`);
-					return false;
-			}
 		}
 	};
 
@@ -478,8 +480,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 				enableTags,
 				listTags,
 				addTags,
-				removeTags,
-				editTags
+				editTags,
+				removeTags
 			}}
 		>
 			{children}

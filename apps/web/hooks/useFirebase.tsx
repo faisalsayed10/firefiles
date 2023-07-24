@@ -197,6 +197,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
+	// get array of tags
 	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
 		if (!app) return;
 		return getMetadata(ref(getStorage(app), file.fullPath))
@@ -210,6 +211,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			});
 	}
 
+	// add tag to object
 	const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
 		if (!app) return false;
 		if (!key.trim()){
@@ -236,6 +238,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	}
 
+	// edit existing tag
 	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
 		if (!app) return false;
 		// if the key has been edited, delete the old tag
@@ -255,6 +258,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		}
 	}
 
+	// remove tag from object
 	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
 		if (!app) return false;
 		await updateMetadata(ref(getStorage(app), file.fullPath),  {
