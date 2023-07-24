@@ -32,13 +32,15 @@ export const ROOT_FOLDER: DriveFolder = {
 export default function useBucket(): ContextValue {
 	const { keys } = useKeys();
 
-	if ((Provider[keys.type] as Provider) === Provider.firebase) {
-		return useFirebase();
-	} else if ((Provider[keys.type] as Provider) === Provider.s3) {
-		return useS3();
-	} else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
-		return useS3();
-	}
+  if ((Provider[keys.type] as Provider) === Provider.firebase) {
+    return useFirebase();
+  } else if ((Provider[keys.type] as Provider) === Provider.s3) {
+    return useS3();
+  } else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
+    return useS3();
+  } else if ((Provider[keys.type] as Provider) === Provider.cloudflare) {
+    return useS3();
+  }
 
 	return null;
 }
