@@ -59,7 +59,7 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     const id = params.id as string;
     if (!user?.email) throw new Error("User not logged in");
 
-    const drive = await prisma.drive.findFirst({ where: { id: id } });
+    const drive = await prisma.drive.findFirst({ where: { id } });
     if (!drive?.keys) throw new Error("Drive not found");
 
     drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
