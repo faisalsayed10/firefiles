@@ -11,6 +11,7 @@ import {
 	Select,
 	Text,
 } from "@chakra-ui/react";
+import WasabiRegionSelect from "@components/ui/WasabiRegionSelect";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
