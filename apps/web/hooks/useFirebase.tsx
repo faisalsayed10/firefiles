@@ -218,6 +218,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			toast.error('Error: Tag key is blank.')
 			return false;
 		}
+		key = key.trim()
 		const tagList = await listTags(file);
 		// check for existing tag key, since same tag key will overwrite the previous value
 		if (tagList) {

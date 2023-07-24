@@ -268,6 +268,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			toast.error('Error: Tag key is blank.')
 			return false;
 		}
+		key = key.trim()
 		const currentTagsResponse = await s3Client.send(new GetObjectTaggingCommand({
 			Bucket: data.keys.Bucket,
 			Key: file.fullPath
