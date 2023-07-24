@@ -109,7 +109,7 @@ const NewFirebase = () => {
             <span>
               Make sure you've followed all the{" "}
               <a
-                href="https://firefiles.vercel.app/docs/firebase/01-setup"
+                href="https://firefiles.app/docs/firebase/01-setup"
                 target="_blank"
                 style={{ textDecoration: "underline" }}
               >

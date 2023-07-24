@@ -23,6 +23,7 @@ export enum Provider {
   backblaze,
   deta,
   git,
+  cloudflare,
 }
 
 export type FileSortConfig = {

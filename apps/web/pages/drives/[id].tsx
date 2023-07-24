@@ -28,6 +28,10 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
     const pathArray = router.asPath.split("/drives/")[1].split("/");
     setFolderPath(pathArray.slice(1).join("/"));
   }, [router.asPath]);
+  useEffect(() => {
+    const pathArray = router.asPath.split("/drives/")[1].split("/");
+    setFolderPath(pathArray.slice(1).join("/"));
+  }, [router.asPath]);
 
   return (
     <>
@@ -40,7 +44,7 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
             <FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
               <Dashboard />
             </FirebaseProvider>
-          ) : data.type === "s3" || data.type === "backblaze" ? (
+          ) : data.type === "s3" || data.type === "backblaze" || data.type === "cloudflare" ? (
             <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
               <Dashboard />
             </S3Provider>
@@ -57,8 +61,8 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     const id = params.id as string;
     if (!user?.email) throw new Error("User not logged in");
 
-    const drive = await prisma.drive.findFirst({ where: { id: id } });
-    if (!drive?.keys) throw new Error("Drive not found");
+		const drive = await prisma.drive.findFirst({ where: { id, userId: user.id } });
+		if (!drive?.keys) throw new Error("Drive not found");
 
     drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
     drive.createdAt = drive.createdAt.toString() as any;
