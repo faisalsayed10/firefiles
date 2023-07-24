@@ -53,7 +53,9 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 
 	switch (type) {
 		case "firebase":
-			return { success: true };
+		case "wasabi":
+		case "digitalocean":
+			return {success: true};
 		case "s3":
 		case "backblaze":
 			try {
@@ -78,10 +80,6 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 				console.error(err);
 				return { success: false, error: err.message };
 			}
-		case "wasabi":
-			return {success: true}
-		case "digitalocean":
-			return {success: true}
 		default:
 			break;
 	}
