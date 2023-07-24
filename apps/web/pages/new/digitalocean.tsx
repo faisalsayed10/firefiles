@@ -20,7 +20,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
-import validator from "validator";
 
 const NewS3 = () => {
 	const { user } = useUser();
