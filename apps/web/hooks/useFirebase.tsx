@@ -241,11 +241,9 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	// edit existing tag
 	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
 		if (!app) return false;
-		// if the key has been edited, delete the old tag
-		if (newTag.key != prevTag.key) {
-			if (!await removeTags(file, prevTag.key)) {
+		// remove previous tag in order to edit
+		if (!await removeTags(file, prevTag.key)) {
 				return false;
-			}
 		}
 		// update the tag
 		if (await addTags(file, newTag.key, newTag.value)){
