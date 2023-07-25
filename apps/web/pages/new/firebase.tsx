@@ -52,9 +52,9 @@ const NewFirebase = () => {
       )
         throw new Error("One or more fields are missing!");
 
-      const createAndSetupDrive = axios
+      const createDrive = axios
         .post<{ driveId: string }>("/api/drive", { data, name: data.projectId, type: "firebase" })
-        .then(({ data: { driveId } }) =>
+        .then(({ data: driveId }) =>
           axios.post("/api/bucketsOnUsers", {
             id: driveId,
             userId: user.id,
@@ -63,7 +63,7 @@ const NewFirebase = () => {
           }),
         );
 
-      toast.promise(createAndSetupDrive, {
+      toast.promise(createDrive, {
         loading: "Creating drive...",
         success: "Drive created successfully.",
         error: "An error occurred while creating the drive.",
@@ -109,7 +109,7 @@ const NewFirebase = () => {
             <span>
               Make sure you've followed all the{" "}
               <a
-                href="https://firefiles.vercel.app/docs/firebase/01-setup"
+                href="https://firefiles.app/docs/firebase/01-setup"
                 target="_blank"
                 style={{ textDecoration: "underline" }}
               >
