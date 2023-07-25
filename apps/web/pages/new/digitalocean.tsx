@@ -123,7 +123,7 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Key ID"
+						placeholder="Access Key ID"
 						type="text"
 						value={keyId}
 						onChange={(e) => setKeyId(e.target.value)}
@@ -132,7 +132,7 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Application Key"
+						placeholder="Secret Key"
 						type="text"
 						value={applicationKey}
 						onChange={(e) => setApplicationKey(e.target.value)}
@@ -147,7 +147,7 @@ const NewS3 = () => {
 						onChange={(e) => setEndpoint(e.target.value)}
 						required
 					/>
-					<VideoModal src="/backblaze-keys-tutorial.mov" />
+					<VideoModal src="/digital-ocean-keys-tutorial.mov" />
 					<Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
 						Next
 					</Button>
