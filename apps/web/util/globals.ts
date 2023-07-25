@@ -20,6 +20,12 @@ export const PROVIDERS = [
 		logo: "/wasabi.png",
 	},
 	{
+		id: "digitalocean",
+		name: "Digital Ocean",
+		logo: "/digitalocean.png",
+		isComingSoon: false,
+	},
+	{
 		id: "minio",
 		name: "Min.io",
 		logo: "/minio.png",
@@ -36,12 +42,6 @@ export const PROVIDERS = [
 		name: "Git",
 		logo: "/git.png",
 		isComingSoon: true,
-	},
-	{
-		id: "digitalocean",
-		name: "Digital Ocean",
-		logo: "/digitalocean.png",
-		isComingSoon: false,
 	}
 ];
 
