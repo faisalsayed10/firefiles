@@ -58,3 +58,53 @@ export type Tag = {
 	key: string;
 	value: string;
 }
+interface CommonDrive {
+  id: string;
+  createdAt: Date;
+  name: string;
+}
+
+interface FirebasePublicKeys {
+  authDomain: string;
+  storageBucket: string;
+  appId: string;
+  projectId: string;
+}
+
+interface FirebaseDriveOwned {
+  permissions: "owned";
+  keys: FirebasePublicKeys & {
+    apiKey: string;
+  };
+}
+
+interface FirebaseDriveShared {
+  permissions: "shared";
+  keys: FirebasePublicKeys;
+}
+
+type FirebaseDrive = { type: "firebase" } & (FirebaseDriveOwned | FirebaseDriveShared);
+
+interface S3PublicKeys {
+  region: string;
+  bucketUrl: string;
+  Bucket: string;
+}
+
+interface S3DriveOwned {
+  permissions: "owned";
+  keys: S3PublicKeys & {
+    accessKey: string;
+    secretKey: string;
+    endpoint?: string;
+  };
+}
+
+interface S3DriveShared {
+  permissions: "shared";
+  keys: S3PublicKeys;
+}
+
+type S3Drive = { type: "s3" | "backblaze" | "cloudflare" } & (S3DriveOwned | S3DriveShared);
+
+export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);
