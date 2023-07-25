@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
+import { Role } from "@prisma/client";
 import axios from "axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -80,20 +81,34 @@ const NewS3 = () => {
 
       const Bucket = existingBucket !== "Not Selected" ? existingBucket : newBucket.trim();
 
-      await axios.post("/api/drive", {
-        data: {
-          accessKey: accessKeyId,
-          secretKey: secretKey,
-          Bucket,
-          bucketUrl: `https://${accountId}.r2.cloudflarestorage.com/${Bucket}`,
-          endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-          region: "auto",
-        },
-        name: Bucket,
-        type: "cloudflare",
+      const createDrive = axios
+        .post<{ driveId: string }>("/api/drive", {
+          data: {
+            accessKey: accessKeyId,
+            secretKey: secretKey,
+            Bucket,
+            bucketUrl: `https://${accountId}.r2.cloudflarestorage.com/${Bucket}`,
+            endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+            region: "auto",
+          },
+          name: Bucket,
+          type: "cloudflare",
+        })
+        .then(({ data: driveId }) =>
+          axios.post("/api/bucketsOnUsers", {
+            id: driveId,
+            userId: user.id,
+            isPending: false,
+            role: Role.CREATOR,
+          }),
+        );
+
+      toast.promise(createDrive, {
+        loading: "Creating drive...",
+        success: "Drive created successfully.",
+        error: "An error occurred while creating the drive.",
       });
 
-      toast.success("Drive created successfully!");
       router.push("/");
     } catch (err) {
       console.error(err);

@@ -52,18 +52,18 @@ const NewFirebase = () => {
       )
         throw new Error("One or more fields are missing!");
 
-      const promise = axios
-        .post("/api/drive", { data, name: data.projectId, type: "firebase" })
-        .then((res) => {
+      const createDrive = axios
+        .post<{ driveId: string }>("/api/drive", { data, name: data.projectId, type: "firebase" })
+        .then(({ data: driveId }) =>
           axios.post("/api/bucketsOnUsers", {
-            id: res.data.driveId,
+            id: driveId,
             userId: user.id,
             isPending: false,
             role: Role.CREATOR,
-          });
-        });
+          }),
+        );
 
-      toast.promise(promise, {
+      toast.promise(createDrive, {
         loading: "Creating drive...",
         success: "Drive created successfully.",
         error: "An error occurred while creating the drive.",

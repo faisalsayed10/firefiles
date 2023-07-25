@@ -79,8 +79,8 @@ const NewS3 = () => {
 
       const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-      const promise = axios
-        .post("/api/drive", {
+      const createDrive = axios
+        .post<{ driveId: string }>("/api/drive", {
           data: {
             accessKey,
             secretKey,
@@ -91,16 +91,16 @@ const NewS3 = () => {
           name: Bucket,
           type: "s3",
         })
-        .then((res) => {
+        .then(({ data: driveId }) =>
           axios.post("/api/bucketsOnUsers", {
-            id: res.data.driveId,
+            id: driveId,
             userId: user.id,
             isPending: false,
             role: Role.CREATOR,
-          });
-        });
+          }),
+        );
 
-      toast.promise(promise, {
+      toast.promise(createDrive, {
         loading: "Creating drive...",
         success: "Drive created successfully.",
         error: "An error occurred while creating the drive.",
