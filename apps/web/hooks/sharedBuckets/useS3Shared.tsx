@@ -21,8 +21,8 @@ import {
 	useState,
 } from "react";
 import toast from "react-hot-toast";
-import { ContextValue, ROOT_FOLDER } from "./useBucket";
-import useUser from "./useUser";
+import { ContextValue, ROOT_FOLDER } from "../useBucket";
+import useUser from "../useUser";
 
 const S3Context = createContext<ContextValue>(null);
 export default () => useContext(S3Context);
