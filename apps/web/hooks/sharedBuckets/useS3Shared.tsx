@@ -8,7 +8,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive } from "@prisma/client";
 import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, StorageDrive, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
@@ -23,12 +23,13 @@ import {
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "../useBucket";
 import useUser from "../useUser";
+import axios from "axios";
 
 const S3Context = createContext<ContextValue>(null);
 export default () => useContext(S3Context);
 
 type Props = {
-	data: Drive & { keys: any };
+	data: StorageDrive;
 	fullPath?: string;
 };
 
@@ -37,17 +38,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	fullPath,
 	children,
 }) => {
-	const [s3Client, setS3Client] = useState<S3Client>(
-		new S3Client({
-			region: data.keys.region,
-			maxAttempts: 1,
-			credentials: {
-				accessKeyId: data.keys.accessKey,
-				secretAccessKey: data.keys.secretKey,
-			},
-			...(data.keys?.endpoint ? { endpoint: data.keys.endpoint } : {}),
-		}),
-	);
+	const [s3Client, setS3Client] = useState<S3Client>(null);
 	const [loading, setLoading] = useState(false);
 	const { user } = useUser();
 
@@ -56,6 +47,10 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const isMounted = useRef(false);
+
+	if (data.permissions !== 'shared' || data.type !== 's3') {
+		return
+	}
 
 	// Fallback for old buckets not already having the bucketUrl.
 	useEffect(() => {
@@ -118,6 +113,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		}
 
 		// recursively delete children
+		// TODO:
 		await emptyS3Directory(s3Client, folder.bucketName, folder.fullPath);
 	};
 
