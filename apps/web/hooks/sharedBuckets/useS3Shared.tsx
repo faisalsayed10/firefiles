@@ -238,9 +238,10 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 
 	const removeFile = async (file: DriveFile) => {
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
-		await s3Client.send(
-			new DeleteObjectCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }),
-		);
+    const deleteFile = await axios.delete<{ deleteUrl: string }>(
+      `/api/shared/s3/file?driveId=${data.id}&fullPath=${file.fullPath}`,
+    );
+    await axios.delete(deleteFile.data.deleteUrl);
 		return true;
 	};
 
