@@ -79,26 +79,17 @@ const NewS3 = () => {
 
       const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-      const createDrive = axios
-        .post<{ driveId: string }>("/api/drive", {
-          data: {
-            accessKey,
-            secretKey,
-            Bucket,
-            bucketUrl: `https://${Bucket}.s3.${region}.amazonaws.com`,
-            region,
-          },
-          name: Bucket,
-          type: "s3",
-        })
-        .then(({ data: driveId }) =>
-          axios.post("/api/bucketsOnUsers", {
-            id: driveId,
-            userId: user.id,
-            isPending: false,
-            role: Role.CREATOR,
-          }),
-        );
+      const createDrive = axios.post<{ driveId: string }>("/api/drive", {
+        data: {
+          accessKey,
+          secretKey,
+          Bucket,
+          bucketUrl: `https://${Bucket}.s3.${region}.amazonaws.com`,
+          region,
+        },
+        name: Bucket,
+        type: "s3",
+      });
 
       toast.promise(createDrive, {
         loading: "Creating drive...",

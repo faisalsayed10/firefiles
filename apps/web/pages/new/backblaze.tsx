@@ -92,27 +92,18 @@ const NewS3 = () => {
 
       const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-      const createDrive = axios
-        .post("/api/drive", {
-          data: {
-            accessKey: keyId,
-            secretKey: applicationKey,
-            Bucket,
-            bucketUrl: `https://${Bucket}.s3.${endpoint.split(".")[1]}.backblazeb2.com`,
-            endpoint,
-            region: endpoint.split(".")[1],
-          },
-          name: Bucket,
-          type: "backblaze",
-        })
-        .then(({ data: driveId }) =>
-          axios.post("/api/bucketsOnUsers", {
-            id: driveId,
-            userId: user.id,
-            isPending: false,
-            role: Role.CREATOR,
-          }),
-        );
+      const createDrive = axios.post("/api/drive", {
+        data: {
+          accessKey: keyId,
+          secretKey: applicationKey,
+          Bucket,
+          bucketUrl: `https://${Bucket}.s3.${endpoint.split(".")[1]}.backblazeb2.com`,
+          endpoint,
+          region: endpoint.split(".")[1],
+        },
+        name: Bucket,
+        type: "backblaze",
+      });
 
       toast.promise(createDrive, {
         loading: "Creating drive...",
