@@ -13,13 +13,14 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
     // READ
     if (req.method === "GET") {
-      const { role, isPending } = req.query;
-      const bucketsOnUserRes = await axios.get(
-        `${
-          process.env.DEPLOY_URL
-        }/api/bucketsOnUsers?role=${role}&isPending=${isPending}&user=${JSON.stringify(user)}`,
-      );
-      const bucketsOnUser = bucketsOnUserRes.data;
+      const { role, isPending, userId } = req.query;
+      const bucketsOnUser = await prisma.bucketsOnUsers.findMany({
+        where: {
+          userId: userId as string,
+          role: role as Role,
+          isPending: isPending === "true",
+        },
+      });
 
       const driveIds = bucketsOnUser.map((bucketOnUser) => bucketOnUser.bucketId);
       const drives = await Promise.all(

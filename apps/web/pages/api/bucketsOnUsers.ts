@@ -6,7 +6,7 @@ import { Role } from "@prisma/client";
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const user = req.session.user || JSON.parse(req.query.user as string);
+    const user = req.session.user;
     if (!user?.email) return res.status(403).json({ error: "You are not logged in." });
 
     // READ
