@@ -45,43 +45,33 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 					AllowedHeaders: ["*"],
 					AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
 					AllowedOrigins: [process.env.DEPLOY_URL],
-					ExposeHeaders: ["ETag"],
+					ExposeHeaders: ["Access-Control-Allow-Origin"],
 				},
 			],
 		},
 	};
 
-	switch (type) {
-		case "firebase":
-		case "wasabi":
-		case "digitalocean":
-			return {success: true};
-		case "s3":
-		case "backblaze":
+	try {
+		await client.send(new GetBucketCorsCommand({ Bucket: data.Bucket })); // Get CORS
+		await client.send(new PutBucketCorsCommand(corsOptions)); // Update CORS anyway
+		return { success: true, error: null };
+	} catch (err) {
+		if (
+			err.name.toLowerCase() === "invalidbucketname" ||
+			err.name.toLowerCase() === "nosuchbucket"
+		) {
+			await createNewBucket(client, data.Bucket, corsOptions); // Bucket doesn't exist, so created a new bucket
+			return { success: true, error: null };
+		} else if (err.name.toLowerCase() === "nosuchcorsconfiguration") {
 			try {
-				await client.send(new GetBucketCorsCommand({ Bucket: data.Bucket })); // Get CORS
-				await client.send(new PutBucketCorsCommand(corsOptions)); // Update CORS anyway
+				await client.send(new PutBucketCorsCommand(corsOptions));
 				return { success: true, error: null };
-			} catch (err) {
-				if (
-					err.name.toLowerCase() === "invalidbucketname" ||
-					err.name.toLowerCase() === "nosuchbucket"
-				) {
-					await createNewBucket(client, data.Bucket, corsOptions); // Bucket doesn't exist, so created a new bucket
-					return { success: true, error: null };
-				} else if (err.name.toLowerCase() === "nosuchcorsconfiguration") {
-					try {
-						await client.send(new PutBucketCorsCommand(corsOptions));
-						return { success: true, error: null };
-					} catch (e) {
-						return { success: false, error: e.message };
-					}
-				}
-				console.error(err);
-				return { success: false, error: err.message };
+			} catch (e) {
+				return { success: false, error: e.message };
 			}
-		default:
-			break;
+		}
+		console.error(err);
+		return { success: false, error: err.message };
 	}
 };
 
