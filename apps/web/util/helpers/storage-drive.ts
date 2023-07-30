@@ -1,3 +1,5 @@
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { BucketsOnUsers, Drive, Role } from "@prisma/client";
 import { Provider, StorageDrive } from "@util/types";
 import { AES, enc } from "crypto-js";
@@ -11,7 +13,7 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
 
   const s3DriveType = (type: string): "s3" | "backblaze" | "cloudflare" => {
     if (type === "s3" || type === "backblaze" || type === "cloudflare") return type;
-    else throw new Error("Invalid provider type found on drive");
+    else throw new Error(`Invalid provider type '${type}' found on driveId ${drive.id}`);
   };
 
   if (drive.type === "firebase") {
@@ -22,6 +24,7 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
         name: drive.name,
         type: "firebase",
         permissions: "owned",
+        supportsDeletion: true,
         keys: {
           authDomain: decryptedKeys.authDomain,
           storageBucket: decryptedKeys.storageBucket,
@@ -37,6 +40,7 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
         name: drive.name,
         type: "firebase",
         permissions: "shared",
+        supportsDeletion: false,
         keys: {
           authDomain: decryptedKeys.authDomain,
           storageBucket: decryptedKeys.storageBucket,
@@ -53,6 +57,8 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
         name: drive.name,
         type: s3DriveType(drive.type),
         permissions: "owned",
+        supportsDeletion: true,
+        performDelete: removeS3File,
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -69,6 +75,8 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
         name: drive.name,
         type: s3DriveType(drive.type),
         permissions: "shared",
+        supportsDeletion: true,
+        performDelete: removeS3File,
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -77,4 +85,33 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
       };
     }
   }
+};
+
+export const signedUrlExpireSeconds = 60;
+
+export const removeS3File = async (privilegedDrive: StorageDrive, fileFullPath: string) => {
+  if (!(privilegedDrive.type !== "firebase") || privilegedDrive.permissions !== "owned") {
+    throw new Error(`Drive type '${privilegedDrive.type}' not valid for S3 provider`);
+  }
+  const adminClient = new S3Client({
+    region: privilegedDrive.keys.region,
+    maxAttempts: 1,
+    credentials: {
+      accessKeyId: privilegedDrive.keys.accessKey,
+      secretAccessKey: privilegedDrive.keys.secretKey,
+    },
+    ...(privilegedDrive.keys?.endpoint ? { endpoint: privilegedDrive.keys.endpoint } : {}),
+  });
+
+  const signedDeleteUrl = await getSignedUrl(
+    adminClient,
+    new DeleteObjectCommand({
+      Bucket: privilegedDrive.keys.Bucket,
+      Key: fileFullPath,
+    }),
+    {
+      expiresIn: signedUrlExpireSeconds,
+    },
+  );
+  return signedDeleteUrl;
 };
