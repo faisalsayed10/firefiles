@@ -1,3 +1,4 @@
+import { S3Client } from "@aws-sdk/client-s3";
 import { FirebaseOptions } from "firebase/app";
 
 export type UploadingFile = {
@@ -62,6 +63,8 @@ interface CommonDrive {
   id: string;
   createdAt: Date;
   name: string;
+  permissions: string;
+  supportsDeletion: boolean;
 }
 
 interface FirebasePublicKeys {
@@ -73,12 +76,15 @@ interface FirebasePublicKeys {
 
 interface FirebaseDriveOwned {
   permissions: "owned";
+  supportsDeletion: true;
+  performDelete?: () => Promise<string>;
   keys: FirebasePublicKeys & {
     apiKey: string;
   };
 }
 
 interface FirebaseDriveShared {
+  supportsDeletion: false;
   permissions: "shared";
   keys: FirebasePublicKeys;
 }
@@ -105,6 +111,10 @@ interface S3DriveShared {
   keys: S3PublicKeys;
 }
 
-type S3Drive = { type: "s3" | "backblaze" | "cloudflare" } & (S3DriveOwned | S3DriveShared);
+type S3Drive = {
+  type: "s3" | "backblaze" | "cloudflare";
+  supportsDeletion: true;
+  performDelete: (drive: StorageDrive, fileFullPath: string) => Promise<string>;
+} & (S3DriveOwned | S3DriveShared);
 
 export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);
