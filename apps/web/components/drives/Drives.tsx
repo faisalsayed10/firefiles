@@ -100,7 +100,6 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
               >
                 {driveRole === Role.CREATOR ? drive.name : `${driveRole} ${drive.name}`}
               </Text>
-<<<<<<< HEAD
               <OptionsPopover header={drive.name}>
                 <Flex alignItems="stretch" flexDirection="column">
                   <Flex
@@ -110,7 +109,7 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                       if (driveRole === Role.CREATOR) {
                         await deleteDrive(Provider[drive.type], drive.id);
                       } else {
-                        await detachDrive(drive.id);
+                        await detachDrive(Provider[drive.type]);
                       }
                       mutate(data.filter((b) => b.id !== drive.id));
                     }}
@@ -118,39 +117,8 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                     <X />
                     <Text ml="2">Delete Drive</Text>
                   </Flex>
-                  {driveRole === Role.CREATOR && (
-                    <Flex
-                      {...optionProps}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        // await shareDrive(drive.id);
-                      }}
-                    >
-                      <Share />
-                      <Text ml="2">Share Drive</Text>
-                    </Flex>
-                  )}
                 </Flex>
               </OptionsPopover>
-=======
-              {driveRole === Role.CREATOR && (
-                <OptionsPopover header={drive.name}>
-                  <Flex alignItems="stretch" flexDirection="column">
-                    <Flex
-                      {...optionProps}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await deleteDrive(Provider[drive.type], drive.id);
-                        mutate(data.filter((b) => b.id !== drive.id));
-                      }}
-                    >
-                      <X />
-                      <Text ml="2">Delete Drive</Text>
-                    </Flex>
-                  </Flex>
-                </OptionsPopover>
-              )}
->>>>>>> c68d0a8 (update Drive tsx)
             </Flex>
           </Flex>
         ))
