@@ -46,6 +46,14 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // });
       return res.status(200).json("ok");
       // DELETE
+    } else if (req.method == "DELETE") {
+      const id = req.query.id as string;
+      if (!id) return res.status(400).json({ error: "Bucket ID not found." });
+      await prisma.bucketsOnUsers.deleteMany({
+        where: { bucketId: id, userId: user.id },
+      });
+      return res.status(200).json("ok");
+      // UPDATE
     }
   } catch (err) {
     console.error(err.message);

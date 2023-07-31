@@ -2,7 +2,7 @@ import { Box, Flex, Image, Text, Skeleton, Tooltip } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import { Drive } from "@prisma/client";
 import { PROVIDERS } from "@util/globals";
-import { deleteDrive } from "@util/helpers";
+import { deleteDrive, detachDrive } from "@util/helpers";
 import { Provider } from "@util/types";
 import { useRouter } from "next/router";
 import React from "react";
@@ -100,23 +100,25 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
               >
                 {driveRole === Role.CREATOR ? drive.name : `${driveRole} ${drive.name}`}
               </Text>
-              {driveRole === Role.CREATOR && (
-                <OptionsPopover header={drive.name}>
-                  <Flex alignItems="stretch" flexDirection="column">
-                    <Flex
-                      {...optionProps}
-                      onClick={async (e) => {
-                        e.stopPropagation();
+              <OptionsPopover header={drive.name}>
+                <Flex alignItems="stretch" flexDirection="column">
+                  <Flex
+                    {...optionProps}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (driveRole === Role.CREATOR) {
                         await deleteDrive(Provider[drive.type], drive.id);
-                        mutate(data.filter((b) => b.id !== drive.id));
-                      }}
-                    >
-                      <X />
-                      <Text ml="2">Delete Drive</Text>
-                    </Flex>
+                      } else {
+                        await detachDrive(Provider[drive.type], drive.id);
+                      }
+                      mutate(data.filter((b) => b.id !== drive.id));
+                    }}
+                  >
+                    <X />
+                    <Text ml="2">Delete Drive</Text>
                   </Flex>
-                </OptionsPopover>
-              )}
+                </Flex>
+              </OptionsPopover>
             </Flex>
           </Flex>
         ))
