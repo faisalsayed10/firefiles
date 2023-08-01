@@ -9,7 +9,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    // no "shared"/
     // authenticate user
     const user = req.session.user;
     if (!user?.email) return res.status(403).json({ error: "You are not logged in." });
@@ -36,26 +35,28 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     // DELETE
     if (req.method === "DELETE") {
       if (!privilegedDrive.supportsDeletion || role === Role.VIEWER)
-        return res
-          .status(403)
-          .json({
-            error: `userId ${user.id} does not have delete permissions in driveId ${drive.id}`,
-          });
+        return res.status(403).json({
+          error: `userId ${user.id} does not have delete permissions in driveId ${drive.id}`,
+        });
 
-      // TODO: move this out
-      const deleteSchema = z.object({
-        driveId: z.string().nonempty(),
-        fullPath: z.string().nonempty(),
-      });
-      if (!deleteSchema.parse(req.query)) return;
+      const parms = deleteSchema.safeParse(req.query);
+      if (!parms.success)
+        return res.status(400).json({
+          error: "bad parameters",
+        });
 
-      const fullFilePath = req.query.fullPath as string;
-      const url = await privilegedDrive.performDelete(privilegedDrive, fullFilePath);
-      return res.status(200).json({ deleteUrl: url });
+      const { fullPath } = parms.data;
+      const deleteFileUrl = await privilegedDrive.getDeleteFileUrl(fullPath);
+      return res.status(200).json({ deleteFileUrl });
     }
-    // handle corner case
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ error: err.message });
   }
+  return res.status(400).json({ error: "invalid method provided" });
 }, sessionOptions);
+
+const deleteSchema = z.object({
+  driveId: z.string().nonempty(),
+  fullPath: z.string().nonempty(),
+});

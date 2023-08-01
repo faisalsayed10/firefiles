@@ -77,7 +77,7 @@ interface FirebasePublicKeys {
 interface FirebaseDriveOwned {
   permissions: "owned";
   supportsDeletion: true;
-  performDelete?: () => Promise<string>;
+  getDeleteFileUrl?: () => Promise<string>;
   keys: FirebasePublicKeys & {
     apiKey: string;
   };
@@ -114,7 +114,7 @@ interface S3DriveShared {
 type S3Drive = {
   type: "s3" | "backblaze" | "cloudflare";
   supportsDeletion: true;
-  performDelete: (drive: StorageDrive, fileFullPath: string) => Promise<string>;
+  getDeleteFileUrl: (fileFullPath: string) => Promise<string>;
 } & (S3DriveOwned | S3DriveShared);
 
 export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);

@@ -1,7 +1,7 @@
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { BucketsOnUsers, Drive, Role } from "@prisma/client";
-import { Provider, StorageDrive } from "@util/types";
+import { Drive, Role } from "@prisma/client";
+import { StorageDrive } from "@util/types";
 import { AES, enc } from "crypto-js";
 
 export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive => {
@@ -51,14 +51,14 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
     }
   } else {
     if (permissions === "owned") {
-      return {
+      const pDrive: StorageDrive = {
         id: drive.id,
         createdAt: drive.createdAt,
         name: drive.name,
         type: s3DriveType(drive.type),
         permissions: "owned",
         supportsDeletion: true,
-        performDelete: removeS3File,
+        getDeleteFileUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -68,28 +68,31 @@ export const createStorageDrive = (drive: Drive, userRole: Role): StorageDrive =
           ...(decryptedKeys.endpoint ? { endpoint: decryptedKeys.endpoint } : {}),
         },
       };
+      return pDrive;
     } else {
-      return {
+      const pDrive: StorageDrive = {
         id: drive.id,
         createdAt: drive.createdAt,
         name: drive.name,
         type: s3DriveType(drive.type),
         permissions: "shared",
         supportsDeletion: true,
-        performDelete: removeS3File,
+        getDeleteFileUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
           Bucket: decryptedKeys.Bucket,
         },
       };
+
+      return pDrive;
     }
   }
 };
 
 export const signedUrlExpireSeconds = 60;
 
-export const removeS3File = async (privilegedDrive: StorageDrive, fileFullPath: string) => {
+const getDeleteS3FileUrl = async (privilegedDrive: StorageDrive, fileFullPath: string) => {
   if (!(privilegedDrive.type !== "firebase") || privilegedDrive.permissions !== "owned") {
     throw new Error(`Drive type '${privilegedDrive.type}' not valid for S3 provider`);
   }
