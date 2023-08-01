@@ -34,7 +34,10 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
     // DELETE
     if (req.method === "DELETE") {
-      if (!privilegedDrive.supportsDeletion || role === Role.VIEWER)
+      if (!privilegedDrive.supportsDeletion) {
+        return res.status(400).json({ error: `driveId ${drive.id} does not support deletion` });
+      }
+      if (role === Role.VIEWER)
         return res.status(403).json({
           error: `userId ${user.id} does not have delete permissions in driveId ${drive.id}`,
         });
