@@ -212,10 +212,10 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
 
   const removeFile = async (file: DriveFile) => {
     setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
-    const deleteFile = await axios.delete<{ deleteUrl: string }>(
-      `/api/shared/s3/file?driveId=${data.id}&fullPath=${file.fullPath}`,
-    );
-    await axios.delete(deleteFile.data.deleteUrl);
+    axios
+      .delete<string>(`/api/shared/s3/file?driveId=${data.id}&fullPath=${file.fullPath}`)
+      .then(({ data: deleteFileUrl }) => axios.delete(deleteFileUrl))
+      .catch((err) => console.log(err));
     return true;
   };
 
