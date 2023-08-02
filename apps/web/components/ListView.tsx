@@ -14,7 +14,7 @@ import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
 import { DriveFile, DriveFolder, FileSortConfig } from "@util/types";
 import React from "react";
-import { LayoutGrid } from "tabler-icons-react";
+import { LayoutGrid, Filter } from "tabler-icons-react";
 import FileSortMenu from "@components/ui/FileSortMenu";
 
 
@@ -72,6 +72,9 @@ const ListView: React.FC<Props> = (props) => {
 				</Text>
 				<Box>
 					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
+					<IconButton aria-label="filter-tags" mr={1}>
+						<Filter />
+					</IconButton>
 					<IconButton aria-label="change-view" onClick={() => props.setGridView(true)}>
 						<LayoutGrid />
 					</IconButton>

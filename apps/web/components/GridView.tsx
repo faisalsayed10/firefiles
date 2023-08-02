@@ -1,12 +1,13 @@
 import { Box, Flex, Grid, IconButton, Skeleton, Text } from "@chakra-ui/react";
 import Folder from "@components/folders/Folder";
 import { DriveFile, DriveFolder } from "@util/types";
-import React from "react";
-import { LayoutList } from "tabler-icons-react";
+import React, { useState } from "react";
+import { LayoutList, Filter} from "tabler-icons-react";
 import { FileSortConfig } from "@util/types";
 import File from "./files/File";
 import AddFolderButton from "./folders/AddFolderButton";
 import FileSortMenu from "./ui/FileSortMenu";
+import FilterTags from "./popups/FilterTags";
 
 type Props = {
 	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,6 +21,17 @@ type Props = {
 };
 
 const GridView: React.FC<Props> = (props) => {
+	const [isFilterTagsOpen, setIsFilterTagsOpen] = useState(false);
+
+	const openFilterTags = () => {
+		setIsFilterTagsOpen(true);
+	};
+
+	const closeFilterTags = () => {
+		setIsFilterTagsOpen(false);
+	};
+
+
 	return (
 		<Box mx="4" mb="6">
 			<Flex align="center" justify="space-between" my="4">
@@ -28,9 +40,15 @@ const GridView: React.FC<Props> = (props) => {
 				</Text>
 				<Box>
 					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
+					
+					<IconButton aria-label="filter-tags" mr={1} onClick={openFilterTags}>
+						<Filter />
+					</IconButton>
+
 					<IconButton aria-label="change-view" onClick={() => props.setGridView(false)}>
 						<LayoutList />
 					</IconButton>
+
 				</Box>
 			</Flex>
 			{props.loading ? (
@@ -71,6 +89,7 @@ const GridView: React.FC<Props> = (props) => {
 						props.files?.map((file) => <File key={file.name} file={file} gridView={true} />)}
 				</Grid>
 			)}
+			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} />
 		</Box>
 	);
 };
