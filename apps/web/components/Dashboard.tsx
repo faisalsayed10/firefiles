@@ -3,15 +3,13 @@ import UploadFileButton from "@components/files/UploadFileButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
-import useKeys from "@hooks/useKeys";
-import { Provider, FileSortConfig } from "@util/types";
+import { DriveFile, FileSortConfig, TagFilter } from "@util/types";
 import React, { useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import { DriveFile } from "@util/types";
 import { sortDriveFiles } from "@util/file-sorting";
 
 const baseStyle = {
@@ -37,6 +35,35 @@ const Dashboard = () => {
 	const [gridView, setGridView] = useState(false);
 	const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
 	const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
+	const [fileTagFilter, setFileTagFilter] = useState<TagFilter>({});
+	const { listTags } = useBucket();
+
+	// filter files by tag
+	const filterDriveFiles = async (files: DriveFile[]): Promise<DriveFile[]> => {
+		// map each file to a boolean array
+		const mapFilter = await Promise.all(files.map(file => filterByTag(file, fileTagFilter)));
+		console.log(`filtered array`)
+		console.log(mapFilter)
+		// filter files by the boolean array
+		return files.filter((file, index) => mapFilter[index]);
+	}
+	// return a boolean based on if file matches the tag filter
+	const filterByTag = async (file: DriveFile, fileTagFilter): Promise<boolean> => {
+		const tags = await listTags(file);
+		if (tags) {
+			console.log(`file tags for ${file.name}:`)
+			console.log(tags)
+			// filter based on whether key, value, or both is provided
+			if (fileTagFilter.hasOwnProperty("key") && fileTagFilter.hasOwnProperty("value")) {
+				return tags.some(tag => (tag.key === fileTagFilter.key) && (tag.value === fileTagFilter.value));
+			} else if (fileTagFilter.hasOwnProperty("key")) {
+				return tags.some(tag => (tag.key === fileTagFilter.key))
+			} else if (fileTagFilter.hasOwnProperty("value")) {
+				return tags.some(tag => (tag.value === fileTagFilter.value))
+			}
+		}
+		return false;
+	}
 
 	useEffect(() => {
 		const storedView = localStorage.getItem("grid_view");
@@ -59,9 +86,29 @@ const Dashboard = () => {
 			setSortedFiles([]);
 			return;
 		}
-		const sortedFiles = sortDriveFiles(files, fileSort);
-		setSortedFiles(sortedFiles);
-	}, [fileSort, files])
+		// filter files if user has selected filter
+		if (fileTagFilter.hasOwnProperty("key") || fileTagFilter.hasOwnProperty("value")) {
+			const fetchFilteredFiles = async () => {
+				const filteredFiles = await filterDriveFiles(files);
+				console.log(`filtered files:`)
+				console.log(filteredFiles)
+				// sort filtered files
+				const sortedFilteredFiles = sortDriveFiles(filteredFiles, fileSort);
+				setSortedFiles(sortedFilteredFiles);
+			}
+			fetchFilteredFiles().catch(console.error);
+		} else {
+			const sortedFiles = sortDriveFiles(files, fileSort);
+			setSortedFiles(sortedFiles);
+		}
+	}, [fileSort, files, fileTagFilter])
+
+
+	// file filter testing
+	useEffect(() => {
+		setFileTagFilter({key: "this"})
+		console.log(`filter set`)
+	}, [gridView])
 
 	return (
 		<>

@@ -58,3 +58,8 @@ export type Tag = {
 	key: string;
 	value: string;
 }
+
+export type TagFilter = {
+  key?: string,
+  value?: string
+}
