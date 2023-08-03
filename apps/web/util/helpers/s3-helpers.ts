@@ -34,9 +34,9 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
 
   switch (type) {
     case "firebase":
-      return { success: true };
     case "wasabi":
     case "digitalocean":
+      return { success: true };
     case "s3":
     case "backblaze":
     case "cloudflare":
@@ -55,7 +55,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
               AllowedHeaders: ["*"],
               AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
               AllowedOrigins: [process.env.DEPLOY_URL, process.env.VERCEL_URL],
-              ExposeHeaders: ["ETag"],
+              ExposeHeaders: ["Access-Control-Allow-Origin"],
             },
           ],
         },
