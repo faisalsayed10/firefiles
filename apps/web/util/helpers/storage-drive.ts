@@ -16,11 +16,6 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
 
   const permissions = userRole === Role.CREATOR ? "owned" : "shared";
 
-  const s3DriveType = (type: string): "s3" | "backblaze" | "cloudflare" => {
-    if (type === "s3" || type === "backblaze" || type === "cloudflare") return type;
-    else throw new Error(`Invalid provider type '${type}' found on driveId ${drive.id}`);
-  };
-
   if (drive.type === "firebase") {
     if (permissions === "owned") {
       return {
@@ -66,7 +61,7 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         id: drive.id,
         createdAt: drive.createdAt,
         name: drive.name,
-        type: s3DriveType(drive.type),
+        type: s3DriveType(drive),
         permissions: "owned",
         environment: "server",
         supportsDeletion: true,
@@ -91,7 +86,7 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         id: drive.id,
         createdAt: drive.createdAt,
         name: drive.name,
-        type: s3DriveType(drive.type),
+        type: s3DriveType(drive),
         permissions: "shared",
         environment: "server",
         supportsDeletion: true,
@@ -120,11 +115,6 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
 
   const permissions = userRole === Role.CREATOR ? "owned" : "shared";
 
-  const s3DriveType = (type: string): "s3" | "backblaze" | "cloudflare" => {
-    if (type === "s3" || type === "backblaze" || type === "cloudflare") return type;
-    else throw new Error(`Invalid provider type '${type}' found on driveId ${drive.id}`);
-  };
-
   if (drive.type === "firebase") {
     if (permissions === "owned") {
       return {
@@ -170,7 +160,7 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
         id: drive.id,
         createdAt: drive.createdAt,
         name: drive.name,
-        type: s3DriveType(drive.type),
+        type: s3DriveType(drive),
         permissions: "owned",
         environment: "client",
         supportsDeletion: true,
@@ -191,7 +181,7 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
         id: drive.id,
         createdAt: drive.createdAt,
         name: drive.name,
-        type: s3DriveType(drive.type),
+        type: s3DriveType(drive),
         permissions: "shared",
         environment: "client",
         supportsDeletion: true,
@@ -207,6 +197,12 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
       return pDrive;
     }
   }
+};
+
+const s3DriveType = (drive: Drive): "s3" | "backblaze" | "cloudflare" => {
+  const type = drive.type;
+  if (type === "s3" || type === "backblaze" || type === "cloudflare") return type;
+  else throw new Error(`Invalid provider type '${type}' found on driveId ${drive.id}`);
 };
 
 export const signedUrlExpireSeconds = 3600 * 24;
