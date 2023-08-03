@@ -64,7 +64,7 @@ const NewFirebase = () => {
         error: "An error occurred while creating the drive.",
       });
 
-      promise.then(() => router.push("/"));
+      createDrive.then(() => router.push("/"));
     } catch (err) {
       console.error(err);
       toast.error(err.message);

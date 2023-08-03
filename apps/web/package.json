@@ -26,6 +26,7 @@
 		"copy-to-clipboard": "^3.3.1",
 		"crypto-js": "^4.1.1",
 		"evaporate": "^2.1.4",
+		"fast-xml-parser": "^4.2.7",
 		"file-icon-vectors": "^1.0.0",
 		"firebase": "^9.5.0",
 		"framer-motion": "^4",

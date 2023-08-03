@@ -1,5 +1,5 @@
 import { Drive, User } from "@prisma/client";
-import { Config, DriveFile, DriveFolder, Tag, UploadingFile } from "@util/types";
+import { Config, DriveFile, DriveFolder, Tag, StorageDrive, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
@@ -32,7 +32,7 @@ const FirebaseContext = createContext<ContextValue>(null);
 export default () => useContext(FirebaseContext);
 
 type Props = {
-	data: Drive;
+	data: StorageDrive;
 	fullPath?: string;
 };
 
@@ -473,7 +473,7 @@ const recursiveDelete = async (
 	}
 };
 
-const initializeAppAndLogin = async (data: Drive, user: User, setApp: any) => {
+const initializeAppAndLogin = async (data: StorageDrive, user: User, setApp: any) => {
 	const has_logged_in =
 		window.localStorage.getItem(`has_logged_in_${data.id}`) === "true" || false;
 	const initialize = initializeApp(data.keys as any, data.id);
@@ -484,7 +484,7 @@ const initializeAppAndLogin = async (data: Drive, user: User, setApp: any) => {
 	}
 };
 
-const loginTheirUser = async (app: FirebaseApp, user: User, data: Drive) => {
+const loginTheirUser = async (app: FirebaseApp, user: User, data: StorageDrive) => {
 	const auth = getAuth(app);
 	const config = app.options as Config;
 	const setLoggedIn = () =>

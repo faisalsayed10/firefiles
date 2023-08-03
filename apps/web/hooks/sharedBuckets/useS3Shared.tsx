@@ -1,13 +1,10 @@
 import {
-  DeleteObjectCommand,
   DeleteObjectsCommand,
-  GetObjectCommand,
   ListObjectsV2Command,
+  ListObjectsV2CommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Drive } from "@prisma/client";
-import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
+import { calculateVariablePartSize, parseXML2JSON } from "@util/helpers/s3-helpers";
 import { DriveFile, DriveFolder, Provider, StorageDrive, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
@@ -18,15 +15,15 @@ import { ContextValue, ROOT_FOLDER } from "../useBucket";
 import useUser from "../useUser";
 import axios from "axios";
 
-const S3Context = createContext<ContextValue>(null);
-export default () => useContext(S3Context);
+const S3SharedContext = createContext<ContextValue>(null);
+export default () => useContext(S3SharedContext);
 
 type Props = {
   data: StorageDrive;
   fullPath?: string;
 };
 
-export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath, children }) => {
+export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath, children }) => {
   const [s3Client, setS3Client] = useState<S3Client>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
@@ -37,7 +34,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
   const [files, setFiles] = useState<DriveFile[]>(null);
   const isMounted = useRef(false);
 
-  if (data.permissions !== "shared" || data.type !== "s3") {
+  if (data.environment !== "client" || data.type !== "s3") {
     return;
   }
 
@@ -110,7 +107,6 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
           ? file.name
           : `${decodeURIComponent(currentFolder.fullPath)}${file.name}`;
 
-      // TODO: Change to Shared functionality
       // TODO: Can we have this operation done in the client?
       const upload = new Upload({
         client: s3Client,
@@ -194,12 +190,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
           contentType: mime.lookup(file.name) || "application/octet-stream",
           bucketName: data.keys.Bucket,
           bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
-          url: await getSignedUrl(
-            // TODO: Get this from the server
-            s3Client,
-            new GetObjectCommand({ Bucket: data.keys.Bucket, Key: Key }),
-            { expiresIn: 3600 * 24 },
-          ),
+          url: (await axios.get<string>(`/api/file?driveId=${data.id}&fullPath=${Key}`)).data,
         };
 
         setFiles((files) => (files ? [...files, newFile] : [newFile]));
@@ -212,10 +203,11 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
 
   const removeFile = async (file: DriveFile) => {
     setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
-    axios
-      .delete<string>(`/api/shared/s3/file?driveId=${data.id}&fullPath=${file.fullPath}`)
-      .then(({ data: deleteFileUrl }) => axios.delete(deleteFileUrl))
-      .catch((err) => console.log(err));
+    const deleteResponse = await axios.delete<string>(
+      `/api/files?driveId=${data.id}&fullPath=${file.fullPath}`,
+    );
+    const deleteFileUrl = deleteResponse.data;
+    await axios.delete(deleteFileUrl);
     return true;
   };
 
@@ -247,40 +239,34 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
     (async () => {
       try {
         if (!files) {
-          let results = await s3Client.send(
-            // TODO:
-            new ListObjectsV2Command({
-              Bucket: data.keys.Bucket,
-              Prefix: currentFolder.fullPath,
-              Delimiter: "/",
-            }),
+          const getListObjectsUrlResponse = await axios.get(
+            `/api/files?driveId=${data.id}&fullPath=${currentFolder.fullPath}&delimiter=${"/"}`,
           );
+          const objectsListResponse = await axios.get(
+            getListObjectsUrlResponse.data.getObjectsListUrl,
+          );
+          const parseResult = parseXML2JSON(objectsListResponse.data);
+          if (!parseResult.success) return;
 
+          let results: ListObjectsV2CommandOutput = parseResult.json.ListBucketResult;
           if (results.Contents) {
-            const x = await Promise.all(
+            const driveFiles = await Promise.all(
               results.Contents.map(async (result) => ({
-                // promiseAll and map
                 fullPath: result.Key,
                 name: result.Key.split("/").pop(),
                 parent: currentFolder.fullPath,
-                createdAt: result.LastModified.toISOString(),
+                createdAt: new Date(result.LastModified).toISOString(),
                 size: result.Size.toString(),
                 contentType: mime.lookup(result.Key) || "",
                 bucketName: results.Name,
                 bucketUrl: data.keys.bucketUrl,
-                url: await getSignedUrl(
-                  // FIXME: change this and the var names
-                  s3Client,
-                  new GetObjectCommand({
-                    Bucket: results.Name,
-                    Key: result.Key,
-                  }),
-                  { expiresIn: 3600 * 24 },
-                ),
+                url: (
+                  await axios.get<string>(`/api/file?driveId=${data.id}&fullPath=${result.Key}`)
+                ).data,
               })),
             );
 
-            setFiles(x);
+            setFiles(driveFiles);
           }
 
           const localFolders = localStorage.getItem(`local_folders_${data.id}`);
@@ -308,35 +294,30 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
 
           // loop to list all files.
           while (results.IsTruncated) {
-            results = await s3Client.send(
-              // TODO:
-              new ListObjectsV2Command({
-                Bucket: data.keys.Bucket,
-                Prefix: currentFolder.fullPath,
-                ContinuationToken: results.ContinuationToken,
-                Delimiter: "/",
-              }),
+            const getListObjectsUrlResponse = await axios.get(
+              `/api/files?driveId=${data.id}&fullPath=${currentFolder.fullPath}&delimiter=${"/"}`,
             );
+            const objectsListResponse = await axios.get(
+              getListObjectsUrlResponse.data.getObjectsListUrl,
+            );
+            const parseResult = parseXML2JSON(objectsListResponse.data);
+            if (!parseResult.success) return;
+
+            results = parseResult.json.ListBucketResult;
 
             results.Contents.forEach(async (result) => {
               const driveFile: DriveFile = {
                 fullPath: result.Key,
                 name: result.Key.split("/").pop(),
                 parent: currentFolder.fullPath,
-                createdAt: result.LastModified.toISOString(),
+                createdAt: new Date(result.LastModified).toISOString(),
                 size: result.Size.toString(),
                 contentType: mime.lookup(result.Key) || "",
                 bucketName: results.Name,
                 bucketUrl: data.keys.bucketUrl,
-                url: await getSignedUrl(
-                  // TODO:
-                  s3Client,
-                  new GetObjectCommand({
-                    Bucket: results.Name,
-                    Key: result.Key,
-                  }),
-                  { expiresIn: 3600 * 24 },
-                ),
+                url: (
+                  await axios.get<string>(`/api/file?driveId=${data.id}&fullPath=${result.Key}`)
+                ).data,
               };
               setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
             });
@@ -351,7 +332,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
   }, [currentFolder, user]);
 
   return (
-    <S3Context.Provider
+    <S3SharedContext.Provider
       value={{
         loading,
         currentFolder,
@@ -366,7 +347,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath,
       }}
     >
       {children}
-    </S3Context.Provider>
+    </S3SharedContext.Provider>
   );
 };
 
