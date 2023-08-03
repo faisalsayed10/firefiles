@@ -23,7 +23,11 @@ type Props = {
   fullPath?: string;
 };
 
-export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath, children }) => {
+export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
+  data,
+  fullPath,
+  children,
+}) => {
   const [s3Client, setS3Client] = useState<S3Client>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
@@ -181,6 +185,10 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({ data, ful
         setUploadingFiles((prevUploadingFiles) =>
           prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id),
         );
+        const {
+          data: { getObjectUrl: url },
+        } = await axios.get(`/api/file?driveId=${data.id}&fullPath=${Key}`);
+
         const newFile: DriveFile = {
           fullPath: Key,
           name: file.name,
@@ -190,7 +198,7 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({ data, ful
           contentType: mime.lookup(file.name) || "application/octet-stream",
           bucketName: data.keys.Bucket,
           bucketUrl: `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`,
-          url: (await axios.get<string>(`/api/file?driveId=${data.id}&fullPath=${Key}`)).data,
+          url,
         };
 
         setFiles((files) => (files ? [...files, newFile] : [newFile]));
@@ -239,31 +247,30 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({ data, ful
     (async () => {
       try {
         if (!files) {
-          const getListObjectsUrlResponse = await axios.get(
-            `/api/files?driveId=${data.id}&fullPath=${currentFolder.fullPath}&delimiter=${"/"}`,
+          const listObjectsResponse = await fetchS3ObjectsList(
+            data.id,
+            currentFolder.fullPath,
+            "/",
           );
-          const objectsListResponse = await axios.get(
-            getListObjectsUrlResponse.data.getObjectsListUrl,
-          );
-          const parseResult = parseXML2JSON(objectsListResponse.data);
-          if (!parseResult.success) return;
-
-          let results: ListObjectsV2CommandOutput = parseResult.json.ListBucketResult;
+          let results = listObjectsResponse.results;
           if (results.Contents) {
             const driveFiles = await Promise.all(
-              results.Contents.map(async (result) => ({
-                fullPath: result.Key,
-                name: result.Key.split("/").pop(),
-                parent: currentFolder.fullPath,
-                createdAt: new Date(result.LastModified).toISOString(),
-                size: result.Size.toString(),
-                contentType: mime.lookup(result.Key) || "",
-                bucketName: results.Name,
-                bucketUrl: data.keys.bucketUrl,
-                url: (
-                  await axios.get<string>(`/api/file?driveId=${data.id}&fullPath=${result.Key}`)
-                ).data,
-              })),
+              results.Contents.map(async (result) => {
+                const {
+                  data: { getObjectUrl: url },
+                } = await axios.get(`/api/file?driveId=${data.id}&fullPath=${result.Key}`);
+                return {
+                  fullPath: result.Key,
+                  name: result.Key.split("/").pop(),
+                  parent: currentFolder.fullPath,
+                  createdAt: new Date(result.LastModified).toISOString(),
+                  size: result.Size.toString(),
+                  contentType: mime.lookup(result.Key) || "",
+                  bucketName: results.Name,
+                  bucketUrl: data.keys.bucketUrl,
+                  url,
+                };
+              }),
             );
 
             setFiles(driveFiles);
@@ -294,33 +301,33 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({ data, ful
 
           // loop to list all files.
           while (results.IsTruncated) {
-            const getListObjectsUrlResponse = await axios.get(
-              `/api/files?driveId=${data.id}&fullPath=${currentFolder.fullPath}&delimiter=${"/"}`,
+            const listObjectsResponse = await fetchS3ObjectsList(
+              data.id,
+              currentFolder.fullPath,
+              results.ContinuationToken,
+              "/",
             );
-            const objectsListResponse = await axios.get(
-              getListObjectsUrlResponse.data.getObjectsListUrl,
+            results = listObjectsResponse.results;
+
+            const driveFiles = await Promise.all(
+              results.Contents.map(async (result) => {
+                const {
+                  data: { getObjectUrl: url },
+                } = await axios.get(`/api/file?driveId=${data.id}&fullPath=${result.Key}`);
+                return {
+                  fullPath: result.Key,
+                  name: result.Key.split("/").pop(),
+                  parent: currentFolder.fullPath,
+                  createdAt: new Date(result.LastModified).toISOString(),
+                  size: result.Size.toString(),
+                  contentType: mime.lookup(result.Key) || "",
+                  bucketName: results.Name,
+                  bucketUrl: data.keys.bucketUrl,
+                  url,
+                };
+              }),
             );
-            const parseResult = parseXML2JSON(objectsListResponse.data);
-            if (!parseResult.success) return;
-
-            results = parseResult.json.ListBucketResult;
-
-            results.Contents.forEach(async (result) => {
-              const driveFile: DriveFile = {
-                fullPath: result.Key,
-                name: result.Key.split("/").pop(),
-                parent: currentFolder.fullPath,
-                createdAt: new Date(result.LastModified).toISOString(),
-                size: result.Size.toString(),
-                contentType: mime.lookup(result.Key) || "",
-                bucketName: results.Name,
-                bucketUrl: data.keys.bucketUrl,
-                url: (
-                  await axios.get<string>(`/api/file?driveId=${data.id}&fullPath=${result.Key}`)
-                ).data,
-              };
-              setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
-            });
+            setFiles((files) => (files ? [...files, ...driveFiles] : driveFiles));
           }
         }
       } catch (err) {
@@ -381,3 +388,21 @@ async function emptyS3Directory(
   await client.send(new DeleteObjectsCommand(deleteParams)); // TODO:
   if (listedObjects.IsTruncated) await emptyS3Directory(client, Bucket, Prefix);
 }
+
+const fetchS3ObjectsList = async (
+  driveId: string,
+  fullPath: string,
+  continuationToken?: string,
+  delimiter?: string,
+) => {
+  const getListObjectsUrlResponse = await axios.get(
+    `/api/files?driveId=${driveId}&fullPath=${fullPath}${
+      continuationToken ? `&continuationToken=${continuationToken}` : ""
+    }${delimiter ? `&delimiter=${delimiter}` : ""}`,
+  );
+  const objectsListResponse = await axios.get(getListObjectsUrlResponse.data.getObjectsListUrl);
+  const parseResult = parseXML2JSON(objectsListResponse.data);
+  if (!parseResult.success) throw new Error(parseResult.error);
+  const results: ListObjectsV2CommandOutput = parseResult.json.ListBucketResult;
+  return { success: true, results };
+};
