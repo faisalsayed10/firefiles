@@ -34,9 +34,10 @@ export default function useBucket(): ContextValue {
 	  case Provider.backblaze:
 	  case Provider.wasabi:
 	  case Provider.digitalocean:
+    case Provider.cloudflare:
 		return useS3();
 	  default:
 		return null;
 	}
-  }
+}
 

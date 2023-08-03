@@ -29,13 +29,14 @@ export const createNewBucket = async (
 };
 
 export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiResponse, body: any) => {
+
   const { data, type } = body;
 
   switch (type) {
     case "firebase":
-	case "wasabi":
-	case "digitalocean":
       return { success: true };
+    case "wasabi":
+    case "digitalocean":
     case "s3":
     case "backblaze":
     case "cloudflare":
@@ -54,7 +55,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
               AllowedHeaders: ["*"],
               AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
               AllowedOrigins: [process.env.DEPLOY_URL, process.env.VERCEL_URL],
-              ExposeHeaders: ["Access-Control-Allow-Origin"],
+              ExposeHeaders: ["ETag"],
             },
           ],
         },
