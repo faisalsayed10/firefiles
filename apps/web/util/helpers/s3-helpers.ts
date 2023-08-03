@@ -7,6 +7,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { NextApiRequest, NextApiResponse } from "next";
+import { XMLParser } from "fast-xml-parser";
 
 export const createNewBucket = async (
   client: S3Client,
@@ -94,4 +95,16 @@ export const calculateVariablePartSize = (size: number) => {
   else if (size <= 10 * gb) return 50 * mb;
   else if (size <= 100 * gb) return 100 * mb;
   else return 500 * mb;
+};
+
+export const parseXML2JSON = (rawXML: string) => {
+  const parserOptions = { allowBooleanAttributes: true };
+  const parser = new XMLParser(parserOptions);
+  try {
+    const result = parser.parse(rawXML);
+    return { success: true, json: result };
+  } catch (err) {
+    console.log(`XML parse error: ${err}`);
+    return { success: false, error: err };
+  }
 };

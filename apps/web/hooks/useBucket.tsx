@@ -2,6 +2,7 @@ import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
 import useFirebase from "./useFirebase";
 import useKeys from "./useKeys";
 import useS3 from "./useS3";
+import useS3Shared from "./sharedBuckets/useS3Shared";
 
 export type ContextValue = {
   loading: boolean;
@@ -30,11 +31,11 @@ export default function useBucket(): ContextValue {
   if ((Provider[keys.type] as Provider) === Provider.firebase) {
     return useFirebase();
   } else if ((Provider[keys.type] as Provider) === Provider.s3) {
-    return useS3();
+    return keys.permissions === "owned" ? useS3() : useS3Shared();
   } else if ((Provider[keys.type] as Provider) === Provider.backblaze) {
-    return useS3();
+    return keys.permissions === "owned" ? useS3() : useS3Shared();
   } else if ((Provider[keys.type] as Provider) === Provider.cloudflare) {
-    return useS3();
+    return keys.permissions === "owned" ? useS3() : useS3Shared();
   }
 
   return null;
