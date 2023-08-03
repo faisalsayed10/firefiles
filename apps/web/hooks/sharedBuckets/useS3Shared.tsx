@@ -253,7 +253,7 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
             "/",
           );
           let results = listObjectsResponse.results;
-          if (results.Contents) {
+          if (Array.isArray(results.Contents)) {
             const driveFiles = await Promise.all(
               results.Contents.map(async (result) => {
                 const {
@@ -304,10 +304,11 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
             const listObjectsResponse = await fetchS3ObjectsList(
               data.id,
               currentFolder.fullPath,
-              results.ContinuationToken,
               "/",
+              results.ContinuationToken,
             );
             results = listObjectsResponse.results;
+            if (!Array.isArray(results.Contents)) break;
 
             const driveFiles = await Promise.all(
               results.Contents.map(async (result) => {
@@ -392,8 +393,8 @@ async function emptyS3Directory(
 const fetchS3ObjectsList = async (
   driveId: string,
   fullPath: string,
-  continuationToken?: string,
   delimiter?: string,
+  continuationToken?: string,
 ) => {
   const getListObjectsUrlResponse = await axios.get(
     `/api/files?driveId=${driveId}&fullPath=${fullPath}${
