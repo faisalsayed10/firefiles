@@ -1,3 +1,5 @@
+import { S3Client } from "@aws-sdk/client-s3";
+import { PrismaPromise } from "@prisma/client";
 import { FirebaseOptions } from "firebase/app";
 
 export type UploadingFile = {
@@ -58,6 +60,11 @@ interface CommonDrive {
   id: string;
   createdAt: Date;
   name: string;
+  permissions: "owned" | "shared";
+  environment: "client" | "server";
+  supportsDeletion: boolean;
+  supportsGetObject: boolean;
+  supportsListObjects: boolean;
 }
 
 interface FirebasePublicKeys {
@@ -69,17 +76,35 @@ interface FirebasePublicKeys {
 
 interface FirebaseDriveOwned {
   permissions: "owned";
+  supportsDeletion: true;
+  supportsGetObject: true;
+  supportsListObjects: true;
   keys: FirebasePublicKeys & {
     apiKey: string;
   };
 }
 
 interface FirebaseDriveShared {
+  supportsDeletion: false;
+  supportsGetObject: false;
+  supportsListObjects: false;
   permissions: "shared";
   keys: FirebasePublicKeys;
 }
 
-type FirebaseDrive = { type: "firebase" } & (FirebaseDriveOwned | FirebaseDriveShared);
+interface FirebaseDriveClient {
+  environment: "client";
+}
+
+interface FirebaseDriveServer {
+  environment: "server";
+  getDeleteFileUrl?: () => Promise<string>;
+  getListObjectsUrl?: () => Promise<string>;
+  getObjectUrl?: () => Promise<string>;
+}
+
+type FirebaseDrive = { type: "firebase" } & (FirebaseDriveOwned | FirebaseDriveShared) &
+  (FirebaseDriveClient | FirebaseDriveServer);
 
 interface S3PublicKeys {
   region: string;
@@ -101,6 +126,28 @@ interface S3DriveShared {
   keys: S3PublicKeys;
 }
 
-type S3Drive = { type: "s3" | "backblaze" | "cloudflare" } & (S3DriveOwned | S3DriveShared);
+// TODO: Condense this or find need for it
+interface S3DriveClient {
+  environment: "client";
+}
+
+interface S3DriveServer {
+  environment: "server";
+  getDeleteFileUrl: (fullPath: string) => Promise<string>;
+  getListObjectsUrl: (
+    fullPath: string,
+    continuationToken?: string,
+    delimiter?: string,
+  ) => Promise<string>;
+  getObjectUrl: (fullPath: string) => Promise<string>;
+}
+
+type S3Drive = {
+  type: "s3" | "backblaze" | "cloudflare";
+  supportsDeletion: true;
+  supportsGetObject: true;
+  supportsListObjects: true;
+} & (S3DriveOwned | S3DriveShared) &
+  (S3DriveClient | S3DriveServer);
 
 export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);

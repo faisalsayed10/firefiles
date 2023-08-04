@@ -2,6 +2,7 @@ import Dashboard from "@components/Dashboard";
 import { FirebaseProvider } from "@hooks/useFirebase";
 import { KeysProvider } from "@hooks/useKeys";
 import { S3Provider } from "@hooks/useS3";
+import { S3SharedProvider } from "@hooks/sharedBuckets/useS3Shared";
 import useUser from "@hooks/useUser";
 import { Drive, Role } from "@prisma/client";
 import prisma from "@util/prisma";
@@ -11,9 +12,11 @@ import { withIronSessionSsr } from "iron-session/next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { createContext, useEffect, useState } from "react";
+import { StorageDrive } from "@util/types";
+import { createClientDrive } from "@util/helpers/storage-drive";
 
 type Props = {
-  data: Drive;
+  data: StorageDrive;
   role: Role;
 };
 
@@ -41,9 +44,15 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
               <Dashboard />
             </FirebaseProvider>
           ) : data.type === "s3" || data.type === "backblaze" || data.type === "cloudflare" ? (
-            <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
-              <Dashboard />
-            </S3Provider>
+            data.permissions === "owned" ? (
+              <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
+                <Dashboard />
+              </S3Provider>
+            ) : (
+              <S3SharedProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+                <Dashboard />
+              </S3SharedProvider>
+            )
           ) : null}
         </RoleContext.Provider>
       </KeysProvider>
@@ -58,17 +67,17 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     if (!user?.email) throw new Error("User not logged in");
 
     const drive = await prisma.drive.findFirst({ where: { id } });
-    if (!drive?.keys) throw new Error("Drive not found");
-
-    drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
-    drive.createdAt = drive.createdAt.toString() as any;
+    if (!drive?.keys) throw new Error(`driveId ${id} not found`);
 
     const bucketOnUser = await prisma.bucketsOnUsers.findFirst({
       where: { userId: user.id, bucketId: drive.id },
     });
-    if (!bucketOnUser?.role) throw new Error("User's access privilege not found");
+    if (!bucketOnUser?.role) throw new Error(`userId ${user.id} cannot access driveId ${drive.id}`);
 
-    return { props: { data: drive, role: bucketOnUser.role } };
+    const accessDrive = createClientDrive(drive, bucketOnUser.role);
+    accessDrive.createdAt = accessDrive.createdAt.toString() as any;
+
+    return { props: { data: accessDrive, role: bucketOnUser.role } };
   } catch (err) {
     return { redirect: { permanent: false, destination: "/" }, props: {} };
   }

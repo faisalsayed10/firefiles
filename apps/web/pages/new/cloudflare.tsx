@@ -81,27 +81,18 @@ const NewS3 = () => {
 
       const Bucket = existingBucket !== "Not Selected" ? existingBucket : newBucket.trim();
 
-      const createDrive = axios
-        .post<{ driveId: string }>("/api/drive", {
-          data: {
-            accessKey: accessKeyId,
-            secretKey: secretKey,
-            Bucket,
-            bucketUrl: `https://${accountId}.r2.cloudflarestorage.com/${Bucket}`,
-            endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-            region: "auto",
-          },
-          name: Bucket,
-          type: "cloudflare",
-        })
-        .then(({ data: driveId }) =>
-          axios.post("/api/bucketsOnUsers", {
-            id: driveId,
-            userId: user.id,
-            isPending: false,
-            role: Role.CREATOR,
-          }),
-        );
+      const createDrive = axios.post<{ driveId: string }>("/api/drive", {
+        data: {
+          accessKey: accessKeyId,
+          secretKey: secretKey,
+          Bucket,
+          bucketUrl: `https://${accountId}.r2.cloudflarestorage.com/${Bucket}`,
+          endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+          region: "auto",
+        },
+        name: Bucket,
+        type: "cloudflare",
+      });
 
       toast.promise(createDrive, {
         loading: "Creating drive...",

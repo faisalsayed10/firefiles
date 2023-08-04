@@ -1,5 +1,3 @@
-import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Role } from "@prisma/client";
 import { createServerDrive } from "@util/helpers/storage-drive";
 import prisma from "@util/prisma";
@@ -34,41 +32,25 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     if (privilegedDrive.environment !== "server")
       return res.status(500).json({ error: "Server failed to create privilegedDrive" });
 
-    // DELETE
-    if (req.method === "DELETE") {
-      if (!privilegedDrive.supportsDeletion) {
-        return res.status(400).json({ error: `driveId ${drive.id} does not support deletion` });
-      }
-      if (role === Role.VIEWER)
-        return res.status(403).json({
-          error: `userId ${user.id} does not have delete permissions in driveId ${drive.id}`,
-        });
-
-      const parms = deleteSchema.safeParse(req.query);
-      if (!parms.success)
-        return res.status(400).json({
-          error: "bad delete file parameters",
-        });
-
-      const { fullPath } = parms.data;
-      const deleteFileUrl = await privilegedDrive.getDeleteFileUrl(fullPath);
-      return res.status(200).json({ deleteFileUrl });
-    }
-    // GET: A single file object
+    // GET: A list of objects
     if (req.method === "GET") {
-      if (!privilegedDrive.supportsGetObject) {
-        return res.status(400).json({ error: `driveId ${drive.id} does not support deletion` });
-      }
+      if (!privilegedDrive.supportsListObjects)
+        return res
+          .status(400)
+          .json({ error: `driveId ${drive.id} does not support getObjectsList` });
 
-      const parms = getObjectSchema.safeParse(req.query);
-      if (!parms.success)
-        return res.status(400).json({
-          error: "bad getObject parameters",
-        });
+      const parms = getObjectsListSchema.safeParse(req.query);
+      if (!parms.success) return res.status(400).json({ error: `bad getObjectsList parameters` });
 
-      const { fullPath } = parms.data;
-      const getObjectUrl = await privilegedDrive.getObjectUrl(fullPath);
-      return res.status(200).json({ getObjectUrl });
+      const { fullPath, continuationToken, delimiter } = parms.data;
+
+      const getObjectsListUrl = await privilegedDrive.getListObjectsUrl(
+        fullPath,
+        continuationToken,
+        delimiter,
+      );
+
+      return res.status(200).json({ getObjectsListUrl });
     }
   } catch (err) {
     console.error(err.message);
@@ -77,12 +59,8 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
   return res.status(400).json({ error: "invalid method provided" });
 }, sessionOptions);
 
-const deleteSchema = z.object({
-  driveId: z.string().nonempty(),
-  fullPath: z.string().nonempty(),
-});
-
-const getObjectSchema = z.object({
-  driveId: z.string().nonempty(),
-  fullPath: z.string().nonempty(),
+const getObjectsListSchema = z.object({
+  fullPath: z.string(),
+  continuationToken: z.string().optional(),
+  delimiter: z.string().optional(),
 });
