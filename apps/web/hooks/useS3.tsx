@@ -2,13 +2,15 @@ import {
 	DeleteObjectCommand,
 	DeleteObjectsCommand,
 	GetObjectCommand,
+	PutObjectTaggingCommand,
+	GetObjectTaggingCommand,
 	ListObjectsV2Command,
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive } from "@prisma/client";
 import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
@@ -56,6 +58,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const isMounted = useRef(false);
+	// enable tags if s3. add new providers with tag support here
+	const enableTags = (Provider[data.type] as Provider) === Provider.s3;
 
 	// Fallback for old buckets not already having the bucketUrl.
 	useEffect(() => {
@@ -252,6 +256,83 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
+	// get array of tags
+	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
+		try {
+			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+		}
+	}
+
+	// add tag to existing object
+	const addTags = async (file: DriveFile, key:string, value:string): Promise<boolean> => {
+		if (!key.trim()){
+			toast.error('Error: Tag key is blank.')
+			return false;
+		}
+		key = key.trim()
+		const currentTagsResponse = await s3Client.send(new GetObjectTaggingCommand({
+			Bucket: data.keys.Bucket,
+			Key: file.fullPath
+		}));
+		const currentTags = currentTagsResponse.TagSet;
+		currentTags.push({Key: key, Value: value});
+		const params = {
+			Bucket: data.keys.Bucket,
+			Key: file.fullPath,
+			Tagging: {TagSet: currentTags}
+		};
+
+		try {
+			await s3Client.send(new PutObjectTaggingCommand(params));
+			return true;
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+			return false;
+		}
+	};
+
+	// edit existing tag
+	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+		// remove previous tag in order to edit
+		if (!await removeTags(file, prevTag.key)){
+			return false;
+		} else {
+			// add the new tag
+			if (await addTags(file, newTag.key, newTag.value)){
+				return true;
+			} else {
+				// if new tag values are invalid, add back the previous tag
+				await addTags(file, prevTag.key, prevTag.value)
+				toast.error(`Error: Tag not edited.`);
+				return false;
+			}
+		}
+	};
+
+	// remove tag from an object
+	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
+		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+		let existingTags = getTagging.TagSet
+		const updatedTags = existingTags.filter(tag => tag.Key !== key);
+
+		const putTagging = {
+			Bucket: data.keys.Bucket, 
+			Key: file.fullPath,
+			Tagging: {TagSet: updatedTags}
+		}
+
+		try {
+			await s3Client.send(new PutObjectTaggingCommand(putTagging));
+			return true;
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+			return false;
+		}
+	};
+
 	// set currentFolder
 	useEffect(() => {
 		if (!user?.email) return;
@@ -401,6 +482,11 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+				enableTags,
+				listTags,
+				addTags,
+				editTags,
+				removeTags
 			}}
 		>
 			{children}
