@@ -53,3 +53,8 @@ export type DriveFolder = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type Tag = {
+	key: string;
+	value: string;
+}
