@@ -26,28 +26,15 @@ export const deleteDrive = async (type: Provider, id: string) => {
       default:
         break;
     }
+
+    // add confirmation if successful
   }
 };
 
-export const detachDrive = async (type: Provider, id: string) => {
-  if (window.confirm("Are you sure you want to delete this drive?")) {
+export const detachDrive = async (id: string) => {
+  if (window.confirm("Are you sure you want to detach this drive?")) {
     await axios.delete(`/api/bucketsOnUsers?id=${id}`);
-  }
-  switch (type) {
-    case Provider.firebase:
-      const has_logged_in = window.localStorage.getItem(`has_logged_in_${id}`) === "true" || false;
-
-      const has_initialized = getApps().filter((app) => app.name === id)[0];
-
-      if (has_logged_in && has_initialized) {
-        await signOut(getAuth(has_initialized));
-        deleteApp(has_initialized);
-        window.localStorage.removeItem(`has_logged_in_${id}`);
-        window.localStorage.removeItem(`local_folders_${id}`);
-        break;
-      }
-    default:
-      break;
+    // add confirmation if successful
   }
 };
 

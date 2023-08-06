@@ -7,7 +7,7 @@ import { Provider } from "@util/types";
 import { useRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
-import { X } from "tabler-icons-react";
+import { X, Share } from "tabler-icons-react";
 import { Role } from "@prisma/client";
 import drive from "pages/api/drive";
 
@@ -109,7 +109,7 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                       if (driveRole === Role.CREATOR) {
                         await deleteDrive(Provider[drive.type], drive.id);
                       } else {
-                        await detachDrive(Provider[drive.type], drive.id);
+                        await detachDrive(drive.id);
                       }
                       mutate(data.filter((b) => b.id !== drive.id));
                     }}
@@ -117,6 +117,18 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                     <X />
                     <Text ml="2">Delete Drive</Text>
                   </Flex>
+                  {driveRole === Role.CREATOR && (
+                    <Flex
+                      {...optionProps}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        // await shareDrive(drive.id);
+                      }}
+                    >
+                      <Share />
+                      <Text ml="2">Share Drive</Text>
+                    </Flex>
+                  )}
                 </Flex>
               </OptionsPopover>
             </Flex>
