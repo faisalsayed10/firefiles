@@ -1,47 +1,4 @@
-import rateLimit from "@util/rate-limit";
-import { sessionOptions } from "@util/session";
-import { withIronSessionApiRoute } from "iron-session/next";
-import jwt from "jsonwebtoken";
-import { NextApiRequest, NextApiResponse } from "next";
-import validator from "validator";
-import { EmailSender } from "@util/emailSender/emailSender";
-import { ResendEmailSender } from "@util/emailSender/resendEmailSender";
-import { SendgridEmailSender } from "@util/emailSender/sendgridEmailSender";
-const url = process.env.DEPLOY_URL || process.env.VERCEL_URL;
-
-const limiter = rateLimit({
-  interval: 5 * 60 * 1000, // 5 minutes
-  uniqueTokenPerInterval: 500, // Max 500 users per second
-});
-
-export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
-  try {
-    await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per 5 minutes
-  } catch (error) {
-    return res.status(429).json({ error: "Too many requests. Please try again after 5 minutes." });
-  }
-
-  const { email } = req.body;
-  if (!validator.isEmail(email))
-    return res.status(400).json({ error: "The email you provided is invalid." });
-
-  const token = await jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-  const emailSender: EmailSender = process.env.RESEND_API_KEY
-    ? new ResendEmailSender()
-    : new SendgridEmailSender();
-
-  try {
-    await emailSender.sendLoginEmail({ email, url, token });
-    return res.json({
-      message: `An email has been sent to you. Click the link to log in or sign up.`,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}, sessionOptions);
-
-export const text = (url: string, email: string) => `
+export const loginText = (url: string, email: string) => `
 Welcome to Firefiles!
 
 Click on the link below to log in to Firefiles.
@@ -54,7 +11,7 @@ ${email}.
 
 - Faisal Sayed`;
 
-export const html = (url: string, email: string) => `<!DOCTYPE html>
+export const loginHtml = (url: string, email: string) => `<!DOCTYPE html>
 <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
 <title></title>
