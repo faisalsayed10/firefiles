@@ -43,7 +43,11 @@ export default function Navbar() {
           </Button>
         ) : null}
         <Box>
+<<<<<<< HEAD
           {router.route !== "/" ? <Invite /> : null}
+=======
+          qwq
+>>>>>>> d5ecca0 (UI changes before Invite.tsx)
           <IconButton
             aria-label="toggle color theme"
             size="md"
