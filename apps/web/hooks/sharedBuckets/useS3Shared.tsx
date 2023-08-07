@@ -2,7 +2,7 @@ import {
   ListObjectsV2CommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { calculateVariablePartSize, parseXML2JSON } from "@util/helpers/s3-helpers";
+import { calculateVariablePartSize, parseXML2JSON, buildJSON2XML } from "@util/helpers/s3-helpers";
 import { DriveFile, DriveFolder, Provider, StorageDrive, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
@@ -242,6 +242,7 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
 
     (async () => {
       try {
+        console.log(files);
         if (!files) {
           const listObjectsResponse = await fetchS3ObjectsList(
             data.id,
@@ -273,6 +274,7 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
             );
 
             setFiles(driveFiles);
+            console.log(files);
           }
 
           const localFolders = localStorage.getItem(`local_folders_${data.id}`);
