@@ -32,6 +32,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
   return (
     <>
       <DeleteAlert
+        role={role}
         cancelRef={cancelRef}
         onClose={onClose}
         isOpen={isOpen}

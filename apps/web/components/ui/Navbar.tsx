@@ -42,6 +42,7 @@ export default function Navbar() {
           </Button>
         ) : null}
         <Box>
+          qwq
           <IconButton
             aria-label="toggle color theme"
             size="md"
