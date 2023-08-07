@@ -11,6 +11,7 @@ import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
 import { sortDriveFiles } from "@util/file-sorting";
+import toast from "react-hot-toast";
 
 const baseStyle = {
 	outline: "none",
@@ -96,19 +97,12 @@ const Dashboard = () => {
 				const sortedFilteredFiles = sortDriveFiles(filteredFiles, fileSort);
 				setSortedFiles(sortedFilteredFiles);
 			}
-			fetchFilteredFiles().catch(console.error);
+			fetchFilteredFiles().catch(() => {toast.error(`Unable to fetch filtered files.`)});
 		} else {
 			const sortedFiles = sortDriveFiles(files, fileSort);
 			setSortedFiles(sortedFiles);
 		}
 	}, [fileSort, files, fileTagFilter])
-
-
-	// file filter testing
-	useEffect(() => {
-		setFileTagFilter({key: "this"})
-		console.log(`filter set`)
-	}, [gridView])
 
 	return (
 		<>
@@ -165,6 +159,8 @@ const Dashboard = () => {
 									setIsFolderDeleting={setIsFolderDeleting}
 									setFileSort={setFileSort}
 									fileSort={fileSort}
+									fileTagFilter={fileTagFilter}
+									setFileTagFilter={setFileTagFilter}
 								/>
 							) : (
 								<GridView
@@ -176,6 +172,8 @@ const Dashboard = () => {
 									setIsFolderDeleting={setIsFolderDeleting}
 									setFileSort={setFileSort}
 									fileSort={fileSort}
+									fileTagFilter={fileTagFilter}
+									setFileTagFilter={setFileTagFilter}
 								/>
 							)}
 						</Box>

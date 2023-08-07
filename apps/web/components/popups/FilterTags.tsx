@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     Flex,
-    IconButton,
     Input,
     Modal,
     ModalCloseButton,
@@ -18,41 +17,63 @@ import {
 } from "@chakra-ui/react";
 import { ChevronUp, ChevronDown } from "tabler-icons-react";
 import toast from "react-hot-toast";
+import { TagFilter } from "@util/types";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    fileTagFilter: TagFilter;
+    setFileTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
   }
 
-const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
+const FilterTags: React.FC<Props> = ({ isOpen, onClose, fileTagFilter, setFileTagFilter}) => {
 
-  const [selectedType, setSelectedType] = useState("Select Type");
+  const [selectedType, setSelectedType] = useState("Key");
   const [keyInput, setKeyInput] = useState("");
   const [valueInput, setValueInput] = useState("");
 
   const handleSave = () => {
-    setKeyInput("")
-    setValueInput("");
-    setSelectedType("Select Type");
-    toast.success(`Filter System successfully applied.`);
+    if (selectedType === "Value") {
+      setFileTagFilter({ value: valueInput });
+      toast.success(`Filter successfully applied.`);
+    } else {
+      // check if key is empty before applying key filter
+      if (keyInput === ""){
+        toast.error("Filter key is empty.")
+        return;
+      } else {
+        // key inputs are trimmed, in accordance with key inputs when modifying tags
+        if (selectedType === "Key and Value") {
+          setFileTagFilter({ key: keyInput.trim(), value: valueInput });
+          toast.success(`Filter successfully applied.`);
+        } else if (selectedType === "Key") {
+          setFileTagFilter({ key: keyInput.trim() });
+          toast.success(`Filter successfully applied.`);
+        }
+      }
+    }
   }
 
   const handleCancel = () => {
     setKeyInput("")
     setValueInput("");
-    setSelectedType("Select Type");
-    onClose();
+    setFileTagFilter({});
+    toast.success(`Filter successfully cleared.`);
   }
-
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
       <ModalOverlay />
         <ModalContent p="0">
           <Flex align="center" justify="space-between" p="4">
-            <Text fontSize="2xl" fontWeight="600" overflow="hidden">
+            { !fileTagFilter.hasOwnProperty("key") && !fileTagFilter.hasOwnProperty("value")  ? (<Text fontSize="2xl" fontWeight="600" overflow="hidden">
               Filter by
-            </Text>
+            </Text>) : (
+              <Text fontSize="2xl" fontWeight="600" overflow="hidden">
+              Filtering by: <Text/>
+                {fileTagFilter.key ? (<Text fontSize="xl" fontWeight="600" overflow="hidden"> Key: {fileTagFilter.key} </Text>) : (null)}
+                {fileTagFilter.value ? (<Text fontSize="xl" fontWeight="600" overflow="hidden">  Value: {fileTagFilter.value} </Text>) : (null)}
+            </Text>)}
             <ModalCloseButton size="md" />
           </Flex>
 
@@ -108,7 +129,7 @@ const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
             )}
             <ModalFooter>
                 <Button onClick={handleSave} colorScheme='green' mr={3}>Save</Button>
-                <Button onClick={handleCancel}>Cancel</Button>
+                <Button onClick={handleCancel}>Clear Filter</Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

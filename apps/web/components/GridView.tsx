@@ -1,6 +1,6 @@
 import { Box, Flex, Grid, IconButton, Skeleton, Text } from "@chakra-ui/react";
 import Folder from "@components/folders/Folder";
-import { DriveFile, DriveFolder } from "@util/types";
+import { DriveFile, DriveFolder, TagFilter } from "@util/types";
 import React, { useState } from "react";
 import { LayoutList, Filter} from "tabler-icons-react";
 import { FileSortConfig } from "@util/types";
@@ -18,6 +18,8 @@ type Props = {
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
 	fileSort: FileSortConfig;
+	fileTagFilter: TagFilter;
+	setFileTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
 };
 
 const GridView: React.FC<Props> = (props) => {
@@ -89,7 +91,7 @@ const GridView: React.FC<Props> = (props) => {
 						props.files?.map((file) => <File key={file.name} file={file} gridView={true} />)}
 				</Grid>
 			)}
-			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} />
+			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} fileTagFilter={props.fileTagFilter} setFileTagFilter={props.setFileTagFilter} />
 		</Box>
 	);
 };

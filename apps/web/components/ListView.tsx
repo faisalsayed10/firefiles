@@ -12,7 +12,7 @@ import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
 import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
-import { DriveFile, DriveFolder, FileSortConfig } from "@util/types";
+import { DriveFile, DriveFolder, FileSortConfig, TagFilter } from "@util/types";
 import React, { useState } from "react";
 import { LayoutGrid, Filter } from "tabler-icons-react";
 import FileSortMenu from "@components/ui/FileSortMenu";
@@ -28,6 +28,8 @@ type Props = {
 	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
 	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
 	fileSort: FileSortConfig;
+	fileTagFilter: TagFilter;
+	setFileTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
 };
 
 const ListView: React.FC<Props> = (props) => {
@@ -98,7 +100,7 @@ const ListView: React.FC<Props> = (props) => {
 			) : (
 				<FilesTable files={props.files} />
 			)}
-			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} />
+			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} fileTagFilter={props.fileTagFilter} setFileTagFilter={props.setFileTagFilter} />
 		</>
 	);
 };
