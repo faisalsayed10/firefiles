@@ -25,13 +25,21 @@ interface Props {
   }
 
 const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
-  const [selection, setSelection] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState("Select Type");
-  // const [inputValue, setInputValue] = useState("");
 
+  const [selectedType, setSelectedType] = useState("Select Type");
+  const [keyInput, setKeyInput] = useState("");
+  const [valueInput, setValueInput] = useState("");
+
+  const handleSave = () => {
+    setKeyInput("")
+    setValueInput("");
+    setSelectedType("Select Type");
+    toast.success(`Filter System successfully applied.`);
+  }
 
   const handleCancel = () => {
-    setInputValue("");
+    setKeyInput("")
+    setValueInput("");
     setSelectedType("Select Type");
     onClose();
   }
@@ -40,23 +48,22 @@ const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
       <ModalOverlay />
-        <ModalContent >
-          <Flex align="center" justify="space-between" p="5">
+        <ModalContent p="0">
+          <Flex align="center" justify="space-between" p="4">
             <Text fontSize="2xl" fontWeight="600" overflow="hidden">
               Filter by
             </Text>
             <ModalCloseButton size="md" />
           </Flex>
 
-          <Menu p="5">
+          <Menu placement="bottom-end">
             {(props) => (
               <React.Fragment>
-                <MenuButton as={Button} rightIcon={props.isOpen ? <ChevronUp /> : <ChevronDown />}>
+                <MenuButton as={Button} mx={4} rightIcon={props.isOpen ? <ChevronUp /> : <ChevronDown />}>
                 {selectedType}
                 </MenuButton>
-
                 <Box>
-                  <MenuList>
+                  <MenuList marginX="3">
                     <MenuItem onClick={() => setSelectedType("Key")}>Key</MenuItem>
                     <MenuItem onClick={() => setSelectedType("Value")}>Value</MenuItem>
                     <MenuItem onClick={() => setSelectedType("Key and Value")}>Key and Value</MenuItem>
@@ -65,28 +72,46 @@ const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
               </React.Fragment>
             )}
           </Menu>
-
-            {selectedType === "Key" && (
-              <Input placeholder="Enter key" mt={4} mx={4} />
-            )}
+          {selectedType === "Key" && (
+          <Input 
+            placeholder="Enter key"
+            value = {keyInput}
+            onChange = {(e) => setKeyInput(e.target.value)}
+            mt={4} mx={4}
+            width="calc(100% - 2 * 1rem)"
+            />
+          )}
             {selectedType === "Value" && (
-              <Input placeholder="Enter value" mt={4} ml={4}/>
+              <Input 
+              placeholder="Enter value"
+              value = {valueInput}
+              onChange = {(e) => setValueInput(e.target.value)}
+              mt={4} mx={4}
+              width="calc(100% - 2 * 1rem)"
+              />
             )}
             {selectedType === "Key and Value" && (
               <Flex mt={4} ml={4}>
-                <Input placeholder="Enter key"  mr={4}/>
-                <Input placeholder="Enter value" mr={4} />
+                <Input 
+                placeholder="Enter key"
+                value = {keyInput}
+                onChange = {(e) => setKeyInput(e.target.value)}
+                mr={4}
+                />
+                <Input 
+                placeholder="Enter value"
+                value = {valueInput}
+                onChange = {(e) => setValueInput(e.target.value)}
+                mr={4} 
+                />
               </Flex>
             )}
 
 
             <ModalFooter>
-                <Button colorScheme='green' mr={3}>
-                    Save
-                </Button>
-                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={handleSave} colorScheme='green' mr={3}>Save</Button>
+                <Button onClick={handleCancel}>Cancel</Button>
             </ModalFooter>
-         
           </ModalContent>
         </Modal>
       );
