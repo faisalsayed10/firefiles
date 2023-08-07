@@ -5,8 +5,25 @@ import axios from "axios";
 import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
 import { SWRConfig } from "swr";
+import Dexie, { Table } from 'dexie';
 
 const ProgressBar = dynamic(() => import("@components/ProgressBar"), { ssr: false });
+
+export interface fire_file {
+	name: string,
+	size: number,
+	url: string,
+	fullpath: string
+}
+
+const db = new Dexie('MyDatabase');
+db.version(1).stores({
+	drive_name_1: 'name, size, url, fullpath', // ++id is an auto-incrementing primary key
+});
+
+db.open().catch((err) => {
+	console.error('Error opening database: ', err);
+});
 
 function MyApp({ Component, pageProps }) {
 	return (

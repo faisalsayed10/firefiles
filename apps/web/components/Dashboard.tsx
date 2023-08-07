@@ -1,4 +1,4 @@
-import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
+import { Box, Center, Divider, Text, useColorMode, IconButton, useColorModeValue} from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
@@ -13,6 +13,7 @@ import GridView from "./GridView";
 import ListView from "./ListView";
 import { DriveFile } from "@util/types";
 import { sortDriveFiles } from "@util/file-sorting";
+import { Refresh } from "tabler-icons-react";
 
 const baseStyle = {
 	outline: "none",
@@ -138,6 +139,24 @@ const Dashboard = () => {
 					filesToUpload={draggedFilesToUpload}
 					setFilesToUpload={setDraggedFilesToUpload}
 				/>
+				<IconButton
+				pos="fixed"
+				p="4"
+				borderRadius="50%"
+				w="60px"
+				h="60px"
+				bottom="2rem"
+				right="7rem"
+				variant="outline"
+				bgColor={useColorModeValue("white", "#1a202c")}
+				_focus={{ outline: "none" }}
+				_hover={{ opacity: 1 }}
+				boxShadow="4.2px 4px 6.5px -1.7px rgba(0, 0, 0, 0.4)"
+				colorScheme="yellow"
+				aria-label="sync file"
+			>
+				<Refresh size="42px" />
+			</IconButton>
 			</LoadingOverlay>
 			{uploadingFiles.length > 0 && (
 				<Center>
