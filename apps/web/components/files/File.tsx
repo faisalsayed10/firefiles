@@ -1,26 +1,27 @@
 import {
-	Modal,
-	ModalCloseButton,
-	ModalContent,
-	ModalOverlay,
-	Text,
-	useDisclosure,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalOverlay,
+  Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
 import { DriveFile } from "@util/types";
 import copy from "copy-to-clipboard";
 import { nanoid } from "nanoid";
-import React, { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import DeleteAlert from "../popups/DeleteAlert";
 import FileGrid from "./FileGrid";
 import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
 import TagsPopup from "../popups/TagsPopup";
+import { RoleContext } from "pages/drives/[id]";
 
 interface Props {
-	file: DriveFile;
-	gridView?: boolean;
+  file: DriveFile;
+  gridView?: boolean;
 }
 
 const File: React.FC<Props> = ({ file, gridView = false }) => {
@@ -31,17 +32,17 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 	const cancelRef = useRef();
 	const { isOpen: isTagsOpen, onOpen: onTagsOpen, onClose: onTagsClose } = useDisclosure();
 
-	const copyFile = () => {
-		copy(file.url);
-		toast.success("File URL copied to clipboard!");
-	};
+  const copyFile = () => {
+    copy(file.url);
+    toast.success("File URL copied to clipboard!");
+  };
+  const role = useContext(RoleContext);
+  const deleteFile = async () => {
+    try {
+      const success = await removeFile(file);
+      if (!success) return;
 
-	const deleteFile = async () => {
-		try {
-			const success = await removeFile(file);
-			if (!success) return;
-
-			setIsOpen(false);
+      setIsOpen(false);
 			toast.success("File deleted successfully!");
 		} catch (err) {
 			setIsOpen(false);
@@ -83,6 +84,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 			)}
 
 			<DeleteAlert
+        role={role}
 				isOpen={isOpen}
 				onClose={() => setIsOpen(false)}
 				cancelRef={cancelRef}

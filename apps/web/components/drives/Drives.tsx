@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Text, Skeleton } from "@chakra-ui/react";
+import { Box, Flex, Image, Text, Skeleton, Tooltip } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import { Drive } from "@prisma/client";
 import { PROVIDERS } from "@util/globals";
@@ -9,6 +9,29 @@ import React from "react";
 import useSWR from "swr";
 import { X } from "tabler-icons-react";
 import { Role } from "@prisma/client";
+import drive from "pages/api/drive";
+
+const tooltips: Record<Role, string> = {
+  CREATOR: "You are the creator of this drive",
+  ADMIN: "You are an administrator of this drive",
+  VIEWER: "You are a viewer of this drive",
+  EDITOR: "You are an editor of this drive",
+};
+
+const abbreviation: Record<Role, string> = {
+  CREATOR: "C",
+  ADMIN: "A",
+  VIEWER: "E",
+  EDITOR: "V",
+};
+
+const ShowRole: React.FC<{ driveRole: Role }> = ({ driveRole }) => (
+  <Tooltip label={tooltips[driveRole]}>
+    <Box position="absolute" top="0" right="2" bg="ghost" color="ghost" p="2" fontWeight="bold">
+      {abbreviation[driveRole]}
+    </Box>
+  </Tooltip>
+);
 
 interface Props {
   optionProps: {
@@ -20,17 +43,17 @@ interface Props {
   };
   driveRole: Role;
 }
-
 const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
   const router = useRouter();
   const { data, isValidating, mutate } = useSWR<Drive[]>(
     `/api/drive?role=${driveRole}&isPending=false`,
   );
-
+  const makeOnClickHandler = (id: string) => () => router.push(`/drives/${id}`);
   return (
     <>
       {!data && isValidating ? (
         <>
+          {/*placeholder for content that is being loaded asynchronously.*/}
           <Skeleton h="140px" w="full" borderRadius="lg" />
           <Skeleton h="140px" w="full" borderRadius="lg" />
           <Skeleton h="140px" w="full" borderRadius="lg" />
@@ -51,12 +74,19 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
             transition="ease-in-out 0.1s"
             className="hoverAnim"
           >
-            <Box flex={1} onClick={() => router.push(`/drives/${drive.id}`)} w="full" mt="2">
+            <Box
+              flex={1}
+              onClick={makeOnClickHandler(drive.id)}
+              w="full"
+              mt="2"
+              position="relative"
+            >
               <Image
                 src={PROVIDERS.filter((p) => p.id === drive.type)[0].logo}
                 maxW="90px"
                 m="auto"
               />
+              <ShowRole driveRole={driveRole} />
             </Box>
             <Flex p="2" w="full" justify="space-between" alignItems="center">
               <Text
@@ -76,7 +106,7 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                     {...optionProps}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await deleteDrive(Provider[drive.type], drive.id);
+                      await deleteDrive(Provider[drive.type], drive.id, driveRole);
                       mutate(data.filter((b) => b.id !== drive.id));
                     }}
                   >
@@ -92,5 +122,4 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
     </>
   );
 };
-
 export default Drives;

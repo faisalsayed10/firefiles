@@ -1,11 +1,16 @@
-import { IconButton, Td, Tr } from "@chakra-ui/react";
+import { IconButton, Td, Tr, Tooltip } from "@chakra-ui/react";
 import { Role } from "@prisma/client";
 import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
 import { RoleContext } from "pages/drives/[id]";
 import prettyBytes from "pretty-bytes";
+<<<<<<< HEAD
 import { Copy, FileDownload, FileMinus, Tags, TagsOff } from "tabler-icons-react";
 import React, { useContext } from "react";
+=======
+import React, { useContext, useState } from "react";
+import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
+>>>>>>> 30f5983 (UI changes before Invite.tsx)
 import FileIcon from "./FileIcon";
 import TagsPopup from "../popups/TagsPopup";
 import useBucket from "@hooks/useBucket";
@@ -34,6 +39,7 @@ const FileRow: React.FC<Props> = (props) => {
   };
 
   return (
+<<<<<<< HEAD
     <>
       <Tr>
         <Td maxW="36px">
@@ -74,12 +80,66 @@ const FileRow: React.FC<Props> = (props) => {
         <Td textAlign="center">
           <IconButton
             disabled={role === Role.VIEWER}
+=======
+    <Tr>
+      <Td maxW="36px">
+        <FileIcon extension={props.file.name.split(".").pop()} id={props.id} />
+      </Td>
+      <Td
+        fontWeight="medium"
+        isTruncated
+        maxW={["250px", "300px", "300px"]}
+        onClick={props.onPreviewOpen}
+        textDecor="underline"
+        cursor="pointer"
+        _hover={{ textDecor: "none" }}
+      >
+        {props.file.name}
+      </Td>
+      <Td minW="110px">{props.file.size && prettyBytes(parseInt(props.file.size) || 0)}</Td>
+      <Td textAlign="center">
+        <IconButton
+          aria-label="Copy file URL"
+          icon={<Copy />}
+          onClick={props.copyFile}
+          isLoading={!props.file.url}
+          variant="outline"
+          colorScheme="blue"
+        />
+      </Td>
+      <Td textAlign="center">
+        <IconButton
+          aria-label="Download file"
+          icon={<FileDownload />}
+          isLoading={!props.file.url}
+          variant="outline"
+          colorScheme="blue"
+          onClick={() => download(props.file)}
+        />
+      </Td>
+      <Td textAlign="center">
+        {role === Role.VIEWER ? (
+          <Tooltip label="You don't have delete permissions as a Viewer">
+            <span>
+              <IconButton
+                disabled
+                aria-label="Delete file"
+                icon={<FileMinus />}
+                variant="outline"
+                colorScheme="red"
+              />
+            </span>
+          </Tooltip>
+        ) : (
+          <IconButton
+>>>>>>> 30f5983 (UI changes before Invite.tsx)
             aria-label="Delete file"
             icon={<FileMinus />}
             onClick={() => props.setIsOpen(true)}
             variant="outline"
             colorScheme="red"
           />
+<<<<<<< HEAD
         </Td>
         {/*disable tags depending on provider*/}
         {enableTags ? (
@@ -108,6 +168,11 @@ const FileRow: React.FC<Props> = (props) => {
       </Tr>
       <TagsPopup isOpen={isTagsOpen} onClose={onTagsClose} file={props.file} />
     </>
+=======
+        )}
+      </Td>
+    </Tr>
+>>>>>>> 30f5983 (UI changes before Invite.tsx)
   );
 };
 
