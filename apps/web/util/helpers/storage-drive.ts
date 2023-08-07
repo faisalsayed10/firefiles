@@ -1,5 +1,7 @@
 import {
   DeleteObjectCommand,
+  DeleteObjectsCommand,
+  DeleteObjectsCommandInput,
   GetObjectCommand,
   ListObjectsV2Command,
   S3Client,
@@ -8,6 +10,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive, Role } from "@prisma/client";
 import { StorageDrive } from "@util/types";
 import { AES, enc } from "crypto-js";
+import { buildJSON2XML } from "./s3-helpers";
 
 export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive => {
   const decryptedKeys = JSON.parse(
@@ -67,10 +70,11 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         supportsDeletion: true,
         supportsGetObject: true,
         supportsListObjects: true,
-        getDeleteFileUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
+        getDeleteObjectUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
           getS3ObjectsListUrl(pDrive, fullPath, continuationToken, delimiter),
+        getDeleteObjectsUrl: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -92,10 +96,11 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         supportsDeletion: true,
         supportsGetObject: true,
         supportsListObjects: true,
-        getDeleteFileUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
+        getDeleteObjectUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
           getS3ObjectsListUrl(pDrive, fullPath, continuationToken, delimiter),
+        getDeleteObjectsUrl: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -210,8 +215,8 @@ export const signedUrlExpireSeconds = 3600 * 24;
 type listObjectsV2Config = {
   Bucket: string;
   Prefix: string;
-  ContinuationToken?: string;
   Delimiter?: string;
+  ContinuationToken?: string;
 };
 
 const getDeleteS3FileUrl = async (privilegedDrive: StorageDrive, fileFullPath: string) => {
@@ -270,8 +275,8 @@ const getS3ObjectUrl = async (privilegedDrive: StorageDrive, fullPath: string) =
 const getS3ObjectsListUrl = async (
   privilegedDrive: StorageDrive,
   fullPath: string,
-  continuationToken?: string,
   delimiter?: string,
+  continuationToken?: string,
 ) => {
   if (!(privilegedDrive.type !== "firebase") || privilegedDrive.permissions !== "owned") {
     throw new Error(`Drive type '${privilegedDrive.type}' not valid for S3 provider`);
@@ -299,4 +304,37 @@ const getS3ObjectsListUrl = async (
   });
 
   return signedGetObjectUrl;
+};
+
+const getS3ObjectsDeleteUrl = async (privilegedDrive: StorageDrive, deleteParams: string) => {
+  if (!(privilegedDrive.type !== "firebase") || privilegedDrive.permissions !== "owned") {
+    throw new Error(`Drive type '${privilegedDrive.type}' not valid for S3 provider`);
+  }
+  const adminClient = new S3Client({
+    region: privilegedDrive.keys.region,
+    maxAttempts: 1,
+    credentials: {
+      accessKeyId: privilegedDrive.keys.accessKey,
+      secretAccessKey: privilegedDrive.keys.secretKey,
+    },
+    ...(privilegedDrive.keys?.endpoint ? { endpoint: privilegedDrive.keys.endpoint } : {}),
+  });
+
+  const deleteList: DeleteObjectsCommandInput = JSON.parse(deleteParams);
+  // const builtXML = buildJSON2XML(deleteParamsJS);
+  // if (!builtXML.success) {
+  //   console.log(builtXML.error);
+  //   return;
+  // }
+  // const deleteList = builtXML.xml;
+  console.log(deleteList.Delete.Objects)
+  const signedDeleteObjectsUrl = await getSignedUrl(
+    adminClient,
+    new DeleteObjectsCommand(deleteList),
+    {
+      expiresIn: signedUrlExpireSeconds,
+    },
+  );
+
+  return signedDeleteObjectsUrl;
 };

@@ -51,8 +51,8 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         });
 
       const { fullPath } = parms.data;
-      const deleteFileUrl = await privilegedDrive.getDeleteFileUrl(fullPath);
-      return res.status(200).json({ deleteFileUrl });
+      const deleteObjectUrl = await privilegedDrive.getDeleteObjectUrl(fullPath);
+      return res.status(200).json({ deleteObjectUrl });
     }
     // GET: A single file object
     if (req.method === "GET") {
