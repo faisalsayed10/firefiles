@@ -1,10 +1,10 @@
-import { IconButton, Td, Tr } from "@chakra-ui/react";
+import { IconButton, Td, Tr, Tooltip } from "@chakra-ui/react";
 import { Role } from "@prisma/client";
 import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
 import { RoleContext } from "pages/drives/[id]";
 import prettyBytes from "pretty-bytes";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Copy, FileDownload, FileMinus } from "tabler-icons-react";
 import FileIcon from "./FileIcon";
 
@@ -57,14 +57,27 @@ const FileRow: React.FC<Props> = (props) => {
         />
       </Td>
       <Td textAlign="center">
-        <IconButton
-          disabled={role === Role.VIEWER}
-          aria-label="Delete file"
-          icon={<FileMinus />}
-          onClick={() => props.setIsOpen(true)}
-          variant="outline"
-          colorScheme="red"
-        />
+        {role === Role.VIEWER ? (
+          <Tooltip label="You don't have delete permissions as a Viewer">
+            <span>
+              <IconButton
+                disabled
+                aria-label="Delete file"
+                icon={<FileMinus />}
+                variant="outline"
+                colorScheme="red"
+              />
+            </span>
+          </Tooltip>
+        ) : (
+          <IconButton
+            aria-label="Delete file"
+            icon={<FileMinus />}
+            onClick={() => props.setIsOpen(true)}
+            variant="outline"
+            colorScheme="red"
+          />
+        )}
       </Td>
     </Tr>
   );
