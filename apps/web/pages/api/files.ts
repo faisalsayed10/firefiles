@@ -46,11 +46,29 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
       const getObjectsListUrl = await privilegedDrive.getListObjectsUrl(
         fullPath,
-        continuationToken,
         delimiter,
+        continuationToken,
       );
 
       return res.status(200).json({ getObjectsListUrl });
+    }
+
+    if (req.method === "DELETE") {
+      if (!privilegedDrive.supportsDeletion) {
+        return res.status(400).json({ error: `driveId ${drive.id} does not support deletion` });
+      }
+      if (role === Role.VIEWER)
+        return res.status(403).json({
+          error: `userId ${user.id} does not have delete permissions in driveId ${drive.id}`,
+        });
+
+      const parms = deleteObjectsSchema.safeParse(req.query);
+      if (!parms.success) return res.status(400).json({ error: `bad deleteObjects parameters` });
+
+      const { deleteParams } = parms.data;
+      const deleteObjectsUrl = await privilegedDrive.getDeleteObjectsUrl(deleteParams);
+
+      return res.status(200).json({ deleteObjectsUrl });
     }
   } catch (err) {
     console.error(err.message);
@@ -63,4 +81,8 @@ const getObjectsListSchema = z.object({
   fullPath: z.string(),
   continuationToken: z.string().optional(),
   delimiter: z.string().optional(),
+});
+
+const deleteObjectsSchema = z.object({
+  deleteParams: z.string().nonempty(),
 });

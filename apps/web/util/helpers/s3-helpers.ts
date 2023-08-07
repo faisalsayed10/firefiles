@@ -7,7 +7,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { NextApiRequest, NextApiResponse } from "next";
-import { XMLParser } from "fast-xml-parser";
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
 
 export const createNewBucket = async (
   client: S3Client,
@@ -105,6 +105,17 @@ export const parseXML2JSON = (rawXML: string) => {
     return { success: true, json: result };
   } catch (err) {
     console.log(`XML parse error: ${err}`);
+    return { success: false, error: err };
+  }
+};
+
+export const buildJSON2XML = (json: any) => {
+  const builder = new XMLBuilder();
+  try {
+    const result = builder.build(json);
+    return { success: true, xml: result };
+  } catch (err) {
+    console.log(`XML build error: ${err}`);
     return { success: false, error: err };
   }
 };
