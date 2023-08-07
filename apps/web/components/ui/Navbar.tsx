@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
 import Invite from "./Invite";
+import Invite from "./Invite";
 
 export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -43,11 +44,7 @@ export default function Navbar() {
           </Button>
         ) : null}
         <Box>
-<<<<<<< HEAD
           {router.route !== "/" ? <Invite /> : null}
-=======
-          qwq
->>>>>>> d5ecca0 (UI changes before Invite.tsx)
           <IconButton
             aria-label="toggle color theme"
             size="md"
