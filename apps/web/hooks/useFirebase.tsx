@@ -33,6 +33,7 @@ import {
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
+import useIndexedDB from './useIndexedDB';
 
 const FirebaseContext = createContext<ContextValue>(null);
 export default () => useContext(FirebaseContext);
@@ -57,6 +58,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
+	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive } = useIndexedDB(); // import indexeddb hook
 
 	const addFolder = (name: string) => {
 		const path =
@@ -127,9 +129,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			const filePath =
 				currentFolder === ROOT_FOLDER
 					? filesToUpload[i].name
-					: `${decodeURIComponent(currentFolder.fullPath)}/${
-							filesToUpload[i].name
-					  }`;
+					: `${decodeURIComponent(currentFolder.fullPath)}/${filesToUpload[i].name
+					}`;
 
 			const fileRef = ref(getStorage(app), filePath);
 			const uploadTask = uploadBytesResumable(fileRef, filesToUpload[i]);
@@ -198,14 +199,13 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const removeFile = async (file: DriveFile) => {
 		if (!app) return false;
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
-		deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => {});
+		deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => { });
 		return true;
 	};
 
 	const getFileMetadata = async (file: DriveFile, i: number) => {
-		const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${
-			file.bucketName
-		}/o/${encodeURIComponent(file.fullPath)}`;
+		const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
+			}/o/${encodeURIComponent(file.fullPath)}`;
 
 		const { data } = await axios.get(fileUrl, {
 			headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
@@ -231,7 +231,9 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 
 		for (let i = 0; i < files.length; i++) {
 			getFileMetadata(files[i], i);
+			//addFileToDrive(data.name, files[i]);
 		}
+
 	}, [appUser, allFilesFetched.current]);
 
 	useEffect(() => {
@@ -285,6 +287,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		if (!user?.email || !app || !appUser || !currentFolder) return;
 		const storage = getStorage(app);
 		setLoading(true);
+		createNewDrive(data.name);
 		allFilesFetched.current = false;
 
 		(async () => {
