@@ -13,9 +13,10 @@ import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
 import AddFolderButton from "@components/folders/AddFolderButton";
 import Folder from "@components/folders/Folder";
 import { DriveFile, DriveFolder, FileSortConfig } from "@util/types";
-import React from "react";
+import React, { useState } from "react";
 import { LayoutGrid, Filter } from "tabler-icons-react";
 import FileSortMenu from "@components/ui/FileSortMenu";
+import FilterTags from "./popups/FilterTags";
 
 
 type Props = {
@@ -30,6 +31,16 @@ type Props = {
 };
 
 const ListView: React.FC<Props> = (props) => {
+	const [isFilterTagsOpen, setIsFilterTagsOpen] = useState(false);
+
+	const openFilterTags = () => {
+		setIsFilterTagsOpen(true);
+	};
+
+	const closeFilterTags = () => {
+		setIsFilterTagsOpen(false);
+	};
+
 	return (
 		<>
 			{props.loading ? (
@@ -72,7 +83,7 @@ const ListView: React.FC<Props> = (props) => {
 				</Text>
 				<Box>
 					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
-					<IconButton aria-label="filter-tags" mr={1}>
+					<IconButton aria-label="filter-tags" mr={1} onClick={openFilterTags}>
 						<Filter />
 					</IconButton>
 					<IconButton aria-label="change-view" onClick={() => props.setGridView(true)}>
@@ -87,6 +98,7 @@ const ListView: React.FC<Props> = (props) => {
 			) : (
 				<FilesTable files={props.files} />
 			)}
+			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} />
 		</>
 	);
 };

@@ -106,8 +106,6 @@ const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
                 />
               </Flex>
             )}
-
-
             <ModalFooter>
                 <Button onClick={handleSave} colorScheme='green' mr={3}>Save</Button>
                 <Button onClick={handleCancel}>Cancel</Button>
@@ -115,6 +113,6 @@ const FilterTags: React.FC<Props> = ({ isOpen, onClose}) => {
           </ModalContent>
         </Modal>
       );
-}
+};
 
 export default FilterTags;
