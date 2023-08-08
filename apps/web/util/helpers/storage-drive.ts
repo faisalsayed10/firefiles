@@ -10,6 +10,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive, Role } from "@prisma/client";
 import { StorageDrive } from "@util/types";
 import { AES, enc } from "crypto-js";
+import { buildJSON2XML } from "./s3-helpers";
 
 export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive => {
   const decryptedKeys = JSON.parse(
