@@ -226,15 +226,21 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	};
 
 	useEffect(() => {
-		if (!appUser || !files || !allFilesFetched || !allFilesFetched.current)
+		const processFiles = async () => {
+		  if (!appUser || !files || !allFilesFetched || !allFilesFetched.current)
 			return;
-
-		for (let i = 0; i < files.length; i++) {
-			getFileMetadata(files[i], i);
-			//addFileToDrive(data.name, files[i]);
-		}
-
-	}, [appUser, allFilesFetched.current]);
+	  
+		  for (let i = 0; i < files.length; i++) {
+			// Get the file metadata first before adding it to the drive
+			const metadata = await getFileMetadata(files[i], i);
+			await addFileToDrive(data.name, files[i]);
+			console.log(data.name, files[i]);
+		  }
+		};
+	  
+		processFiles();
+	  }, [appUser, allFilesFetched.current]);
+	  
 
 	useEffect(() => {
 		if (!app) return;
