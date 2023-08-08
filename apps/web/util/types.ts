@@ -1,5 +1,3 @@
-import { S3Client } from "@aws-sdk/client-s3";
-import { PrismaPromise } from "@prisma/client";
 import { FirebaseOptions } from "firebase/app";
 
 export type UploadingFile = {
