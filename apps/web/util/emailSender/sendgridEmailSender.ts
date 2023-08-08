@@ -1,6 +1,6 @@
 import { EmailSender, LoginEmailOptions, InvitationEmailOptions } from "./emailSender";
 import sendgrid from "@sendgrid/mail";
-import { loginHtml, loginText } from "./format";
+import { inviteHtml, inviteText, loginHtml, loginText } from "./format";
 
 export class SendgridEmailSender implements EmailSender {
   async sendLoginEmail(options: LoginEmailOptions): Promise<void> {
@@ -22,8 +22,8 @@ export class SendgridEmailSender implements EmailSender {
     await sendgrid.send({
       from: process.env.EMAIL_FROM,
       to: email,
-      html: loginHtml(url, email),
-      text: loginText(url, email),
+      html: inviteHtml(url, email),
+      text: inviteText(url, email),
       subject: "Invitation to a Bucket",
       categories: ["firefiles", "login_link"],
     });
