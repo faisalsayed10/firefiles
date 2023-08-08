@@ -55,9 +55,9 @@ export type DriveFolder = {
 };
 
 export type Tag = {
-	key: string;
-	value: string;
-}
+  key: string;
+  value: string;
+};
 interface CommonDrive {
   id: string;
   createdAt: Date;
@@ -74,6 +74,7 @@ interface FirebasePublicKeys {
   storageBucket: string;
   appId: string;
   projectId: string;
+  password?: string;
 }
 
 interface FirebaseDriveOwned {

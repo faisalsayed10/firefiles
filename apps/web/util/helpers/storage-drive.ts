@@ -37,6 +37,7 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
           appId: decryptedKeys.appId,
           projectId: decryptedKeys.projectId,
           apiKey: decryptedKeys.apiKey,
+          ...(decryptedKeys.password ? { password: decryptedKeys.password } : {}),
         },
       };
     } else {
@@ -140,6 +141,7 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
           appId: decryptedKeys.appId,
           projectId: decryptedKeys.projectId,
           apiKey: decryptedKeys.apiKey,
+          ...(decryptedKeys.password ? { password: decryptedKeys.password } : {}),
         },
       };
     } else {
