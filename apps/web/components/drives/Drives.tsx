@@ -9,7 +9,6 @@ import React from "react";
 import useSWR from "swr";
 import { X, Share } from "tabler-icons-react";
 import { Role } from "@prisma/client";
-import drive from "pages/api/drive";
 
 const tooltips: Record<Role, string> = {
   CREATOR: "You are the creator of this drive",
@@ -117,18 +116,22 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                     <X />
                     <Text ml="2">Delete Drive</Text>
                   </Flex>
-                  {driveRole === Role.CREATOR && (
+                  {/* {driveRole === Role.CREATOR && (
                     <Flex
                       {...optionProps}
                       onClick={async (e) => {
                         e.stopPropagation();
-                        // await shareDrive(drive.id);
+                        const { data } = await axios.post("/api/invitation/create", {
+                          email: "alexmorra431@gmail.com",
+                          bucketId: drive.id,
+                        });
+                        toast.success(data.message);
                       }}
                     >
                       <Share />
                       <Text ml="2">Share Drive</Text>
                     </Flex>
-                  )}
+                  )} */}
                 </Flex>
               </OptionsPopover>
             </Flex>

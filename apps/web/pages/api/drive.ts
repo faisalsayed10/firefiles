@@ -13,10 +13,10 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
     // READ
     if (req.method === "GET") {
-      const { role, isPending, userId } = req.query;
+      const { role, isPending } = req.query;
       const bucketsOnUser = await prisma.bucketsOnUsers.findMany({
         where: {
-          userId: userId as string,
+          userId: user.id as string,
           role: role as Role,
           isPending: isPending === "true",
         },
