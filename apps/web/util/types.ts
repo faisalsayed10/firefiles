@@ -101,8 +101,7 @@ interface FirebaseDriveServer {
   getDeleteObjectUrl?: () => Promise<string>;
   getListObjectsUrl?: () => Promise<string>;
   getObjectUrl?: () => Promise<string>;
-  getDeleteObjectsUrl?: () => Promise<string>;
-
+  performDeleteObjects?: () => void;
 }
 
 type FirebaseDrive = { type: "firebase" } & (FirebaseDriveOwned | FirebaseDriveShared) &
@@ -142,7 +141,7 @@ interface S3DriveServer {
     delimiter?: string,
   ) => Promise<string>;
   getObjectUrl: (fullPath: string) => Promise<string>;
-  getDeleteObjectsUrl: (deleteParams: string) => Promise<string>;
+  performDeleteObjects: (deleteParams: string) => void;
 }
 
 type S3Drive = {
