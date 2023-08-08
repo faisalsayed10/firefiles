@@ -11,8 +11,16 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     // Create
     if (req.method === "POST") {
       const { bucketId, inviteeId } = req.body;
-      await prisma.bucketsOnUsers.deleteMany({
+      const bucketOnUsers = await prisma.bucketsOnUsers.deleteMany({
         where: { bucketId: bucketId, userId: inviteeId, isPending: true },
+      });
+
+      if (!bucketOnUsers[0]) {
+        return res.status(400).json({ error: "Invalid Request" });
+      }
+
+      await prisma.invitation.deleteMany({
+        where: { invitationId: bucketOnUsers[0].id },
       });
       return res.status(200).json({
         message: `You have revoked the invitation to this bucket.`,
