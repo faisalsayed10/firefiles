@@ -17,7 +17,6 @@ import { useRouter } from "next/router";
 import React from "react";
 import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
 import Invite from "./Invite";
-import Invite from "./Invite";
 
 export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();

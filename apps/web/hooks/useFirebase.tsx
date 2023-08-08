@@ -26,7 +26,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useRef, useSta
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
-import { getMetadata, updateMetadata } from "@firebase/storage";
+import { getMetadata, updateMetadata } from "firebase/storage";
 
 const FirebaseContext = createContext<ContextValue>(null);
 export default () => useContext(FirebaseContext);
