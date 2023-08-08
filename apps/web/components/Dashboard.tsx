@@ -1,4 +1,4 @@
-import { Box, Center, Divider, Text, useColorMode } from "@chakra-ui/react";
+import { Box, Center, Divider, Flex, Text, useColorMode } from "@chakra-ui/react";
 import UploadFileButton from "@components/files/UploadFileButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
@@ -110,7 +110,12 @@ const Dashboard = () => {
                 DROP FILES ANYWHERE ON THE SCREEN
               </Text>
               <Navbar />
-              <FolderBreadCrumbs currentFolder={currentFolder} />
+              <Flex justifyContent="space-between" alignItems="center">
+                <FolderBreadCrumbs currentFolder={currentFolder} />
+                <Text fontWeight="bold" marginRight="9">
+                  {role}
+                </Text>
+              </Flex>
               <Divider />
               {!gridView ? (
                 <ListView
