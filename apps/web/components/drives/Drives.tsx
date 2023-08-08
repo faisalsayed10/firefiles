@@ -21,8 +21,8 @@ const tooltips: Record<Role, string> = {
 const abbreviation: Record<Role, string> = {
   CREATOR: "C",
   ADMIN: "A",
-  VIEWER: "E",
-  EDITOR: "V",
+  VIEWER: "V",
+  EDITOR: "E",
 };
 
 const ShowRole: React.FC<{ driveRole: Role }> = ({ driveRole }) => (

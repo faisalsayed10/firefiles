@@ -55,9 +55,9 @@ export type DriveFolder = {
 };
 
 export type Tag = {
-	key: string;
-	value: string;
-}
+  key: string;
+  value: string;
+};
 interface CommonDrive {
   id: string;
   createdAt: Date;
@@ -122,14 +122,17 @@ interface S3DriveOwned {
     secretKey: string;
     endpoint?: string;
   };
+  supportsTagging: true;
+  supportsUploading: true;
 }
 
 interface S3DriveShared {
   permissions: "shared";
   keys: S3PublicKeys;
+  supportsTagging: false;
+  supportsUploading: false;
 }
 
-// TODO: Condense this or find need for it
 interface S3DriveClient {
   environment: "client";
 }

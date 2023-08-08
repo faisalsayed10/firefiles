@@ -38,7 +38,8 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	fullPath,
 	children,
 }) => {
-	if (data.permissions !== "owned" || data.type !== "s3") {
+	if (data.permissions !== "owned" || data.type === "firebase") {
+    toast.error('Drive type invalid for S3 Provider.')
 		return;
 	}
 
