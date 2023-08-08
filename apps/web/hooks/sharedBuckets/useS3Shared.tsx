@@ -1,9 +1,11 @@
 import {
-  ListObjectsV2CommandOutput,
+  PutObjectTaggingCommand,
+  GetObjectTaggingCommand,
   S3Client,
+  ListObjectsV2CommandOutput,
 } from "@aws-sdk/client-s3";
-import { calculateVariablePartSize, parseXML2JSON, buildJSON2XML } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, Provider, StorageDrive, UploadingFile } from "@util/types";
+import { calculateVariablePartSize, parseXML2JSON } from "@util/helpers/s3-helpers";
+import { DriveFile, DriveFolder, Provider, Tag, StorageDrive, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
@@ -26,6 +28,11 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
   fullPath,
   children,
 }) => {
+  if (data.environment !== "client" || data.type === "firebase") {
+    toast.error("Drive type invalid for SharedS3 Provider.");
+    return;
+  }
+
   const [s3Client, setS3Client] = useState<S3Client>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
@@ -35,10 +42,8 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [files, setFiles] = useState<DriveFile[]>(null);
   const isMounted = useRef(false);
-
-  if (data.environment !== "client" || data.type !== "s3") {
-    return;
-  }
+  // TODO: Add tag support for shared drives (server-side GET/POST/PUT/DELETE)
+  const enableTags = data.supportsTagging;
 
   // Fallback for old buckets not already having the bucketUrl.
   useEffect(() => {
@@ -95,6 +100,12 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
 
   const addFile = async (filesToUpload: File[] | FileList) => {
     Array.from(filesToUpload).forEach(async (file) => {
+      if (!data.supportsUploading) {
+        // TODO: Add this support
+        toast.error("Drive provider does not yet support file uploading.");
+        return;
+      }
+
       if (/[#\$\[\]\*/]/.test(file.name))
         return toast.error("File name cannot contain special characters (#$[]*/).");
 
@@ -107,7 +118,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
           ? file.name
           : `${decodeURIComponent(currentFolder.fullPath)}${file.name}`;
 
-      // TODO: Can we have this operation done in the client?
       const upload = new Upload({
         client: s3Client,
         params: {
@@ -213,6 +223,94 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
     const deleteFileUrl = deleteObjectResponse.data.deleteObjectUrl;
     await axios.delete(deleteFileUrl);
     return true;
+  };
+
+  // get array of tags
+  const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
+    if (!data.supportsUploading) {
+      // TODO: Add this support
+      toast.error("Drive provider does not yet support file tagging.");
+      return;
+    }
+    try {
+      const response = await s3Client.send(
+        new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }),
+      );
+      return response.TagSet.map((tag) => ({ key: tag.Key, value: tag.Value }));
+    } catch (err) {
+      toast.error(`Error: ${err.message}`);
+    }
+  };
+
+  // add tag to existing object
+  const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
+    if (!key.trim()) {
+      toast.error("Error: Tag key is blank.");
+      return false;
+    }
+    key = key.trim();
+    const currentTagsResponse = await s3Client.send(
+      new GetObjectTaggingCommand({
+        Bucket: data.keys.Bucket,
+        Key: file.fullPath,
+      }),
+    );
+    const currentTags = currentTagsResponse.TagSet;
+    currentTags.push({ Key: key, Value: value });
+    const params = {
+      Bucket: data.keys.Bucket,
+      Key: file.fullPath,
+      Tagging: { TagSet: currentTags },
+    };
+
+    try {
+      await s3Client.send(new PutObjectTaggingCommand(params));
+      return true;
+    } catch (err) {
+      toast.error(`Error: ${err.message}`);
+      return false;
+    }
+  };
+
+  // edit existing tag
+  const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+    // remove previous tag in order to edit
+    if (!(await removeTags(file, prevTag.key))) {
+      return false;
+    } else {
+      // add the new tag
+      if (await addTags(file, newTag.key, newTag.value)) {
+        return true;
+      } else {
+        // if new tag values are invalid, add back the previous tag
+        await addTags(file, prevTag.key, prevTag.value);
+        toast.error(`Error: Tag not edited.`);
+        return false;
+      }
+    }
+  };
+
+  // remove tag from an object
+  const removeTags = async (file: DriveFile, key: string): Promise<boolean> => {
+    const getTagging = await s3Client.send(
+      new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }),
+    );
+    let existingTags = getTagging.TagSet;
+    const updatedTags = existingTags.filter((tag) => tag.Key !== key);
+
+    const putTagging = {
+      Bucket: data.keys.Bucket,
+      Key: file.fullPath,
+      Tagging: { TagSet: updatedTags },
+    };
+
+    try {
+      await s3Client.send(new PutObjectTaggingCommand(putTagging));
+      return true;
+    } catch (err) {
+      toast.error(`Error: ${err.message}`);
+      return false;
+    }
   };
 
   // set currentFolder
@@ -356,6 +454,11 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
         addFolder,
         removeFile,
         removeFolder,
+        enableTags,
+        listTags,
+        addTags,
+        editTags,
+        removeTags,
       }}
     >
       {children}

@@ -10,7 +10,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive, Role } from "@prisma/client";
 import { StorageDrive } from "@util/types";
 import { AES, enc } from "crypto-js";
-import { buildJSON2XML } from "./s3-helpers";
 
 export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive => {
   const decryptedKeys = JSON.parse(
@@ -71,6 +70,8 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         supportsDeletion: true,
         supportsGetObject: true,
         supportsListObjects: true,
+        supportsTagging: true,
+        supportsUploading: true,
         getDeleteObjectUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
@@ -98,6 +99,8 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         supportsDeletion: true,
         supportsGetObject: true,
         supportsListObjects: true,
+        supportsTagging: false,
+        supportsUploading: false,
         getDeleteObjectUrl: (path: string) => getDeleteS3FileUrl(pDrive, path),
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
@@ -175,6 +178,8 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
         supportsDeletion: true,
         supportsGetObject: true,
         supportsListObjects: true,
+        supportsTagging: true,
+        supportsUploading: true,
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -196,6 +201,8 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
         supportsDeletion: true,
         supportsGetObject: true,
         supportsListObjects: true,
+        supportsTagging: false,
+        supportsUploading: false,
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
