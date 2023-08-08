@@ -1,10 +1,8 @@
 import {
-  DeleteObjectsCommand,
-  ListObjectsV2Command,
   ListObjectsV2CommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { calculateVariablePartSize, parseXML2JSON, buildJSON2XML } from "@util/helpers/s3-helpers";
+import { calculateVariablePartSize, parseXML2JSON } from "@util/helpers/s3-helpers";
 import { DriveFile, DriveFolder, Provider, StorageDrive, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
@@ -92,8 +90,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
       localStorage.setItem(`local_folders_${data.id}`, JSON.stringify(filtered));
     }
 
-    // recursively delete children
-    // TODO: Change to Shared functionality
     await emptyS3Directory(data.id, folder.bucketName, folder.fullPath);
   };
 
@@ -368,11 +364,11 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
 async function emptyS3Directory(driveId: string, Bucket: string, Prefix: string) {
   const fetchedObjectsList = await fetchS3ObjectsList(driveId, Prefix);
   if (!fetchedObjectsList.success) return;
-  const listedObjects = fetchedObjectsList.results;
 
   const contents = Array.isArray(fetchedObjectsList.results.Contents)
     ? fetchedObjectsList.results.Contents
     : [fetchedObjectsList.results.Contents];
+
   const commonPrefixes = Array.isArray(fetchedObjectsList.results.CommonPrefixes)
     ? fetchedObjectsList.results.CommonPrefixes
     : [fetchedObjectsList.results.CommonPrefixes];
@@ -391,7 +387,7 @@ async function emptyS3Directory(driveId: string, Bucket: string, Prefix: string)
 
   await axios.delete(`/api/files?driveId=${driveId}&deleteParams=${JSON.stringify(deleteParams)}`);
 
-  if (listedObjects.IsTruncated) await emptyS3Directory(driveId, Bucket, Prefix);
+  if (fetchedObjectsList.results.IsTruncated) await emptyS3Directory(driveId, Bucket, Prefix);
 }
 
 const fetchS3ObjectsList = async (

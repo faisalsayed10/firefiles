@@ -10,7 +10,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive, Role } from "@prisma/client";
 import { StorageDrive } from "@util/types";
 import { AES, enc } from "crypto-js";
-import { buildJSON2XML } from "./s3-helpers";
 
 export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive => {
   const decryptedKeys = JSON.parse(
@@ -74,7 +73,8 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
           getS3ObjectsListUrl(pDrive, fullPath, continuationToken, delimiter),
-        performDeleteObjects: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
+        performDeleteObjects: (deleteParams: string) =>
+          performS3ObjectsDelete(pDrive, deleteParams),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -100,7 +100,8 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
           getS3ObjectsListUrl(pDrive, fullPath, continuationToken, delimiter),
-        performDeleteObjects: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
+        performDeleteObjects: (deleteParams: string) =>
+          performS3ObjectsDelete(pDrive, deleteParams),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -306,7 +307,7 @@ const getS3ObjectsListUrl = async (
   return signedGetObjectUrl;
 };
 
-const getS3ObjectsDeleteUrl = async (privilegedDrive: StorageDrive, deleteParams: string) => {
+const performS3ObjectsDelete = async (privilegedDrive: StorageDrive, deleteParams: string) => {
   if (!(privilegedDrive.type !== "firebase") || privilegedDrive.permissions !== "owned") {
     throw new Error(`Drive type '${privilegedDrive.type}' not valid for S3 provider`);
   }
