@@ -66,9 +66,9 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       if (!parms.success) return res.status(400).json({ error: `bad deleteObjects parameters` });
 
       const { deleteParams } = parms.data;
-      const deleteObjectsUrl = await privilegedDrive.getDeleteObjectsUrl(deleteParams);
+      privilegedDrive.performDeleteObjects(deleteParams);
 
-      return res.status(200).json({ deleteObjectsUrl });
+      return res.status(200).json({ message: `objects ${deleteParams} successfully deleted` });
     }
   } catch (err) {
     console.error(err.message);

@@ -74,7 +74,7 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
           getS3ObjectsListUrl(pDrive, fullPath, continuationToken, delimiter),
-        getDeleteObjectsUrl: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
+        performDeleteObjects: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -100,7 +100,7 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
         getObjectUrl: (path: string) => getS3ObjectUrl(pDrive, path),
         getListObjectsUrl: (fullPath: string, continuationToken?: string, delimiter?: string) =>
           getS3ObjectsListUrl(pDrive, fullPath, continuationToken, delimiter),
-        getDeleteObjectsUrl: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
+        performDeleteObjects: (deleteParams: string) => getS3ObjectsDeleteUrl(pDrive, deleteParams),
         keys: {
           region: decryptedKeys.region,
           bucketUrl: decryptedKeys.bucketUrl,
@@ -320,21 +320,6 @@ const getS3ObjectsDeleteUrl = async (privilegedDrive: StorageDrive, deleteParams
     ...(privilegedDrive.keys?.endpoint ? { endpoint: privilegedDrive.keys.endpoint } : {}),
   });
 
-  const deleteList: DeleteObjectsCommandInput = JSON.parse(deleteParams);
-  // const builtXML = buildJSON2XML(deleteParamsJS);
-  // if (!builtXML.success) {
-  //   console.log(builtXML.error);
-  //   return;
-  // }
-  // const deleteList = builtXML.xml;
-  console.log(deleteList.Delete.Objects)
-  const signedDeleteObjectsUrl = await getSignedUrl(
-    adminClient,
-    new DeleteObjectsCommand(deleteList),
-    {
-      expiresIn: signedUrlExpireSeconds,
-    },
-  );
-
-  return signedDeleteObjectsUrl;
+  const deleteInput: DeleteObjectsCommandInput = JSON.parse(deleteParams);
+  await adminClient.send(new DeleteObjectsCommand(deleteInput));
 };

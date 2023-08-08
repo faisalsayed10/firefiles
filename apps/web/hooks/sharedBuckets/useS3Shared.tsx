@@ -246,7 +246,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
 
     (async () => {
       try {
-        console.log(files);
         if (!files) {
           const listObjectsResponse = await fetchS3ObjectsList(
             data.id,
@@ -278,7 +277,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
             );
 
             setFiles(driveFiles);
-            console.log(files);
           }
 
           const localFolders = localStorage.getItem(`local_folders_${data.id}`);
@@ -374,30 +372,24 @@ async function emptyS3Directory(driveId: string, Bucket: string, Prefix: string)
 
   const contents = Array.isArray(fetchedObjectsList.results.Contents)
     ? fetchedObjectsList.results.Contents
-    : [fetchedObjectsList.results.CommonPrefixes];
+    : [fetchedObjectsList.results.Contents];
   const commonPrefixes = Array.isArray(fetchedObjectsList.results.CommonPrefixes)
     ? fetchedObjectsList.results.CommonPrefixes
     : [fetchedObjectsList.results.CommonPrefixes];
-  console.log(listedObjects);
 
-  if (listedObjects.CommonPrefixes?.length > 0) {
-    for (let i = 0; i < listedObjects.CommonPrefixes.length; i++) {
-      await emptyS3Directory(driveId, Bucket, listedObjects.CommonPrefixes[i].Prefix);
+  if (commonPrefixes[0]) {
+    for (let i = 0; i < commonPrefixes.length; i++) {
+      await emptyS3Directory(driveId, Bucket, commonPrefixes[i].Prefix);
     }
   }
-  if (listedObjects.Contents?.length === 0) return;
+  if (!contents[0]) return;
 
   const deleteParams = { Bucket, Delete: { Objects: [] } };
-  for (let i = 0; i < listedObjects.Contents.length; i++) {
-    deleteParams.Delete.Objects.push({ Key: listedObjects.Contents[i].Key });
+  for (let i = 0; i < contents.length; i++) {
+    deleteParams.Delete.Objects.push({ Key: contents[i].Key });
   }
 
-  const {
-    data: { deleteObjectsUrl: url },
-  } = await axios.delete(
-    `/api/files?driveId=${driveId}&deleteParams=${JSON.stringify(deleteParams)}`,
-  );
-  await axios.delete(url);
+  await axios.delete(`/api/files?driveId=${driveId}&deleteParams=${JSON.stringify(deleteParams)}`);
 
   if (listedObjects.IsTruncated) await emptyS3Directory(driveId, Bucket, Prefix);
 }
