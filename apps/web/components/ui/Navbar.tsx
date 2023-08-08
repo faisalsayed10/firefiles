@@ -11,10 +11,12 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import useUser from "@hooks/useUser";
+import { Role } from "@prisma/client";
 import { onLogout } from "@util/helpers";
 import axios from "axios";
 import { useRouter } from "next/router";
-import React from "react";
+import { RoleContext } from "pages/drives/[id]";
+import React, { useContext } from "react";
 import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
 import Invite from "./Invite";
 import InviteNotification from "./InviteNotification";
@@ -23,6 +25,7 @@ export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { mutateUser } = useUser();
   const router = useRouter();
+  const role = useContext(RoleContext);
 
   return (
     <>
@@ -45,7 +48,7 @@ export default function Navbar() {
         ) : null}
 
         <Box>
-          {router.route !== "/" ? <Invite /> : null}
+          {router.route !== "/" && (role == Role.CREATOR || role == Role.ADMIN) && <Invite />}
           <InviteNotification />
           <IconButton
             aria-label="toggle color theme"
