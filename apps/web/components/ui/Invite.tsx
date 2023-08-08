@@ -1,40 +1,50 @@
 import {
-	useDisclosure,
-	Button,
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalBody,
-	ModalFooter,
-	Input,
-	Select,
-	FormControl,
-	FormLabel,
+  useDisclosure,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+  Select,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
+import { Role } from "@prisma/client";
+import axios from "axios";
+import { useRouter } from "next/router";
 import React from "react";
+import toast from "react-hot-toast";
 import validator from "validator";
 
 export default function Invite() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [email, setEmail] = React.useState("");
   const [isValidEmail, setIsValidEmail] = React.useState(true);
-  const [selectedRole, setSelectedRole] = React.useState("");
+  const [selectedRole, setSelectedRole] = React.useState<Role>(null);
+  const router = useRouter();
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (validator.isEmail(email)) {
-      // Valid email, perform sharing logic
-      // e.g., send email or share the file
+      const { data } = await axios.post("/api/invitation/create", {
+        email: email,
+        bucketId: router.query.id,
+        role: selectedRole,
+      });
+
       onClose();
+      toast.success(data.message);
     } else {
       // Invalid email, show an error or take appropriate action
       setIsValidEmail(false);
     }
   };
-  const handleSelectChange = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setSelectedRole(event.target.value);
+  const handleSelectChange = (event: { target: { value: React.SetStateAction<String> } }) => {
+    setSelectedRole(event.target.value as Role);
   };
-  const isFormValid = selectedRole !== "";
+  const isFormValid = selectedRole !== null;
 
   return (
     <>
@@ -73,9 +83,9 @@ export default function Invite() {
               value={selectedRole}
               onChange={handleSelectChange}
             >
-              <option value="option1">Administer</option>
-              <option value="option2">Editor</option>
-              <option value="option3">Viewer</option>
+              <option value={Role.ADMIN}>{Role.ADMIN}</option>
+              <option value={Role.EDITOR}>{Role.EDITOR}</option>
+              <option value={Role.VIEWER}>{Role.VIEWER}</option>
             </Select>
             {!isFormValid && <span style={{ color: "crimson" }}>Please select a role.</span>}
           </ModalBody>
@@ -84,7 +94,7 @@ export default function Invite() {
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="blue" ml={3}>
+            <Button colorScheme="blue" ml={3} onClick={handleShare}>
               Share
             </Button>
           </ModalFooter>
