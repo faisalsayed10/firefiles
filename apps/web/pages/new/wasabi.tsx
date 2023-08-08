@@ -11,6 +11,7 @@ import {
 	Select,
 	Text,
 } from "@chakra-ui/react";
+import WasabiRegionSelect from "@components/ui/WasabiRegionSelect";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
 import axios from "axios";
@@ -26,8 +27,8 @@ const NewS3 = () => {
 	const { user } = useUser();
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
-	const [keyId, setKeyId] = useState("");
-	const [applicationKey, setApplicationKey] = useState("");
+	const [accessKey, setAccessKey] = useState("");
+	const [secretKey, setSecretKey] = useState("");
 	const [endpoint, setEndpoint] = useState("");
 	const [bucketName, setBucketName] = useState("");
 	const [buckets, setBuckets] = useState<Bucket[]>([]);
@@ -40,7 +41,7 @@ const NewS3 = () => {
 		try {
 			if (!user?.email) throw new Error("You need to login to perform this action!");
 
-			if (!keyId.trim() || !applicationKey.trim() || !endpoint.trim())
+			if (!accessKey.trim() || !secretKey.trim() || !endpoint.trim())
 				throw new Error("One or more fields are missing!");
 
 			if (
@@ -50,8 +51,8 @@ const NewS3 = () => {
 				throw new Error("Endpoint URL does not match the required format!");
 
 			const { data } = await axios.post<ListBucketsCommandOutput>("/api/s3/list-buckets", {
-				accessKey: keyId,
-				secretKey: applicationKey,
+				accessKey,
+				secretKey,
 				endpoint,
 				region: endpoint.split(".")[1],
 			});
@@ -71,7 +72,7 @@ const NewS3 = () => {
 		try {
 			if (!user?.email) throw new Error("You need to login to perform this action!");
 
-			if (!keyId.trim() || !applicationKey.trim())
+			if (!accessKey.trim() || !secretKey.trim())
 				throw new Error("One or more fields are missing!");
 
 			if (
@@ -93,8 +94,8 @@ const NewS3 = () => {
 
 			await axios.post("/api/drive", {
 				data: {
-					accessKey: keyId,
-					secretKey: applicationKey,
+					accessKey,
+					secretKey,
 					Bucket,
 					bucketUrl: `https://${Bucket}.s3.${endpoint.split(".")[1]}.wasabisys.com`,
 					endpoint,
@@ -136,19 +137,19 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Key ID"
+						placeholder="Access Key ID"
 						type="text"
-						value={keyId}
-						onChange={(e) => setKeyId(e.target.value)}
+						value={accessKey}
+						onChange={(e) => setAccessKey(e.target.value)}
 						required
 					/>
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Application Key"
+						placeholder="Secret Access Key"
 						type="text"
-						value={applicationKey}
-						onChange={(e) => setApplicationKey(e.target.value)}
+						value={secretKey}
+						onChange={(e) => setSecretKey(e.target.value)}
 						required
 					/>
 					<Input

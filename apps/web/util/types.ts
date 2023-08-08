@@ -17,12 +17,12 @@ export type UploadingFile = {
 export type Config = FirebaseOptions & { password?: string };
 
 export enum Provider {
-	firebase,
-	s3,
-	minio,
-	backblaze,
-	deta,
-	git,
+  firebase,
+  s3,
+  minio,
+  backblaze,
+  deta,
+  git,
 	wasabi,
 	digitalocean,
   cloudflare,

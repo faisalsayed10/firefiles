@@ -1,7 +1,7 @@
 const PROVIDERS = [
 	{ name: "Firebase", src: "/logos/firebase.png", comingSoon: false },
 	{ name: "AWS", src: "/logos/amazonaws.png", comingSoon: false },
-	// { name: "Digital Ocean", src: "/logos/digitalocean.png", comingSoon: true },
+	{ name: "Digital Ocean", src: "/logos/digitalocean.png", comingSoon: false },
 	{ name: "Backblaze", src: "/logos/backblaze.png", comingSoon: false },
 	{ name: "Wasabi", src: "/logos/wasabi.png", comingSoon: false },
 	{ name: "Scaleway", src: "/logos/scaleway.png", comingSoon: true },

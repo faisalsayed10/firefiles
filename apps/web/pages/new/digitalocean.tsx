@@ -20,7 +20,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
-import validator from "validator";
 
 const NewS3 = () => {
 	const { user } = useUser();
@@ -42,12 +41,6 @@ const NewS3 = () => {
 
 			if (!keyId.trim() || !applicationKey.trim() || !endpoint.trim())
 				throw new Error("One or more fields are missing!");
-
-			if (
-				!validator.isURL(endpoint, { require_protocol: true, protocols: ["https"] }) ||
-				!/^(https:\/\/s3\.).+(\.digitalocean.com)$/g.test(endpoint)
-			)
-				throw new Error("Endpoint URL does not match the required format!");
 
 			const { data } = await axios.post<ListBucketsCommandOutput>("/api/s3/list-buckets", {
 				accessKey: keyId,
@@ -74,12 +67,6 @@ const NewS3 = () => {
 			if (!keyId.trim() || !applicationKey.trim())
 				throw new Error("One or more fields are missing!");
 
-			if (
-				!validator.isURL(endpoint, { require_protocol: true, protocols: ["https"] }) ||
-				!/^(https:\/\/s3\.).+(\.digitalocean.com)$/g.test(endpoint)
-			)
-				throw new Error("Endpoint URL does not match the required format!");
-
 			if ((selectedBucket === "Not Selected" && !bucketName.trim()) || !endpoint.trim())
 				throw new Error("Select an existing bucket or enter a new bucket name!");
 
@@ -96,7 +83,7 @@ const NewS3 = () => {
 					accessKey: keyId,
 					secretKey: applicationKey,
 					Bucket,
-					bucketUrl: `https://${Bucket}.s3.${endpoint.split(".")[1]}.digitalocean.com`,
+					bucketUrl: `https://${Bucket}.${endpoint.split(".")[1]}.digitaloceanspaces.com`,
 					endpoint,
 					region: endpoint.split(".")[1],
 				},
@@ -136,7 +123,7 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Key ID"
+						placeholder="Access Key ID"
 						type="text"
 						value={keyId}
 						onChange={(e) => setKeyId(e.target.value)}
@@ -145,7 +132,7 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Application Key"
+						placeholder="Secret Key"
 						type="text"
 						value={applicationKey}
 						onChange={(e) => setApplicationKey(e.target.value)}
@@ -154,13 +141,13 @@ const NewS3 = () => {
 					<Input
 						mb="2"
 						variant="flushed"
-						placeholder="Endpoint - https://s3.<your-region>.digitalocean.com"
+						placeholder="Endpoint - https://<your-region>.digitaloceanspaces.com"
 						type="text"
 						value={endpoint}
 						onChange={(e) => setEndpoint(e.target.value)}
 						required
 					/>
-					<VideoModal src="/backblaze-keys-tutorial.mov" />
+					<VideoModal src="/digital-ocean-keys-tutorial.mov" />
 					<Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
 						Next
 					</Button>
