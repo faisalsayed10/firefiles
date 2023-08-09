@@ -39,7 +39,7 @@ const useIndexedDB = () => {
     if (!db) return;
 
     const drive = await db.drives.where('driveName').equals(driveName).first();
-    console.log(drive);
+    //console.log(drive);
     if (drive) {
       // Check if the file with the same name already exists in the drive
       const existingFile = drive.files.find(file => file.name === fileData.name);
@@ -52,21 +52,11 @@ const useIndexedDB = () => {
         name: fileData.name,
         size: fileData.size,
         url: fileData.url,
-        fullpath: fileData.fullpath,
+        fullPath: fileData.fullPath,
       };
 
-      // drive.files.push(newFile);
-      // const updatedFiles = (drive.files) ? [...drive.files, newFile] : [newFile];
-      /*
-      if (typeof(updatedFiles) !== 'object') {
-        updatedFiles = [newFile];
-      }
-      else {
-        updatedFiles?.push(newFile);
-      }
-      */
       const updatedFiles = drive.files ? [...drive.files, newFile] : [newFile];
-      console.log('before', updatedFiles);
+      //console.log('before', updatedFiles);
     
       await db.drives.update(drive.id, { files: updatedFiles });
       console.log(`File '${fileData.name}' added to drive '${driveName}'.`);

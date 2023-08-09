@@ -190,6 +190,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 						url: await getDownloadURL(fileRef),
 					};
 					setFiles((files) => [...(files || []), newFile]);
+					addFileToDrive(data.name, newFile);
 					toast.success("File uploaded successfully.");
 				},
 			);
@@ -211,36 +212,39 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
 		});
 
+		const updatedFile: DriveFile = {
+			...file,
+			contentType: data.contentType,
+			size: data.size,
+			createdAt: data.timeCreated,
+			updatedAt: data.updated,
+			url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
+		};
+
 		setFiles((files) => [
 			...(files || []).slice(0, i),
-			{
-				...file,
-				contentType: data.contentType,
-				size: data.size,
-				createdAt: data.timeCreated,
-				updatedAt: data.updated,
-				url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
-			},
+			updatedFile,
 			...(files || []).slice(i + 1),
 		]);
+		return updatedFile;
 	};
 
 	useEffect(() => {
 		const processFiles = async () => {
-		  if (!appUser || !files || !allFilesFetched || !allFilesFetched.current)
-			return;
-	  
-		  for (let i = 0; i < files.length; i++) {
-			// Get the file metadata first before adding it to the drive
-			const metadata = await getFileMetadata(files[i], i);
-			await addFileToDrive(data.name, files[i]);
-			console.log(data.name, files[i]);
-		  }
+			if (!appUser || !files || !allFilesFetched || !allFilesFetched.current)
+				return;
+
+			for (let i = 0; i < files.length; i++) {
+				// Get the file metadata first before adding it to the drive
+				const updatedFile = await getFileMetadata(files[i], i);
+				await addFileToDrive(data.name, updatedFile);
+				//console.log(data.name, files[i]);
+			}
 		};
-	  
+
 		processFiles();
-	  }, [appUser, allFilesFetched.current]);
-	  
+	}, [appUser, allFilesFetched.current]);
+
 
 	useEffect(() => {
 		if (!app) return;
