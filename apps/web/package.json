@@ -13,6 +13,7 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.72.0",
 		"@aws-sdk/s3-request-presigner": "^3.81.0",
+		"@chakra-ui/icons": "^2.1.0",
 		"@chakra-ui/react": "^1.8.8",
 		"@emotion/react": "^11",
 		"@emotion/styled": "^11",
