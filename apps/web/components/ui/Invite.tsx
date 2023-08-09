@@ -28,7 +28,7 @@ export default function Invite() {
 
   const handleShare = async () => {
     if (validator.isEmail(email)) {
-      const { data } = await axios.post("/api/invitation/create", {
+      const { data } = await axios.post("/api/bucketsOnUsers", {
         email: email,
         bucketId: router.query.id,
         role: selectedRole,
