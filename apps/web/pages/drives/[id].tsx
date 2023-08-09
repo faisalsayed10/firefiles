@@ -76,7 +76,10 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     });
     if (!bucketOnUser?.role) throw new Error(`userId ${user.id} cannot access driveId ${drive.id}`);
 
-    const accessDrive = createClientDrive(drive, bucketOnUser.role);
+    const accessDrive =
+      drive.type === "firebase"
+        ? createClientDrive(drive, Role.CREATOR)
+        : createClientDrive(drive, bucketOnUser.role);
     accessDrive.createdAt = accessDrive.createdAt.toString() as any;
 
     return { props: { data: accessDrive, role: bucketOnUser.role } };
