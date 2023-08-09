@@ -7,7 +7,7 @@ import { Provider } from "@util/types";
 import { useRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
-import { X } from "tabler-icons-react";
+import { X, Share } from "tabler-icons-react";
 import { Role } from "@prisma/client";
 
 const tooltips: Record<Role, string> = {

@@ -22,12 +22,8 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           data: { email, verified: false, lastSignedIn: new Date(), createdAt: new Date() },
         });
       }
-      const bucketOnUser = await prisma.bucketsOnUsers.create({
+      await prisma.bucketsOnUsers.create({
         data: { userId: user.id, bucketId: bucketId, isPending: true, role: role as Role },
-      });
-
-      await prisma.invitation.create({
-        data: { userId: sender.id, invitationId: bucketOnUser.id },
       });
 
       const emailSender: EmailSender = process.env.RESEND_API_KEY

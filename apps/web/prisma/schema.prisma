@@ -16,7 +16,6 @@ model User {
   verified     Boolean          @default(false)
   plan         PricingPlan      @default(FREE)
   drives       BucketsOnUsers[]
-  invitations  Invitation[]
 }
 
 model Drive {
@@ -29,7 +28,6 @@ model Drive {
 }
 
 model BucketsOnUsers {
-  id        String   @id @unique @default(uuid())
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   bucket    Drive    @relation(fields: [bucketId], references: [id])
@@ -37,21 +35,10 @@ model BucketsOnUsers {
   createdAt DateTime @default(now()) @map("created_at")
   isPending Boolean  @default(true) @map("is_pending")
   role      Role     @default(VIEWER)
-  invitation Invitation?
 
+  @@id([userId, bucketId])
   @@index([userId])
   @@index([bucketId])
-}
-
-model Invitation {
-  user          User           @relation(fields: [userId], references: [id])
-  userId        String
-  bucketOnUser  BucketsOnUsers @relation(fields: [invitationId], references: [id])
-  invitationId  String         @unique
-
-  @@id([userId, invitationId])
-  @@index([userId])
-  @@index([invitationId])
 }
 
 enum Role {
