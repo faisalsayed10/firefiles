@@ -81,6 +81,8 @@ const useIndexedDB = () => {
     }
   };
 
+  // Delete a folder, delete all files inside the folder function?
+
   return {
     db,
     createNewDrive,

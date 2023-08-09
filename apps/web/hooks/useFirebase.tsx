@@ -200,6 +200,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const removeFile = async (file: DriveFile) => {
 		if (!app) return false;
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
+		deleteFileFromDrive(data.name, file.name);
 		deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => { });
 		return true;
 	};
