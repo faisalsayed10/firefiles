@@ -3,6 +3,10 @@ import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Role } from "@prisma/client";
+import { EmailSender } from "@util/emailSender/emailSender";
+import { ResendEmailSender } from "@util/emailSender/resendEmailSender";
+import { SendgridEmailSender } from "@util/emailSender/sendgridEmailSender";
+const url = process.env.DEPLOY_URL || process.env.VERCEL_URL;
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -22,38 +26,45 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       return res.status(200).json(bucketsOnUser);
       // CREATE
     } else if (req.method === "POST") {
-      const { id, userId, isPending, role } = req.body;
-      if (!id || !userId || isPending === null || role === null)
-        return res.status(400).json({ error: "Invalid request." });
-
-      const user = await prisma.user.findFirst({ where: { id: userId } });
-      if (!user) return res.status(400).json({ error: "User not found." });
+      const { email, bucketId, role } = req.body;
+      let receiver = await prisma.user.findFirst({ where: { email } });
+      if (!receiver) {
+        receiver = await prisma.user.create({
+          data: { email, verified: false, lastSignedIn: new Date(), createdAt: new Date() },
+        });
+      }
       await prisma.bucketsOnUsers.create({
-        data: { userId: userId, bucketId: id, isPending, role },
+        data: { userId: receiver.id, bucketId: bucketId, isPending: true, role: role as Role },
       });
 
-      // await prisma.bucketsOnUsers.create({
-      //   data: {
-      //     user: {
-      //       connect: { id: userId }, // Connect to an existing User by its ID
-      //     },
-      //     bucket: {
-      //       connect: { id: id }, // Connect to an existing Drive by its ID
-      //     },
-      //     isPending,
-      //     role,
-      //   },
-      // });
+      const emailSender: EmailSender = process.env.RESEND_API_KEY
+        ? new ResendEmailSender()
+        : new SendgridEmailSender();
+
+      await emailSender.sendInvitationEmail({
+        email: email,
+        url: `${url}/login`,
+      });
+      return res.status(200).json({
+        message: `An invitation has been sent to ${email}.`,
+      });
+      // UPDATE
+    } else if (req.method == "PATCH") {
+      const data = req.body;
+      if (!data.bucketId) return res.status(400).json({ error: "Bucket ID not found." });
+      await prisma.bucketsOnUsers.updateMany({
+        where: { bucketId: data.bucketId, userId: user.id },
+        data: data,
+      });
       return res.status(200).json("ok");
       // DELETE
     } else if (req.method == "DELETE") {
-      const id = req.query.id as string;
-      if (!id) return res.status(400).json({ error: "Bucket ID not found." });
+      const { inviteeId, bucketId } = req.body;
+      if (!bucketId) return res.status(400).json({ error: "Bucket ID not found." });
       await prisma.bucketsOnUsers.deleteMany({
-        where: { bucketId: id, userId: user.id },
+        where: { bucketId: bucketId, userId: inviteeId || user.id },
       });
       return res.status(200).json("ok");
-      // UPDATE
     }
   } catch (err) {
     console.error(err.message);
