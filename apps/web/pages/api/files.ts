@@ -5,6 +5,29 @@ import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
+
+/**
+ * Schema for performing a GET operation on a drive to fetch a list of objects.
+ *
+ * @param {string} fullPath - An optional fullPath query parameter
+ * @param {string=} continuationToken - An optional continuation query parameter
+ * @param {string=} delimiter - An optional delimiter query parameter
+ */
+const getObjectsListSchema = z.object({
+  fullPath: z.string(),
+  continuationToken: z.string().optional(),
+  delimiter: z.string().optional(),
+});
+
+/**
+ * Schema for performing a DELETE operation on a drive remove a list of objects.
+ *
+ * @param {string} deleteParams - A required deleteParams query parameter
+ */
+const deleteObjectsSchema = z.object({
+  deleteParams: z.string().nonempty(),
+});
+
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     // authenticate user
@@ -21,7 +44,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     // validate user has ANY access to this drive
     const { role } = await prisma.bucketsOnUsers.findFirst({
       select: { role: true },
-      where: { userId: user.id, bucketId: driveId },
+      where: { userId: user.id, bucketId: driveId, isPending: false },
     });
     if (!role)
       return res
@@ -63,7 +86,8 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         });
 
       const parms = deleteObjectsSchema.safeParse(req.query);
-      if (!parms.success) return res.status(400).json({ error: `bad deleteObjects parameters` });
+      if (!parms.success)
+        return res.status(400).json({ error: `invalid deleteObjects parameters` });
 
       const { deleteParams } = parms.data;
       privilegedDrive.performDeleteObjects(deleteParams);
@@ -76,13 +100,3 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
   }
   return res.status(400).json({ error: "invalid method provided" });
 }, sessionOptions);
-
-const getObjectsListSchema = z.object({
-  fullPath: z.string(),
-  continuationToken: z.string().optional(),
-  delimiter: z.string().optional(),
-});
-
-const deleteObjectsSchema = z.object({
-  deleteParams: z.string().nonempty(),
-});

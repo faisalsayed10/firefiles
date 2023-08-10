@@ -1,5 +1,3 @@
-import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Role } from "@prisma/client";
 import { createServerDrive } from "@util/helpers/storage-drive";
 import prisma from "@util/prisma";
@@ -7,6 +5,29 @@ import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
+
+/**
+ * Schema for performing a DELETE operation on a drive for a single object.
+ *
+ * @param {string} driveId - A required driveId query parameter
+ * @param {string} fullPath - A required fullPath query parameter
+ */
+const deleteSchema = z.object({
+  driveId: z.string().nonempty(),
+  fullPath: z.string().nonempty(),
+});
+
+/**
+ * Schema for performing a GET operation on a drive for a single object.
+ *
+ * @param {string} driveId - A required driveId query parameter
+ * @param {string} fullPath - A required fullPath query parameter
+ */
+const getObjectSchema = z.object({
+  driveId: z.string().nonempty(),
+  fullPath: z.string().nonempty(),
+});
+
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     // authenticate user
@@ -76,13 +97,3 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
   }
   return res.status(400).json({ error: "invalid method provided" });
 }, sessionOptions);
-
-const deleteSchema = z.object({
-  driveId: z.string().nonempty(),
-  fullPath: z.string().nonempty(),
-});
-
-const getObjectSchema = z.object({
-  driveId: z.string().nonempty(),
-  fullPath: z.string().nonempty(),
-});
