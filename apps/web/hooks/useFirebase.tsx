@@ -58,7 +58,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
-	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive, getFileByFullPath } = useIndexedDB(); // import indexeddb hook
+	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive,
+		deleteFilesInFolder, getFileByFullPath } = useIndexedDB(); // import indexeddb hook
 	const driveName = data.name;
 
 	const addFolder = (name: string) => {
@@ -90,6 +91,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		setFolders((folders) =>
 			folders.filter((f) => f.fullPath !== folder.fullPath),
 		);
+
+		deleteFilesInFolder(driveName, folder.name);
 
 		// delete from localStorage
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
@@ -130,7 +133,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			const filePath =
 				currentFolder === ROOT_FOLDER
 					? filesToUpload[i].name
-					: `${decodeURIComponent(currentFolder.fullPath)}/${filesToUpload[i].name
+					: `${decodeURIComponent(currentFolder.fullPath)}${filesToUpload[i].name
 					}`;
 
 			const fileRef = ref(getStorage(app), filePath);
@@ -208,18 +211,18 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 
 	const getFileMetadata = async (file: DriveFile, i: number) => {
 		let updatedFile: DriveFile;
-	
+
 		// Check if the file is already in the drive
 		const foundFile = await getFileByFullPath(driveName, file.fullPath);
 
 		if (!foundFile) {
 			const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
 				}/o/${encodeURIComponent(file.fullPath)}`;
-	
+
 			const { data } = await axios.get(fileUrl, {
 				headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
 			});
-	
+
 			updatedFile = {
 				...file,
 				contentType: data.contentType,
@@ -236,16 +239,16 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				url: foundFile.url,
 			};
 		}
-	
+
 		setFiles((files) => [
 			...(files || []).slice(0, i),
 			updatedFile,
 			...(files || []).slice(i + 1),
 		]);
-	
+
 		return updatedFile;
 	};
-	
+
 
 	useEffect(() => {
 		const processFiles = async () => {
