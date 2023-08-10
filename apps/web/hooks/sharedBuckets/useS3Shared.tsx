@@ -33,6 +33,7 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
     return;
   }
 
+  // TODO: S3 object should be moved off client entirely
   const [s3Client, setS3Client] = useState<S3Client>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();

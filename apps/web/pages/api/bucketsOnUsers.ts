@@ -9,6 +9,8 @@ import { SendgridEmailSender } from "@util/emailSender/sendgridEmailSender";
 import { z } from "zod";
 const url = process.env.DEPLOY_URL || process.env.VERCEL_URL;
 
+// FIXME: For future expansion, the authorization functionality could be moved out to its own microservice
+
 /**
  * Schema for performing a DELETE operation on a BOU record.
  * Represents either revoking/removing access or detaching from a shared drive
@@ -53,18 +55,36 @@ const postBOUSchema = z.object({
 });
 
 /**
- * Schema for performing a GET operation on a BOU record.
- * Gets all outgoing (provided a bucketId) or incoming access grants
+ * Schema for performing a GET operation for a list of properties relevant to BOU record & invitation.
  *
- * @param {string} bucketId - An optional bucketId query parameter
+ * @param {string} bucketId - An optional bucketId query parameter (returns outgoing props if present, incoming if absent)
  * @param {boolean} isPending - A required isPending query parameter
  *
- * @returns {BucketsOnUsers[]}
+ * @returns {getProps[]} Gets all outgoing (provided a bucketId) or incoming access properties
  */
 const getBOUSchema = z.object({
   bucketId: z.string().optional(),
   isPending: z.boolean(),
 });
+
+interface commonGetProp {
+  accessType: "incoming" | "outgoing";
+  bucketId: string;
+  bucketName: string;
+  role: Role;
+}
+
+interface incomingGetProp {
+  accessType: "incoming";
+}
+
+type outgoingGetProp = {
+  accessType: "outgoing";
+  inviteeEmail: string;
+  inviteeId: string;
+};
+
+type getProp = commonGetProp & (incomingGetProp | outgoingGetProp);
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -79,19 +99,40 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         return res.status(400).json({ error: `invalid get BucketsOnUsers parameters` });
       const { bucketId, isPending } = parms.data;
 
-      // Get a user's incoming requests
+      // Get a user's INCOMING requests
       if (!bucketId) {
         const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
           where: { userId: user.id, isPending },
         });
 
-        return res.status(200).json(bucketsOnUsers);
+        // TODO: determine if return should be done given empty array before map operation
+        const incomingRequests: getProp[] = await Promise.all(
+          bucketsOnUsers.map(async (bucketOnUser) => {
+            const { name: bucketName } = await prisma.drive.findFirst({
+              where: { id: bucketOnUser.bucketId },
+              select: { name: true },
+            });
+            return {
+              accessType: "incoming",
+              bucketId: bucketOnUser.bucketId,
+              bucketName,
+              role: bucketOnUser.role,
+            };
+          }),
+        );
+
+        return res.status(200).json(incomingRequests || []);
       }
-      // Get a bucket's outgoing requests
+      // Get a bucket's OUTGOING requests
       // Authorize action...
       const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
         select: { role: true },
-        where: { userId: user.id, bucketId: bucketId, isPending: false },
+        where: {
+          userId: user.id,
+          bucketId: bucketId,
+          isPending: false,
+          NOT: { role: Role.CREATOR },
+        },
       });
 
       if (!requestorRole)
@@ -104,10 +145,38 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           error: `cannot read granted access: requesting userId ${user.id} does not have admin access to bucketId ${bucketId}`,
         });
 
+      // const { email } = await prisma.user.findFirst({where: {id: bucketOnUser.userId}});
       const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
         where: { bucketId, isPending },
       });
-      return res.status(200).json(bucketsOnUsers);
+
+      const outgoingRequests: getProp[] = await Promise.all(
+        bucketsOnUsers.map(async (bucketOnUser) => {
+          const { name: bucketName } = await prisma.drive.findFirst({
+            where: { id: bucketOnUser.bucketId },
+            select: { name: true },
+          });
+          const { id: inviteeId, email: inviteeEmail } = await prisma.user.findFirst({
+            where: {
+              id: bucketOnUser.userId,
+            },
+            select: {
+              id: true,
+              email: true,
+            },
+          });
+          return {
+            accessType: "outgoing",
+            bucketId: bucketOnUser.bucketId,
+            bucketName,
+            role: bucketOnUser.role,
+            inviteeEmail,
+            inviteeId,
+          };
+        }),
+      );
+
+      return res.status(200).json(outgoingRequests || []);
 
       // POST - CREATE
     } else if (req.method === "POST") {
@@ -209,7 +278,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       }
       // Patch operation for accepting the user's invitation to the drive (requestor == accepting user)
       const patchCount = await prisma.bucketsOnUsers.updateMany({
-        where: { bucketId, userId: inviteeData.userId },
+        where: { bucketId, userId: user.id },
         data: { isPending: true },
       });
       return res
