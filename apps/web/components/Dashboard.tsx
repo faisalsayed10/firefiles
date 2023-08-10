@@ -43,8 +43,6 @@ const Dashboard = () => {
 	const filterDriveFiles = async (files: DriveFile[]): Promise<DriveFile[]> => {
 		// map each file to a boolean array
 		const mapFilter = await Promise.all(files.map(file => filterByTag(file, fileTagFilter)));
-		console.log(`filtered array`)
-		console.log(mapFilter)
 		// filter files by the boolean array
 		return files.filter((file, index) => mapFilter[index]);
 	}
@@ -52,8 +50,6 @@ const Dashboard = () => {
 	const filterByTag = async (file: DriveFile, fileTagFilter): Promise<boolean> => {
 		const tags = await listTags(file);
 		if (tags) {
-			console.log(`file tags for ${file.name}:`)
-			console.log(tags)
 			// filter based on whether key, value, or both is provided
 			if (fileTagFilter.hasOwnProperty("key") && fileTagFilter.hasOwnProperty("value")) {
 				return tags.some(tag => (tag.key === fileTagFilter.key) && (tag.value === fileTagFilter.value));
@@ -91,8 +87,6 @@ const Dashboard = () => {
 		if (fileTagFilter.hasOwnProperty("key") || fileTagFilter.hasOwnProperty("value")) {
 			const fetchFilteredFiles = async () => {
 				const filteredFiles = await filterDriveFiles(files);
-				console.log(`filtered files:`)
-				console.log(filteredFiles)
 				// sort filtered files
 				const sortedFilteredFiles = sortDriveFiles(filteredFiles, fileSort);
 				setSortedFiles(sortedFilteredFiles);
