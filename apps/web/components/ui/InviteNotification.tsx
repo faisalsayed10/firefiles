@@ -7,6 +7,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
+  Flex,
   useDisclosure,
 } from "@chakra-ui/react";
 import { BellIcon } from "@chakra-ui/icons";
@@ -21,7 +22,7 @@ export default function InviteNotification() {
   // Simulate fetching invitation requests from the backend
   const fetchInvitationRequests = () => {
     // Need to replace with the actual API call to fetch the requests
-    const mockRequests = ["Request 1", "Request 2", "Request 3"];
+    const mockRequests = ["request 1", "2", "3"];
     setInvitationRequests(mockRequests);
   };
 
@@ -59,15 +60,17 @@ export default function InviteNotification() {
 
           <DrawerBody>
             {invitationRequests.map((request, index) => (
-              <div key={index}>
+              <Flex justifyContent="space-between" key={index}>
                 {request}
-                <Button ml="2" colorScheme="green" size="sm" onClick={() => acceptRequest(index)}>
-                  Accept
-                </Button>
-                <Button ml="2" colorScheme="red" size="sm" onClick={() => rejectRequest(index)}>
-                  Reject
-                </Button>
-              </div>
+                <div>
+                  <Button ml="2" colorScheme="green" size="sm" onClick={() => acceptRequest(index)}>
+                    Accept
+                  </Button>
+                  <Button ml="2" colorScheme="red" size="sm" onClick={() => rejectRequest(index)}>
+                    Reject
+                  </Button>
+                </div>
+              </Flex>
             ))}
           </DrawerBody>
 
