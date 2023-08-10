@@ -58,7 +58,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
-	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive } = useIndexedDB(); // import indexeddb hook
+	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive, getFileByFullPath } = useIndexedDB(); // import indexeddb hook
+	const driveName = data.name;
 
 	const addFolder = (name: string) => {
 		const path =
@@ -206,29 +207,45 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	};
 
 	const getFileMetadata = async (file: DriveFile, i: number) => {
-		const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
-			}/o/${encodeURIComponent(file.fullPath)}`;
+		let updatedFile: DriveFile;
+	
+		// Check if the file is already in the drive
+		const foundFile = await getFileByFullPath(driveName, file.fullPath);
 
-		const { data } = await axios.get(fileUrl, {
-			headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
-		});
-
-		const updatedFile: DriveFile = {
-			...file,
-			contentType: data.contentType,
-			size: data.size,
-			createdAt: data.timeCreated,
-			updatedAt: data.updated,
-			url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
-		};
-
+		if (!foundFile) {
+			const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
+				}/o/${encodeURIComponent(file.fullPath)}`;
+	
+			const { data } = await axios.get(fileUrl, {
+				headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
+			});
+	
+			updatedFile = {
+				...file,
+				contentType: data.contentType,
+				size: data.size,
+				createdAt: data.timeCreated,
+				updatedAt: data.updated,
+				url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
+			};
+		} else {
+			//console.log(foundFile);
+			updatedFile = {
+				...file,
+				size: foundFile.size,
+				url: foundFile.url,
+			};
+		}
+	
 		setFiles((files) => [
 			...(files || []).slice(0, i),
 			updatedFile,
 			...(files || []).slice(i + 1),
 		]);
+	
 		return updatedFile;
 	};
+	
 
 	useEffect(() => {
 		const processFiles = async () => {
