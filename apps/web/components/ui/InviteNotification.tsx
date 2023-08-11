@@ -12,9 +12,10 @@ import {
 } from "@chakra-ui/react";
 import { BellIcon } from "@chakra-ui/icons";
 import React, { useState, useEffect } from "react";
-import { BucketsOnUsers } from "@prisma/client";
 import useSWR from "swr";
 import { getProp } from "pages/api/bucketsOnUsers";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function InviteNotification() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -74,7 +75,16 @@ export default function InviteNotification() {
                         ml="2"
                         colorScheme="green"
                         size="sm"
-                        onClick={() => acceptRequest(request.bucketId)}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await axios.patch(`/api/bucketsOnUsers?bucketId=${request.bucketId}`);
+                            mutate(data.filter((b) => b.bucketId !== request.bucketId));
+                            toast.success("You have successfully accepted the invitation");
+                          } catch (error) {
+                            toast.error("Something went wrong");
+                          }
+                        }}
                       >
                         Accept
                       </Button>
@@ -82,7 +92,16 @@ export default function InviteNotification() {
                         ml="2"
                         colorScheme="red"
                         size="sm"
-                        onClick={() => rejectRequest(request.bucketId)}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await axios.delete(`/api/bucketsOnUsers?bucketId=${request.bucketId}`);
+                            mutate(data.filter((b) => b.bucketId !== request.bucketId));
+                            toast.success("You have successfully rejected the invitation");
+                          } catch (error) {
+                            toast.error("Something went wrong");
+                          }
+                        }}
                       >
                         Reject
                       </Button>
