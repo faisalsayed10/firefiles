@@ -246,7 +246,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // PATCH - UPDATE
     } else if (req.method == "PATCH") {
       // Validate params...
-      const parms = patchBOUSchema.safeParse(req.body);
+      const parms = patchBOUSchema.safeParse(req.query);
       if (!parms.success)
         return res.status(400).json({ error: `invalid patch BucketsOnUsers parameters` });
       const { bucketId, inviteeData } = parms.data;
@@ -254,7 +254,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // Authorize action...
       const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
         select: { role: true },
-        where: { userId: user.id, bucketId: bucketId, isPending: false },
+        where: { userId: user.id, bucketId: bucketId }, // I deleted isPending: false since there might be invitee who is pending
       });
 
       // Requesting user must have access or invitation to access for this drive
@@ -281,7 +281,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // Patch operation for accepting the user's invitation to the drive (requestor == accepting user)
       const { count: patchCount } = await prisma.bucketsOnUsers.updateMany({
         where: { bucketId, userId: user.id },
-        data: { isPending: true },
+        data: { isPending: false },
       });
       return res
         .status(200)
@@ -297,7 +297,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // Authorize action...
       const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
         select: { role: true },
-        where: { userId: user.id, bucketId: bucketId, isPending: false },
+        where: { userId: user.id, bucketId: bucketId }, // I deleted isPending: false since there might be invitee who is pending
       });
 
       // Requesting user must have access to the drive
