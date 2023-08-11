@@ -74,12 +74,6 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			case Provider.backblaze:
 			  data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.backblazeb2.com`;
 			  break;
-			case Provider.wasabi:
-			  data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.wasabisys.com`;
-			  break;
-			case Provider.digitalocean:
-			  data.keys.bucketUrl = `https://${data.keys.Bucket}.${data.keys.region}.digitaloceanspaces.com`;
-			  break;
 			default:
 			  break;
 		  }

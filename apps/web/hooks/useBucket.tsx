@@ -33,16 +33,16 @@ export default function useBucket(): ContextValue {
 	const { keys } = useKeys();
   
 	switch (Provider[keys.type] as Provider) {
-	  case Provider.firebase:
-		return useFirebase();
-	  case Provider.s3:
-	  case Provider.backblaze:
-	  case Provider.wasabi:
-	  case Provider.digitalocean:
-    case Provider.cloudflare:
-		return useS3();
-	  default:
-		return null;
+	  	case Provider.firebase:
+			return useFirebase();
+	  	case Provider.s3:
+	  	case Provider.backblaze:
+	  	case Provider.wasabi:
+	  	case Provider.digitalocean:
+    	case Provider.cloudflare:
+			return useS3();
+	 	default:
+			return null;
 	}
 }
 
