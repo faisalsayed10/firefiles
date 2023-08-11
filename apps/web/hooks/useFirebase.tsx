@@ -58,6 +58,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
+
 	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive,
 		deleteFilesInFolder, getFileByFullPath, getFileFromDrive } = useIndexedDB(); // import indexeddb hook
 	const driveName = data.name;
@@ -136,6 +137,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 					? filesToUpload[i].name
 					: `${decodeURIComponent(currentFolder.fullPath)}${filesToUpload[i].name
 					}`;
+			console.log(filePath);
 
 			const fileRef = ref(getStorage(app), filePath);
 			const uploadTask = uploadBytesResumable(fileRef, filesToUpload[i]);

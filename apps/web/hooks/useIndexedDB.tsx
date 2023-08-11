@@ -42,10 +42,14 @@ const useIndexedDB = () => {
     //console.log(drive);
     if (drive) {
       // Check if the file with the same name already exists in the drive
-      const existingFile = drive.files.find(file => file.name === fileData.name);
-  
+      const existingFile = drive.files.find(file => file.fullPath === fileData.fullPath);
+      // if (existingFile) {
+      //   console.log("this is the existing File " + existingFile.name + ' and full path ' + existingFile.fullPath);
+      //   console.log(existingFile.fullPath + ' ' + fileData.fullPath);
+      // }
+
       // check if the file has the same path:
-      if (existingFile && (existingFile.fullPath === fileData.fullPath || existingFile.url === fileData.url)) {
+      if (existingFile) {
         console.log(`File '${fileData.name}' already exists in drive '${driveName}'.`);
         return;
       }
@@ -59,7 +63,7 @@ const useIndexedDB = () => {
       const updatedFiles = drive.files ? [...drive.files, newFile] : [newFile];
       //console.log('before', updatedFiles);
       console.log(newFile.fullPath);
-    
+
       await db.drives.update(drive.id, { files: updatedFiles });
       console.log(`File '${fileData.name}' added to drive '${driveName}'.`);
     } else {
@@ -86,20 +90,20 @@ const useIndexedDB = () => {
   // Delete a folder, delete all files inside the folder function?
   const deleteFilesInFolder = async (driveName, folderName) => {
     if (!db) return;
-  
+
     const drive = await db.drives.where('driveName').equals(driveName).first();
-  
+
     if (drive) {
       const filesToDelete = drive.files.filter(file => file.fullPath.startsWith(folderName));
-  
+
       if (filesToDelete.length === 0) {
         console.log(`No files found in folder '${folderName}' of drive '${driveName}'.`);
         return;
       }
-  
+
       const updatedFiles = drive.files.filter(file => !file.fullPath.startsWith(folderName + '/'));
       await db.drives.update(drive.id, { files: updatedFiles });
-  
+
       console.log(`Deleted ${filesToDelete.length} files from folder '${folderName}' of drive '${driveName}'.`);
     } else {
       console.log(`Drive '${driveName}' not found.`);
@@ -109,16 +113,29 @@ const useIndexedDB = () => {
   // find the file data with file's fullPath
   const getFileByFullPath = async (driveName, fullPath) => {
     if (!db) return null;
-  
+
     const drive = await db.drives.where('driveName').equals(driveName).first();
-  
+
     if (drive) {
       const file = drive.files.find(file => file.fullPath === fullPath);
       //console.log('File found:', file);
       return file || null; // Return the file if found, otherwise return null
     }
-  
+
     return null; // Drive not found, return null
+  };
+
+  const deleteDbDrive = async (driveName) => {
+    if (!db) return;
+  
+    const drive = await db.drives.where('driveName').equals(driveName).first();
+  
+    if (drive) {
+      await db.drives.delete(drive.id);
+      console.log(`Drive '${driveName}' and its data have been deleted.`);
+    } else {
+      console.log(`Drive '${driveName}' not found.`);
+    }
   };
 
   return {
@@ -128,6 +145,7 @@ const useIndexedDB = () => {
     deleteFileFromDrive,
     deleteFilesInFolder,
     getFileByFullPath,
+    deleteDbDrive,
   };
 };
 

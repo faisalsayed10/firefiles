@@ -24,11 +24,13 @@ import { useRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
 import { X } from "tabler-icons-react";
+import useIndexedDB from '@hooks/useIndexedDB';
 
 const Dashboard = () => {
 	const router = useRouter();
 	const { user } = useUser({ redirectTo: "/login" });
 	const { data, isValidating, mutate } = useSWR<Drive[]>(`/api/drive`);
+	const { deleteDbDrive } = useIndexedDB(); // import indexeddb hook
 
 	const optionProps = {
 		p: 2,
@@ -137,6 +139,7 @@ const Dashboard = () => {
 													onClick={async (e) => {
 														e.stopPropagation();
 														await deleteDrive(Provider[drive.type], drive.id);
+														await deleteDbDrive(drive.name);
 														mutate(data.filter((b) => b.id !== drive.id));
 													}}
 												>
