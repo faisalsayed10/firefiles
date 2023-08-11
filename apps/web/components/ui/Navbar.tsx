@@ -16,17 +16,34 @@ import { onLogout } from "@util/helpers";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { RoleContext } from "pages/drives/[id]";
-import React, { useContext } from "react";
-import { ArrowNarrowLeft, ChevronDown, Coin, File, Logout, Moon, Sun } from "tabler-icons-react";
+import React, { useContext, useState } from "react";
+import {
+  ArrowNarrowLeft,
+  ChevronDown,
+  Coin,
+  File,
+  Logout,
+  Moon,
+  Sun,
+  User,
+} from "tabler-icons-react";
 import Invite from "./Invite";
 import InviteNotification from "./InviteNotification";
+import UserManagement from "./UserManagement";
 
 export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { mutateUser } = useUser();
   const router = useRouter();
   const role = useContext(RoleContext);
+  const [isUserManagementModalOpen, setIsUserManagementModalOpen] = useState(false);
+  const handleOpenUserManagementModal = () => {
+    setIsUserManagementModalOpen(true);
+  };
 
+  const handleCloseUserManagementModal = () => {
+    setIsUserManagementModalOpen(false);
+  };
   return (
     <>
       <Flex
@@ -63,13 +80,20 @@ export default function Navbar() {
               Actions
             </MenuButton>
             <MenuList>
+              {router.route !== "/" && (role == Role.CREATOR || role == Role.ADMIN) && (
+                <MenuItem height="8" icon={<User />} onClick={handleOpenUserManagementModal}>
+                  User Management
+                </MenuItem>
+              )}
               <MenuItem
+                height="8"
                 icon={<File />}
                 onClick={() => window.open("https://firefiles.app/docs", "_blank")}
               >
                 View Documentation
               </MenuItem>
               <MenuItem
+                height="8"
                 icon={<Coin />}
                 onClick={() => {
                   const url = "https://github.com/faisalsayed10/firefiles#sponsor-this-project";
@@ -79,6 +103,7 @@ export default function Navbar() {
                 Donate Us
               </MenuItem>
               <MenuItem
+                height="8"
                 icon={<Logout />}
                 onClick={async () => {
                   await onLogout();
@@ -94,6 +119,8 @@ export default function Navbar() {
         </Box>
       </Flex>
       <Divider />
+      <UserManagement isOpen={isUserManagementModalOpen} onClose={handleCloseUserManagementModal} />
+      )
     </>
   );
 }
