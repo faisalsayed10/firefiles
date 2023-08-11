@@ -64,7 +64,10 @@ const postBOUSchema = z.object({
  */
 const getBOUSchema = z.object({
   bucketId: z.string().optional(),
-  isPending: z.boolean(),
+  isPending: z
+    .string()
+    .nonempty()
+    .transform((arg) => arg === "true"),
 });
 
 interface commonGetProp {
@@ -104,8 +107,9 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
           where: { userId: user.id, isPending },
         });
+        console.log(isPending);
+        console.log(typeof isPending);
 
-        // TODO: determine if return should be done given empty array before map operation
         const incomingRequests: getProp[] = await Promise.all(
           bucketsOnUsers.map(async (bucketOnUser) => {
             const { name: bucketName } = await prisma.drive.findFirst({
@@ -121,7 +125,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           }),
         );
 
-        return res.status(200).json(incomingRequests || []);
+        return res.status(200).json(incomingRequests);
       }
       // Get a bucket's OUTGOING requests
       // Authorize action...
@@ -176,7 +180,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         }),
       );
 
-      return res.status(200).json(outgoingRequests || []);
+      return res.status(200).json(outgoingRequests);
 
       // POST - CREATE
     } else if (req.method === "POST") {
@@ -268,7 +272,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
             error: `cannot change access level: requesting userId ${user.id} does not have admin access to bucketId ${bucketId}`,
           });
 
-        const patchCount = await prisma.bucketsOnUsers.updateMany({
+        const { count: patchCount } = await prisma.bucketsOnUsers.updateMany({
           where: { bucketId, userId: inviteeData.userId },
           data: { role: inviteeData.role },
         });
@@ -277,7 +281,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           .json(`successfully patched role of ${patchCount} bucketOnUsers record(s)`);
       }
       // Patch operation for accepting the user's invitation to the drive (requestor == accepting user)
-      const patchCount = await prisma.bucketsOnUsers.updateMany({
+      const { count: patchCount } = await prisma.bucketsOnUsers.updateMany({
         where: { bucketId, userId: user.id },
         data: { isPending: true },
       });
@@ -331,7 +335,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           });
       }
       // Perform revoke/remove or detach operation
-      const deletedBucketsOnUsersCount = await prisma.bucketsOnUsers.deleteMany({
+      const { count: deletedBucketsOnUsersCount } = await prisma.bucketsOnUsers.deleteMany({
         where: { bucketId: bucketId, userId: inviteeId || user.id },
       });
       return res

@@ -5,6 +5,76 @@ import { sessionOptions } from "@util/session";
 import { AES } from "crypto-js";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
+
+const roleFromString = (value: string): Role => {
+  switch (value) {
+    case Role.CREATOR:
+    case Role.ADMIN:
+    case Role.VIEWER:
+    case Role.EDITOR:
+      return value;
+    default:
+      throw new Error(`Invalid role: ${value}`);
+  }
+};
+
+/**
+ * Schema for performing a GET operation on Drive records.
+ *
+ * @param {Role} role - A required Role query parameter
+ * @param {boolean} isPending - A required boolean query parameter
+ */
+const getDriveSchema = z.object({
+  role: z.string().nonempty().transform(roleFromString),
+  isPending: z
+    .string()
+    .nonempty()
+    .transform((arg) => arg === "true"),
+});
+
+/**
+ * Schema for performing a POST operation for a Drive record.
+ *
+ * @param {string} data - A required decrypted drive data body parameter
+ * @param {string} name - A required drive name body parameter
+ * @param {string} type - A required drive type body parameter
+ */
+const postDriveSchema = z.object({
+  data: z.string().nonempty(),
+  name: z.string().nonempty(),
+  type: z.string().nonempty(),
+});
+
+/**
+ * Schema for performing a DELETE operation on Drive records.
+ *
+ * @param {string} id - A required drive id query parameter
+ */
+const deleteDriveSchema = z.object({
+  id: z.string().nonempty(),
+});
+
+/**
+ * Body schema for performing a PUT operation on Drive records.
+ * Required in addition to the putDriveQuerySchema
+ *
+ * @param {string} data - A required decrypted drive data body parameter
+ */
+const putDriveBodySchema = z.object({
+  data: z.string().nonempty(),
+});
+
+/**
+ * Query schema for performing a PUT operation on Drive records.
+ * Required in addition to the putDriveBodySchema
+ *
+ * @param {string} id - A required drive id query parameter
+ */
+const putDriveQuerySchema = z.object({
+  id: z.string().nonempty(),
+});
+
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const user = req.session.user;
@@ -12,12 +82,15 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
     // READ
     if (req.method === "GET") {
-      const { role, isPending } = req.query;
+      const parms = getDriveSchema.safeParse(req.query);
+      if (!parms.success)
+        return res.status(400).json({ error: "Invalid GET drives request params." });
+      const { role, isPending } = parms.data;
       const bucketsOnUser = await prisma.bucketsOnUsers.findMany({
         where: {
-          userId: user.id as string,
-          role: role as Role,
-          isPending: isPending === "true",
+          userId: user.id,
+          role,
+          isPending,
         },
       });
 
@@ -28,8 +101,10 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       return res.status(200).json(drives);
       // CREATE
     } else if (req.method === "POST") {
-      const { data, name, type } = req.body;
-      if (!data || !name || !type) return res.status(400).json({ error: "Invalid request." });
+      const parms = postDriveSchema.safeParse(req.body);
+      if (!parms.success)
+        return res.status(400).json({ error: "Invalid POST drive request params." });
+      const { data, name, type } = parms.data;
       const { success, error } = await beforeCreatingDoc(req, res, req.body);
 
       if (!success) return res.status(400).json({ error });
@@ -39,33 +114,59 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         data: { userId: user.id, bucketId: drive.id, isPending: false, role: Role.CREATOR },
       });
       return res.status(200).json({ driveId: drive.id });
-      // TODO: DELETE
+      // DELETE
     } else if (req.method === "DELETE") {
-      const id = req.query.id as string; // TODO: zod
-      if (!id) return res.status(400).json({ error: "Drive ID not found." });
-      // await prisma.drive.deleteMany({ where: { id, userId: user.id } });
+      const parms = deleteDriveSchema.safeParse(req.query);
+      if (!parms.success)
+        return res.status(400).json({ error: "Invalid DELETE drive request params." });
+      const { id } = parms.data;
 
-      // TODO: authorize
-      // Delete all rows in the "BucketsOnUsers" table that contain the specified "id"
-      await prisma.bucketsOnUsers.deleteMany({
+      // Authorize action...
+      const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
+        where: {
+          userId: user.id,
+          bucketId: id,
+        },
+      });
+
+      if (!requestorRole)
+        return res.status(403).json({
+          error: `requesting userId ${user.id} does not have access to bucketId ${id}`,
+        });
+
+      if (requestorRole === Role.VIEWER || requestorRole === Role.EDITOR)
+        return res.status(403).json({
+          error: `cannot revoke access: requesting userId ${user.id} does not have admin access to bucketId ${id}`,
+        });
+
+      const { count: bucketsOnUsersCount } = await prisma.bucketsOnUsers.deleteMany({
         where: { bucketId: id },
       });
 
-      // Delete the Drive row from the "Drive" table
-      await prisma.drive.deleteMany({
+      const { count: driveCount } = await prisma.drive.deleteMany({
         where: { id: id },
       });
 
-      return res.status(200).json("ok");
+      return res
+        .status(200)
+        .json(
+          `Successfully deleted ${bucketsOnUsersCount} BOU records and ${driveCount} Drive records`,
+        );
       // UPDATE
     } else if (req.method === "PUT") {
-      const id = req.query.id as string;
-      const data = req.body;
+      const parmsQuery = putDriveQuerySchema.safeParse(req.query);
+      if (!parmsQuery.success)
+        return res.status(400).json({ error: "Invalid PUT drive request query params." });
+      const { id } = parmsQuery.data;
 
-      if (!id || !data) return res.status(400).json({ error: "Data / Drive ID not found." });
+      const parmsBody = putDriveBodySchema.safeParse(req.body);
+      if (!parmsBody.success)
+        return res.status(400).json({ error: "Invalid PUT drive request body params." });
+      const { data } = parmsBody.data;
+
       const keys = AES.encrypt(JSON.stringify(data), process.env.CIPHER_KEY).toString();
-      await prisma.drive.updateMany({ where: { id }, data: { keys } });
-      return res.status(200).json("ok");
+      const { count: putCount } = await prisma.drive.updateMany({ where: { id }, data: { keys } });
+      return res.status(200).json(`Successfully updated ${putCount} Drive records`);
     }
   } catch (err) {
     console.error(err.message);
