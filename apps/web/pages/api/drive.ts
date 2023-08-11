@@ -56,13 +56,21 @@ const deleteDriveSchema = z.object({
 });
 
 /**
- * Body schema for performing a PUT operation on Drive records.
+ * Body schema for performing a PUT operation on Firebase Drive records.
  * Required in addition to the putDriveQuerySchema
+ * TODO: adjust to allow other drive types/functionality
  *
  * @param {string} data - A required decrypted drive data body parameter
  */
 const putDriveBodySchema = z.object({
-  data: z.string().nonempty(),
+  data: z.object({
+    apiKey: z.string().nonempty(),
+    appId: z.string().nonempty(),
+    authDomain: z.string().nonempty(),
+    password: z.string().optional(),
+    projectId: z.string().nonempty(),
+    storageBucket: z.string().nonempty(),
+  }),
 });
 
 /**
