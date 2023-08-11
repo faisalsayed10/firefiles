@@ -10,8 +10,11 @@ import {
   Flex,
   useDisclosure,
 } from "@chakra-ui/react";
-// import { BellIcon } from "@chakra-ui/icons";
+import { BellIcon } from "@chakra-ui/icons";
 import React, { useState, useEffect } from "react";
+import { BucketsOnUsers } from "@prisma/client";
+import useSWR from "swr";
+import { getProp } from "pages/api/bucketsOnUsers";
 
 export default function InviteNotification() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -20,67 +23,83 @@ export default function InviteNotification() {
   const [invitationRequests, setInvitationRequests] = useState<string[]>([]);
 
   // Simulate fetching invitation requests from the backend
-  const fetchInvitationRequests = () => {
-    // Need to replace with the actual API call to fetch the requests
-    const mockRequests = ["request 1", "2", "3"];
-    setInvitationRequests(mockRequests);
+  // const fetchInvitationRequests = () => {
+  //   const { data, isValidating, mutate } = useSWR<BucketsOnUsers[]>(
+  //     `/api/bucketsOnUsers?isPending=true`,
+  //   );
+  // };
+
+  // useEffect(() => {
+  //   fetchInvitationRequests();
+  // }, []);
+
+  const { data, isValidating, mutate } = useSWR<getProp[]>(`/api/bucketsOnUsers?isPending=true`);
+
+  const acceptRequest = (bucketId: string) => {
+    mutate(data.filter((b) => b.bucketId !== bucketId));
   };
 
-  useEffect(() => {
-    fetchInvitationRequests();
-  }, []);
-
-  const acceptRequest = (index: number) => {
-    const updatedRequests = invitationRequests.filter((_, i) => i !== index);
-    setInvitationRequests(updatedRequests);
-  };
-
-  const rejectRequest = (index: number) => {
-    const updatedRequests = invitationRequests.filter((_, i) => i !== index);
-    setInvitationRequests(updatedRequests);
+  const rejectRequest = (bucketId: string) => {
+    mutate(data.filter((b) => b.bucketId !== bucketId));
   };
 
   return (
     <>
-      <Button
-        ref={btnRef}
-        variant="ghost"
-        onClick={() => {
-          fetchInvitationRequests(); // Fetch the requests again when the button is clicked
-          onOpen();
-        }}
-      >
-        {/* <BellIcon /> */}
-      </Button>
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>Invitation Requests</DrawerHeader>
+      {!data && isValidating ? (
+        <>{/*placeholder for content that is being loaded asynchronously.*/}</>
+      ) : (
+        <>
+          <Button
+            ref={btnRef}
+            variant="ghost"
+            onClick={() => {
+              // fetchInvitationRequests(); // Fetch the requests again when the button is clicked
+              onOpen();
+            }}
+          >
+            <BellIcon />
+          </Button>
+          <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
+            <DrawerOverlay />
+            <DrawerContent>
+              <DrawerCloseButton />
+              <DrawerHeader>Invitation Requests</DrawerHeader>
 
-          <DrawerBody>
-            {invitationRequests.map((request, index) => (
-              <Flex justifyContent="space-between" key={index}>
-                {request}
-                <div>
-                  <Button ml="2" colorScheme="green" size="sm" onClick={() => acceptRequest(index)}>
-                    Accept
-                  </Button>
-                  <Button ml="2" colorScheme="red" size="sm" onClick={() => rejectRequest(index)}>
-                    Reject
-                  </Button>
-                </div>
-              </Flex>
-            ))}
-          </DrawerBody>
+              <DrawerBody>
+                {data?.map((request, index) => (
+                  <Flex justifyContent="space-between" key={index}>
+                    Invite to Bucket {request.bucketName} as {request.role}
+                    <div>
+                      <Button
+                        ml="2"
+                        colorScheme="green"
+                        size="sm"
+                        onClick={() => acceptRequest(request.bucketId)}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        ml="2"
+                        colorScheme="red"
+                        size="sm"
+                        onClick={() => rejectRequest(request.bucketId)}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  </Flex>
+                ))}
+              </DrawerBody>
 
-          <DrawerFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Done
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+              <DrawerFooter>
+                <Button colorScheme="blue" mr={3} onClick={onClose}>
+                  Done
+                </Button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        </>
+      )}
     </>
   );
 }

@@ -87,7 +87,7 @@ type outgoingGetProp = {
   inviteeId: string;
 };
 
-type getProp = commonGetProp & (incomingGetProp | outgoingGetProp);
+export type getProp = commonGetProp & (incomingGetProp | outgoingGetProp);
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
