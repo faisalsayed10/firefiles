@@ -104,7 +104,7 @@ export const parseXML2JSON = (rawXML: string) => {
     const result = parser.parse(rawXML);
     return { success: true, json: result };
   } catch (err) {
-    console.log(`XML parse error: ${err}`);
+    console.error(`XML parse error: ${err}`);
     return { success: false, error: err };
   }
 };
@@ -115,7 +115,7 @@ export const buildJSON2XML = (json: any) => {
     const result = builder.build(json);
     return { success: true, xml: result };
   } catch (err) {
-    console.log(`XML build error: ${err}`);
+    console.error(`XML build error: ${err}`);
     return { success: false, error: err };
   }
 };

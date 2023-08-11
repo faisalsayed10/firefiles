@@ -107,8 +107,6 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
           where: { userId: user.id, isPending },
         });
-        console.log(isPending);
-        console.log(typeof isPending);
 
         const incomingRequests: getProp[] = await Promise.all(
           bucketsOnUsers.map(async (bucketOnUser) => {

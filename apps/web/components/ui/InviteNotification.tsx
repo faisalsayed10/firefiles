@@ -10,7 +10,7 @@ import {
   Flex,
   useDisclosure,
 } from "@chakra-ui/react";
-import { BellIcon } from "@chakra-ui/icons";
+// import { BellIcon } from "@chakra-ui/icons";
 import React, { useState, useEffect } from "react";
 
 export default function InviteNotification() {
@@ -50,7 +50,7 @@ export default function InviteNotification() {
           onOpen();
         }}
       >
-        <BellIcon />
+        {/* <BellIcon /> */}
       </Button>
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />

@@ -341,7 +341,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
 
     (async () => {
       try {
-        console.log(files);
         if (!files) {
           const listObjectsResponse = await fetchS3ObjectsList(
             data.id,
@@ -373,7 +372,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
             );
 
             setFiles(driveFiles);
-            console.log(files);
           }
 
           const localFolders = localStorage.getItem(`local_folders_${data.id}`);
