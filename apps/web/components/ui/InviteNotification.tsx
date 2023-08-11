@@ -10,12 +10,21 @@ import {
   Flex,
   useDisclosure,
 } from "@chakra-ui/react";
-import { BellIcon } from "@chakra-ui/icons";
+import { Bell } from "tabler-icons-react";
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import { getProp } from "pages/api/bucketsOnUsers";
 import axios from "axios";
 import toast from "react-hot-toast";
+
+const NotificationIcon = ({ count }) => {
+  return (
+    <div className="notification-icon">
+      <Bell size={24} strokeWidth={1.5} />
+      {count > 0 && <span className="notification-badge">{count}</span>}
+    </div>
+  );
+};
 
 export default function InviteNotification() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,7 +67,7 @@ export default function InviteNotification() {
               onOpen();
             }}
           >
-            <BellIcon />
+            <NotificationIcon count={data.length} />
           </Button>
           <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
             <DrawerOverlay />
