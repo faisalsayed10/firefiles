@@ -27,14 +27,14 @@ export const deleteDrive = async (type: Provider, id: string) => {
         break;
     }
 
-    // add confirmation if successful
+    toast.success("Drive deleted successfully");
   }
 };
 
 export const detachDrive = async (id: string) => {
   if (window.confirm("Are you sure you want to detach this drive?")) {
-    await axios.delete(`/api/bucketsOnUsers?id=${id}`);
-    // add confirmation if successful
+    await axios.delete(`/api/bucketsOnUsers?bucketId=${id}`);
+    toast.success("Drive detached successfully");
   }
 };
 

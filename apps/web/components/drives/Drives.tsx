@@ -9,6 +9,7 @@ import React from "react";
 import useSWR from "swr";
 import { X, Share } from "tabler-icons-react";
 import { Role } from "@prisma/client";
+import toast from "react-hot-toast";
 
 const tooltips: Record<Role, string> = {
   CREATOR: "You are the creator of this drive",
@@ -105,12 +106,16 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                     {...optionProps}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      if (driveRole === Role.CREATOR) {
-                        await deleteDrive(Provider[drive.type], drive.id);
-                      } else {
-                        await detachDrive(drive.id);
+                      try {
+                        if (driveRole === Role.CREATOR) {
+                          await deleteDrive(Provider[drive.type], drive.id);
+                        } else {
+                          await detachDrive(drive.id);
+                        }
+                        mutate(data.filter((b) => b.id !== drive.id));
+                      } catch (e) {
+                        toast.error(e.message);
                       }
-                      mutate(data.filter((b) => b.id !== drive.id));
                     }}
                   >
                     <X />
