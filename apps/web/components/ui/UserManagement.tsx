@@ -54,6 +54,30 @@ const UserManagementModal = ({ isOpen, onClose }) => {
           toast.error(error.message);
         }
       };
+
+      const handleChangeRole = async (id: string, role: Role) => {
+        try {
+          await axios.put(`/api/bucketsOnUsers`, {
+            bucketId: router.query.id,
+            inviteeData: {
+              role: role,
+              userId: id,
+            },
+          });
+          mutate(
+            data.map((user) => {
+              if (user.inviteeId === id) {
+                user.role = role;
+              }
+              return user;
+            }),
+          );
+          toast.success("You have successfully changed this user's role.");
+        } catch (error) {
+          toast.error(error.response?.data?.error || error.message);
+        }
+      };
+
       return (
         <Modal size="lg" isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
