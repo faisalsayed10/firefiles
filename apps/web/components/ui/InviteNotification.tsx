@@ -13,7 +13,7 @@ import {
 import { Bell } from "tabler-icons-react";
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import { getProp } from "pages/api/bucketsOnUsers";
+import { incomingGetProp } from "pages/api/bucketsOnUsers";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -43,15 +43,9 @@ export default function InviteNotification() {
   //   fetchInvitationRequests();
   // }, []);
 
-  const { data, isValidating, mutate } = useSWR<getProp[]>(`/api/bucketsOnUsers?isPending=true`);
-
-  const acceptRequest = (bucketId: string) => {
-    mutate(data.filter((b) => b.bucketId !== bucketId));
-  };
-
-  const rejectRequest = (bucketId: string) => {
-    mutate(data.filter((b) => b.bucketId !== bucketId));
-  };
+  const { data, isValidating, mutate } = useSWR<incomingGetProp[]>(
+    `/api/bucketsOnUsers?isPending=true`,
+  );
 
   return (
     <>

@@ -28,14 +28,18 @@ export default function Invite() {
 
   const handleShare = async () => {
     if (validator.isEmail(email)) {
-      const { data } = await axios.post("/api/bucketsOnUsers", {
-        email: email,
-        bucketId: router.query.id,
-        role: selectedRole,
-      });
+      try {
+        const { data } = await axios.post("/api/bucketsOnUsers", {
+          email: email,
+          bucketId: router.query.id,
+          role: selectedRole,
+        });
 
-      onClose();
-      toast.success(data.message);
+        onClose();
+        toast.success(data.message);
+      } catch (error) {
+        toast.error(error.message);
+      }
     } else {
       // Invalid email, show an error or take appropriate action
       setIsValidEmail(false);

@@ -16,78 +16,103 @@ import {
   TableContainer,
 } from "@chakra-ui/react";
 import { X } from "tabler-icons-react";
+import useSWR from "swr";
+import { useRouter } from "next/router";
+import { outgoingGetProp } from "pages/api/bucketsOnUsers";
+import { Role } from "@prisma/client";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const UserManagementModal = ({ isOpen, onClose }) => {
-  // Mock data for demonstration
-  const existingUsers = [
-    { email: "user1@example.com", role: "Editor" },
-    { email: "user2@example.com", role: "Admin" },
-  ];
+  const router = useRouter();
 
-  const pendingUsers = [
-    { email: "qwq@example.com", role: "Viewer" },
-    { email: "qwq2@example.com", role: "Admin" },
-  ];
+  if (router.query.id) {
+    const { data, isValidating, mutate } = useSWR<outgoingGetProp[]>(
+      `/api/bucketsOnUsers?bucketId=${router.query.id}`,
+    );
 
-  const handleRemoveAccess = (userEmail) => {
-    // Handle the logic to remove user access
-  };
-  return (
-    <Modal size="lg" isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>User Management</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <TableContainer>
-            <Table variant="simple">
-              <Tbody>
-                <Tr>
-                  <Th>Pending User Email</Th>
-                  <Th>Role</Th>
-                  <Th>Delete</Th>
-                  <Th></Th>
-                </Tr>
-                {existingUsers.map((user, index) => (
-                  <Tr key={index}>
-                    <Td>{user.email}</Td>
-                    <Td>{user.role}</Td>
-                    <Td>
-                      <Button onClick={() => handleRemoveAccess(user.email)}>
-                        <X size={20} strokeWidth={5} color={"#bf4044"} />
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+    if (!data && isValidating) {
+      return <></>;
+    } else {
+      const existingUsers: outgoingGetProp[] = [];
+      const pendingUsers: outgoingGetProp[] = [];
 
-            <Table variant="simple">
-              <Tbody>
-                <Tr>
-                  <Th>Existing User Email</Th>
-                  <Th>Role</Th>
-                  <Th>Delete</Th>
-                </Tr>
-                {pendingUsers.map((user, index) => (
-                  <Tr key={index}>
-                    <Td>{user.email}</Td>
-                    <Td>{user.role}</Td>
-                    <Td>
-                      <Button onClick={() => handleRemoveAccess(user.email)}>
-                        <X size={20} strokeWidth={5} color={"#bf4044"} />
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </ModalBody>
-        <ModalFooter>{/* Add any footer content or buttons if needed */}</ModalFooter>
-      </ModalContent>
-    </Modal>
-  );
+      data.forEach((bucketsOnUser) => {
+        if (bucketsOnUser.isPending) {
+          pendingUsers.push(bucketsOnUser);
+        } else {
+          existingUsers.push(bucketsOnUser);
+        }
+      });
+
+      const handleRemoveAccess = async (id: string) => {
+        try {
+          await axios.delete(`/api/bucketsOnUsers?inviteeId=${id}&bucketId=${router.query.id}`);
+          mutate(data.filter((user) => user.inviteeId !== id));
+          toast.success("You have successfully removed this user to this bucket.");
+        } catch (error) {
+          toast.error(error.message);
+        }
+      };
+      return (
+        <Modal size="lg" isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>User Management</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <TableContainer>
+                <Table variant="simple">
+                  <Tbody>
+                    <Tr>
+                      <Th>Pending User</Th>
+                      <Th>Role</Th>
+                      <Th>Delete</Th>
+                      <Th></Th>
+                    </Tr>
+                    {existingUsers.map((user, index) => (
+                      <Tr key={index}>
+                        <Td>{user.inviteeEmail}</Td>
+                        <Td>{user.role}</Td>
+                        <Td>
+                          {user.role !== Role.CREATOR && (
+                            <Button onClick={() => handleRemoveAccess(user.inviteeId)}>
+                              <X size={20} strokeWidth={5} color={"#bf4044"} />
+                            </Button>
+                          )}
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+
+                <Table variant="simple">
+                  <Tbody>
+                    <Tr>
+                      <Th>Existing User</Th>
+                      <Th>Role</Th>
+                      <Th>Delete</Th>
+                    </Tr>
+                    {pendingUsers.map((user, index) => (
+                      <Tr key={index}>
+                        <Td>{user.inviteeEmail}</Td>
+                        <Td>{user.role}</Td>
+                        <Td>
+                          <Button onClick={() => handleRemoveAccess(user.inviteeId)}>
+                            <X size={20} strokeWidth={5} color={"#bf4044"} />
+                          </Button>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            </ModalBody>
+            <ModalFooter>{/* Add any footer content or buttons if needed */}</ModalFooter>
+          </ModalContent>
+        </Modal>
+      );
+    }
+  }
 };
-
 export default UserManagementModal;

@@ -120,7 +120,6 @@ export default function Navbar() {
       </Flex>
       <Divider />
       <UserManagement isOpen={isUserManagementModalOpen} onClose={handleCloseUserManagementModal} />
-      )
     </>
   );
 }
