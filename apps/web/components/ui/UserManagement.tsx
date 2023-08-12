@@ -65,7 +65,7 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                 <Table variant="simple">
                   <Tbody>
                     <Tr>
-                      <Th>Pending User</Th>
+                      <Th>Existing User</Th>
                       <Th>Role</Th>
                       <Th>Delete</Th>
                       <Th></Th>
@@ -89,7 +89,7 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                 <Table variant="simple">
                   <Tbody>
                     <Tr>
-                      <Th>Existing User</Th>
+                      <Th>Pending User</Th>
                       <Th>Role</Th>
                       <Th>Delete</Th>
                     </Tr>
