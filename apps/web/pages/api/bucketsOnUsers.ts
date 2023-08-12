@@ -225,7 +225,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
         if (userBOURecords.length > 0)
           return res.status(403).json({
-            error: `cannot create access invitation: userId ${id} already has access to bucketId ${bucketId}`,
+            error: `Cannot create access invitation: user with the email ${email} already has invited to this bucket`,
           });
 
         await prisma.bucketsOnUsers.create({
@@ -312,7 +312,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       if (inviteeId) {
         const { role: inviteeRole } = await prisma.bucketsOnUsers.findFirst({
           select: { role: true },
-          where: { userId: inviteeId, bucketId: bucketId, isPending: false },
+          where: { userId: inviteeId, bucketId: bucketId }, // I deleted isPending: false since there might be invitee who is pending
         });
 
         if (!inviteeRole)
