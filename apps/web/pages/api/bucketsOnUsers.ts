@@ -66,7 +66,7 @@ const getBOUSchema = z.object({
   bucketId: z.string().optional(),
   isPending: z
     .string()
-    .nonempty()
+    .optional()
     .transform((arg) => arg === "true"),
 });
 
@@ -75,19 +75,20 @@ interface commonGetProp {
   bucketId: string;
   bucketName: string;
   role: Role;
+  isPending?: boolean;
 }
 
-interface incomingGetProp {
+export interface incomingGetProp extends commonGetProp {
   accessType: "incoming";
 }
 
-type outgoingGetProp = {
+export interface outgoingGetProp extends commonGetProp {
   accessType: "outgoing";
   inviteeEmail: string;
   inviteeId: string;
-};
+}
 
-export type getProp = commonGetProp & (incomingGetProp | outgoingGetProp);
+// export type getProp = commonGetProp & (incomingGetProp | outgoingGetProp);
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -101,14 +102,13 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       if (!parms.success)
         return res.status(400).json({ error: `invalid get BucketsOnUsers parameters` });
       const { bucketId, isPending } = parms.data;
-
       // Get a user's INCOMING requests
       if (!bucketId) {
         const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
           where: { userId: user.id, isPending },
         });
 
-        const incomingRequests: getProp[] = await Promise.all(
+        const incomingRequests: incomingGetProp[] = await Promise.all(
           bucketsOnUsers.map(async (bucketOnUser) => {
             const { name: bucketName } = await prisma.drive.findFirst({
               where: { id: bucketOnUser.bucketId },
@@ -124,61 +124,63 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         );
 
         return res.status(200).json(incomingRequests);
+      } else {
+        // Get a bucket's OUTGOING requests
+        // Authorize action...
+        const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
+          select: { role: true },
+          where: {
+            userId: user.id,
+            bucketId: bucketId,
+            isPending: false,
+            // NOT: { role: Role.CREATOR },
+          },
+        });
+
+        if (!requestorRole)
+          return res.status(403).json({
+            error: `requesting userId ${user.id} does not have access to bucketId ${bucketId}`,
+          });
+
+        if (requestorRole === Role.EDITOR || requestorRole === Role.VIEWER)
+          return res.status(403).json({
+            error: `cannot read granted access: requesting userId ${user.id} does not have admin access to bucketId ${bucketId}`,
+          });
+
+        // const { email } = await prisma.user.findFirst({where: {id: bucketOnUser.userId}});
+        const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
+          where: { bucketId },
+        });
+
+        const outgoingRequests: outgoingGetProp[] = await Promise.all(
+          bucketsOnUsers.map(async (bucketOnUser) => {
+            const { name: bucketName } = await prisma.drive.findFirst({
+              where: { id: bucketOnUser.bucketId },
+              select: { name: true },
+            });
+            const { id: inviteeId, email: inviteeEmail } = await prisma.user.findFirst({
+              where: {
+                id: bucketOnUser.userId,
+              },
+              select: {
+                id: true,
+                email: true,
+              },
+            });
+            return {
+              accessType: "outgoing",
+              bucketId: bucketOnUser.bucketId,
+              bucketName,
+              role: bucketOnUser.role,
+              isPending: bucketOnUser.isPending,
+              inviteeEmail,
+              inviteeId,
+            };
+          }),
+        );
+
+        return res.status(200).json(outgoingRequests);
       }
-      // Get a bucket's OUTGOING requests
-      // Authorize action...
-      const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
-        select: { role: true },
-        where: {
-          userId: user.id,
-          bucketId: bucketId,
-          isPending: false,
-          NOT: { role: Role.CREATOR },
-        },
-      });
-
-      if (!requestorRole)
-        return res.status(403).json({
-          error: `requesting userId ${user.id} does not have access to bucketId ${bucketId}`,
-        });
-
-      if (requestorRole === Role.EDITOR || requestorRole === Role.VIEWER)
-        return res.status(403).json({
-          error: `cannot read granted access: requesting userId ${user.id} does not have admin access to bucketId ${bucketId}`,
-        });
-
-      // const { email } = await prisma.user.findFirst({where: {id: bucketOnUser.userId}});
-      const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
-        where: { bucketId, isPending },
-      });
-
-      const outgoingRequests: getProp[] = await Promise.all(
-        bucketsOnUsers.map(async (bucketOnUser) => {
-          const { name: bucketName } = await prisma.drive.findFirst({
-            where: { id: bucketOnUser.bucketId },
-            select: { name: true },
-          });
-          const { id: inviteeId, email: inviteeEmail } = await prisma.user.findFirst({
-            where: {
-              id: bucketOnUser.userId,
-            },
-            select: {
-              id: true,
-              email: true,
-            },
-          });
-          return {
-            accessType: "outgoing",
-            bucketId: bucketOnUser.bucketId,
-            bucketName,
-            role: bucketOnUser.role,
-            inviteeEmail,
-            inviteeId,
-          };
-        }),
-      );
-
-      return res.status(200).json(outgoingRequests);
 
       // POST - CREATE
     } else if (req.method === "POST") {
