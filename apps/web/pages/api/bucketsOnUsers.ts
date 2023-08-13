@@ -207,9 +207,9 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           error: `cannot create access invitation: requesting userId ${user.id} does not have admin access to bucketId ${bucketId}`,
         });
 
-      const { id } = await prisma.user.findFirst({ where: { email } });
+      const inviteeUser = await prisma.user.findFirst({ where: { email } });
       // Create Firefiles user if one doesn't yet exist for invitee
-      if (!id) {
+      if (!inviteeUser?.id) {
         const { id: inviteeId } = await prisma.user.create({
           data: { email, verified: false, lastSignedIn: new Date(), createdAt: new Date() },
         });
@@ -220,7 +220,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
         // User should not be permitted multiple bucketsOnUsers records for a single drive
       } else {
         const userBOURecords = await prisma.bucketsOnUsers.findMany({
-          where: { userId: id, bucketId },
+          where: { userId: inviteeUser.id, bucketId },
         });
 
         if (userBOURecords.length > 0)
@@ -229,7 +229,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           });
 
         await prisma.bucketsOnUsers.create({
-          data: { userId: id, bucketId, isPending: true, role },
+          data: { userId: inviteeUser.id, bucketId, isPending: true, role },
         });
       }
 
