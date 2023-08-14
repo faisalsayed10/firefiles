@@ -91,17 +91,17 @@ const UserManagementModal = ({ isOpen, onClose }) => {
         <Modal size="2xl" isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>User Management</ModalHeader>
+            <ModalHeader fontSize="2xl">User Management</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <TableContainer>
                 <Table variant="simple">
                   <Tbody>
                     <Tr>
-                      <Th>Existing User</Th>
-                      <Th>Role</Th>
-                      <Th>Delete</Th>
-                      <Th></Th>
+                      <Th fontSize="lg">Existing User</Th>
+                      <Th fontSize="lg">Role</Th>
+                      <Th fontSize="lg">Delete</Th>
+                      <Th fontSize="lg"></Th>
                     </Tr>
                     {existingUsers.map((bucketOnUser, index) => (
                       <Tr key={index}>
@@ -117,9 +117,9 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                       </Tr>
                     ))}
                     <Tr>
-                      <Th>Pending User</Th>
-                      <Th>Role</Th>
-                      <Th>Delete</Th>
+                      <Th fontSize="lg">Pending User</Th>
+                      <Th fontSize="lg">Role</Th>
+                      <Th fontSize="lg">Delete</Th>
                     </Tr>
                     {pendingUsers.map((bucketOnUser, index) => (
                       <Tr key={index}>
