@@ -58,6 +58,7 @@ const useIndexedDB = () => {
         size: fileData.size,
         url: fileData.url,
         fullPath: fileData.fullPath,
+        contentType: fileData.contentType,
       };
 
       const updatedFiles = drive.files ? [...drive.files, newFile] : [newFile];
