@@ -88,7 +88,7 @@ const UserManagementModal = ({ isOpen, onClose }) => {
       };
 
       return (
-        <Modal size="2xl" isOpen={isOpen} onClose={onClose}>
+        <Modal size="xl" isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader fontSize="2xl">User Management</ModalHeader>
@@ -98,18 +98,28 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                 <Table variant="simple">
                   <Tbody>
                     <Tr>
-                      <Th fontSize="lg">Existing User</Th>
-                      <Th fontSize="lg">Role</Th>
-                      <Th fontSize="lg">Delete</Th>
-                      <Th fontSize="lg"></Th>
+                      <Th textAlign="center" fontSize="lg">
+                        Existing User
+                      </Th>
+                      <Th textAlign="center" fontSize="lg">
+                        Role
+                      </Th>
+                      <Th textAlign="center" fontSize="lg">
+                        Delete
+                      </Th>
                     </Tr>
                     {existingUsers.map((bucketOnUser, index) => (
                       <Tr key={index}>
-                        <Td>{bucketOnUser.inviteeEmail}</Td>
-                        <Td>{bucketOnUser.role}</Td>
-                        <Td>
+                        <Td isTruncated maxW={"200px"}>
+                          {bucketOnUser.inviteeEmail}
+                        </Td>
+                        <Td textAlign="center">{bucketOnUser.role}</Td>
+                        <Td textAlign="center">
                           {bucketOnUser.role !== Role.CREATOR && (
-                            <Button onClick={() => handleRemoveAccess(bucketOnUser.inviteeId)}>
+                            <Button
+                              size="sm"
+                              onClick={() => handleRemoveAccess(bucketOnUser.inviteeId)}
+                            >
                               <X size={20} strokeWidth={5} color={"#bf4044"} />
                             </Button>
                           )}
@@ -117,15 +127,21 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                       </Tr>
                     ))}
                     <Tr>
-                      <Th fontSize="lg">Pending User</Th>
-                      <Th fontSize="lg">Role</Th>
-                      <Th fontSize="lg">Delete</Th>
+                      <Th textAlign="center" fontSize="lg">
+                        Pending User
+                      </Th>
+                      <Th textAlign="center" fontSize="lg">
+                        Role
+                      </Th>
+                      <Th textAlign="center" fontSize="lg">
+                        Delete
+                      </Th>
                     </Tr>
                     {pendingUsers.map((bucketOnUser, index) => (
                       <Tr key={index}>
                         <Td>{bucketOnUser.inviteeEmail}</Td>
-                        <Td>{bucketOnUser.role}</Td>
-                        <Td>
+                        <Td textAlign="center">{bucketOnUser.role}</Td>
+                        <Td textAlign="center">
                           <Button onClick={() => handleRemoveAccess(bucketOnUser.inviteeId)}>
                             <X size={20} strokeWidth={5} color={"#bf4044"} />
                           </Button>
