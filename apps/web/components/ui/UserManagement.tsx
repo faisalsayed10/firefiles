@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -22,11 +22,15 @@ import { outgoingGetProp } from "pages/api/bucketsOnUsers";
 import { Role } from "@prisma/client";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import useUser from "@hooks/useUser";
+import { RoleContext } from "pages/drives/[id]";
 
 const UserManagementModal = ({ isOpen, onClose }) => {
   const router = useRouter();
+  const { user } = useUser();
+  const role = useContext(RoleContext);
 
-  if (router.query.id) {
+  if (router.query.id && (role === Role.CREATOR || role === Role.ADMIN)) {
     const { data, isValidating, mutate } = useSWR<outgoingGetProp[]>(
       `/api/bucketsOnUsers?bucketId=${router.query.id}`,
     );
@@ -47,10 +51,14 @@ const UserManagementModal = ({ isOpen, onClose }) => {
 
       const handleRemoveAccess = async (id: string) => {
         try {
-          await axios.delete(`/api/bucketsOnUsers?inviteeId=${id}&bucketId=${router.query.id}`);
-          mutate(data.filter((user) => user.inviteeId !== id));
-          toast.success("You have successfully removed this user to this bucket.");
-          window.location.reload();
+          if (window.confirm("Are you sure you want to remove this user from this bucket?")) {
+            await axios.delete(`/api/bucketsOnUsers?inviteeId=${id}&bucketId=${router.query.id}`);
+            mutate(data.filter((b) => b.inviteeId !== id));
+            toast.success("You have successfully removed this user to this bucket.");
+            if (user.id === id) {
+              router.push("/");
+            }
+          }
         } catch (error) {
           toast.error(error.message);
         }
@@ -66,11 +74,11 @@ const UserManagementModal = ({ isOpen, onClose }) => {
             },
           });
           mutate(
-            data.map((user) => {
-              if (user.inviteeId === id) {
-                user.role = role;
+            data.map((bucketOnUser) => {
+              if (bucketOnUser.inviteeId === id) {
+                bucketOnUser.role = role;
               }
-              return user;
+              return bucketOnUser;
             }),
           );
           toast.success("You have successfully changed this user's role.");
@@ -95,13 +103,13 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                       <Th>Delete</Th>
                       <Th></Th>
                     </Tr>
-                    {existingUsers.map((user, index) => (
+                    {existingUsers.map((bucketOnUser, index) => (
                       <Tr key={index}>
-                        <Td>{user.inviteeEmail}</Td>
-                        <Td>{user.role}</Td>
+                        <Td>{bucketOnUser.inviteeEmail}</Td>
+                        <Td>{bucketOnUser.role}</Td>
                         <Td>
-                          {user.role !== Role.CREATOR && (
-                            <Button onClick={() => handleRemoveAccess(user.inviteeId)}>
+                          {bucketOnUser.role !== Role.CREATOR && (
+                            <Button onClick={() => handleRemoveAccess(bucketOnUser.inviteeId)}>
                               <X size={20} strokeWidth={5} color={"#bf4044"} />
                             </Button>
                           )}
@@ -118,12 +126,12 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                       <Th>Role</Th>
                       <Th>Delete</Th>
                     </Tr>
-                    {pendingUsers.map((user, index) => (
+                    {pendingUsers.map((bucketOnUser, index) => (
                       <Tr key={index}>
-                        <Td>{user.inviteeEmail}</Td>
-                        <Td>{user.role}</Td>
+                        <Td>{bucketOnUser.inviteeEmail}</Td>
+                        <Td>{bucketOnUser.role}</Td>
                         <Td>
-                          <Button onClick={() => handleRemoveAccess(user.inviteeId)}>
+                          <Button onClick={() => handleRemoveAccess(bucketOnUser.inviteeId)}>
                             <X size={20} strokeWidth={5} color={"#bf4044"} />
                           </Button>
                         </Td>
