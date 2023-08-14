@@ -2,7 +2,7 @@ import prisma from "@util/prisma";
 import { sessionOptions } from "@util/session";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
-import { BucketsOnUsers, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { EmailSender } from "@util/emailSender/emailSender";
 import { ResendEmailSender } from "@util/emailSender/resendEmailSender";
 import { SendgridEmailSender } from "@util/emailSender/sendgridEmailSender";
