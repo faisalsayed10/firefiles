@@ -230,7 +230,6 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
   const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
     if (!data.supportsUploading) {
       // TODO: Add this support
-      toast.error("Drive provider does not yet support file tagging.");
       return;
     }
     try {

@@ -32,17 +32,6 @@ export default function InviteNotification() {
 
   const [invitationRequests, setInvitationRequests] = useState<string[]>([]);
 
-  // Simulate fetching invitation requests from the backend
-  // const fetchInvitationRequests = () => {
-  //   const { data, isValidating, mutate } = useSWR<BucketsOnUsers[]>(
-  //     `/api/bucketsOnUsers?isPending=true`,
-  //   );
-  // };
-
-  // useEffect(() => {
-  //   fetchInvitationRequests();
-  // }, []);
-
   const { data, isValidating, mutate } = useSWR<incomingGetProp[]>(
     `/api/bucketsOnUsers?isPending=true`,
   );

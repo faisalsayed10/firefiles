@@ -121,22 +121,6 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                     <X />
                     <Text ml="2">Delete Drive</Text>
                   </Flex>
-                  {/* {driveRole === Role.CREATOR && (
-                    <Flex
-                      {...optionProps}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const { data } = await axios.post("/api/invitation/create", {
-                          email: "alexmorra431@gmail.com",
-                          bucketId: drive.id,
-                        });
-                        toast.success(data.message);
-                      }}
-                    >
-                      <Share />
-                      <Text ml="2">Share Drive</Text>
-                    </Flex>
-                  )} */}
                 </Flex>
               </OptionsPopover>
             </Flex>

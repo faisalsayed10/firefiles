@@ -133,7 +133,6 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
             userId: user.id,
             bucketId: bucketId,
             isPending: false,
-            // NOT: { role: Role.CREATOR },
           },
         });
 
@@ -147,7 +146,6 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
             error: `cannot read granted access: requesting userId ${user.id} does not have admin access to bucketId ${bucketId}`,
           });
 
-        // const { email } = await prisma.user.findFirst({where: {id: bucketOnUser.userId}});
         const bucketsOnUsers = await prisma.bucketsOnUsers.findMany({
           where: { bucketId },
         });
