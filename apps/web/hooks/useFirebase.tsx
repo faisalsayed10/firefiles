@@ -59,7 +59,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const allFilesFetched = useRef(false);
 	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive,
-		deleteFilesInFolder, getFileByFullPath } = useIndexedDB(); // import indexeddb hook
+		deleteFilesInFolder, getFileByFullPath, getFileFromDrive } = useIndexedDB(); // import indexeddb hook
 	const driveName = data.name;
 
 	const addFolder = (name: string) => {
@@ -116,6 +116,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	};
 
 	const addFile = async (filesToUpload: File[] | FileList) => {
+
 		if (!app) return;
 
 		for (let i = 0; i < filesToUpload.length; i++) {
@@ -249,6 +250,21 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		return updatedFile;
 	};
 
+	const syncFilesInCurrentFolder = async () => {
+		if (!appUser || !files) {
+			console.log("User not authenticated or no files.");
+			return;
+		}
+		for (let i = 0; i < files.length; i++) {
+			try {
+				const updatedFile = await getFileMetadata(files[i], i);
+				await addFileToDrive(driveName, updatedFile);
+				console.log(`Synced file: ${updatedFile.name}`);
+			} catch (error) {
+				console.error(`Error syncing file ${files[i].name}: ${error}`);
+			}
+		}
+	};
 
 	useEffect(() => {
 		const processFiles = async () => {
@@ -409,6 +425,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+				syncFilesInCurrentFolder
 			}}
 		>
 			{children}

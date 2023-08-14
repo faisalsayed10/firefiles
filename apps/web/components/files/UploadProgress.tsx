@@ -10,7 +10,9 @@ type Props = {
 };
 
 const UploadProgress: React.FC<Props> = ({ file }) => {
+
 	const { setUploadingFiles } = useBucket();
+	
 
 	return (
 		<Flex align="center">
