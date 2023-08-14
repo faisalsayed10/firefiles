@@ -139,6 +139,19 @@ const useIndexedDB = () => {
     }
   };
 
+  const isFileInDrive = async (driveName, fullPath) => {
+    if (!db) return false;
+  
+    const drive = await db.drives.where('driveName').equals(driveName).first();
+  
+    if (drive) {
+      const fileExists = drive.files.some(file => file.fullPath === fullPath);
+      return fileExists;
+    }
+  
+    return false; // Drive not found, so the file can't exist in it
+  };
+
   return {
     db,
     createNewDrive,
@@ -147,6 +160,7 @@ const useIndexedDB = () => {
     deleteFilesInFolder,
     getFileByFullPath,
     deleteDbDrive,
+    isFileInDrive,
   };
 };
 

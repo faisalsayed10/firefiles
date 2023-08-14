@@ -60,7 +60,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const allFilesFetched = useRef(false);
 
 	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive,
-		deleteFilesInFolder, getFileByFullPath } = useIndexedDB(); // import indexeddb hook
+		deleteFilesInFolder, getFileByFullPath, isFileInDrive } = useIndexedDB(); // import indexeddb hook
 	const driveName = data.name;
 
 	const addFolder = (name: string) => {
@@ -254,19 +254,89 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	};
 
 	const syncFilesInCurrentFolder = async () => {
-		if (!appUser || !files) {
-			console.log("User not authenticated or no files.");
-			return;
-		}
-		for (let i = 0; i < files.length; i++) {
+		if (!user?.email || !app || !appUser || !currentFolder) return;
+		const storage = getStorage(app);
+		setLoading(true);
+
+		allFilesFetched.current = false;
+
+		(async () => {
 			try {
-				const updatedFile = await getFileMetadata(files[i], i);
-				await addFileToDrive(driveName, updatedFile);
-				console.log(`Synced file: ${updatedFile.name}`);
-			} catch (error) {
-				console.error(`Error syncing file ${files[i].name}: ${error}`);
+				const reference = ref(storage, currentFolder.fullPath);
+				let results = await list(reference, { maxResults: 100 });
+
+				for (let i = 0; i < results.items.length; i++) {
+					const fileExists = await isFileInDrive(driveName, results.items[i].fullPath);
+					if (!fileExists) {
+						const driveFile = {
+							fullPath: results.items[i].fullPath,
+							name: results.items[i].name,
+							bucketName: results.items[i].bucket,
+							parent: results.items[i].parent.fullPath + "/",
+						};
+						setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
+					}
+				}
+
+				while (results.nextPageToken) {
+					const more = await list(reference, {
+						maxResults: 100,
+						pageToken: results.nextPageToken,
+					});
+
+					results = {
+						nextPageToken: more.nextPageToken,
+						items: [...results.items, ...more.items],
+						prefixes: [...results.prefixes, ...more.prefixes],
+					};
+
+					for (let i = 0; i < more.items.length; i++) {
+						const fileExists = await isFileInDrive(driveName, more.items[i].fullPath);
+						if (!fileExists) {
+							const driveFile = {
+								fullPath: more.items[i].fullPath,
+								name: more.items[i].name,
+								bucketName: more.items[i].bucket,
+								parent: more.items[i].parent.fullPath + "/",
+							};
+							setFiles((files) => [...files, driveFile]);
+						}
+					}
+				}
+
+				allFilesFetched.current = true;
+
+				const localFolders = localStorage.getItem(`local_folders_${data.id}`);
+				let localFoldersArray: DriveFolder[] = localFolders
+					? JSON.parse(localFolders)
+					: [];
+				localFoldersArray = localFoldersArray.filter(
+					(folder) =>
+						folder.parent === currentFolder.fullPath &&
+						!results.prefixes.find((prefix) => prefix.name === folder.name),
+				);
+
+				setFolders(localFoldersArray);
+
+				for (let i = 0; i < results.prefixes.length; i++) {
+					const driveFolder = {
+						fullPath: results.prefixes[i].fullPath + "/",
+						name: results.prefixes[i].name,
+						bucketName: results.prefixes[i].bucket,
+						parent: results.prefixes[i].parent.fullPath + "/",
+					};
+					setFolders((folders) => [...folders, driveFolder]);
+				}
+
+			} catch (err) {
+				console.error(err);
 			}
-		}
+
+			setLoading(false);
+		})();
+		return () => {
+			allFilesFetched.current = false;
+		};
 	};
 
 	useEffect(() => {
@@ -428,7 +498,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
-				syncFilesInCurrentFolder
+				syncFilesInCurrentFolder,
 			}}
 		>
 			{children}

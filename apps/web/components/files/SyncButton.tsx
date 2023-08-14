@@ -6,25 +6,27 @@ import { nanoid } from "nanoid";
 import React, { useEffect, useRef } from "react";
 import { Refresh } from "tabler-icons-react";
 import useFirebase from '@hooks/useFirebase'
-    
+
 interface Props {
 }
 
-const SyncButton: React.FC<Props> = ({  }) => {
-    const { syncFilesInCurrentFolder } = useFirebase();
-    
-    // handleSync to be completed
+const SyncButton: React.FC<Props> = ({ }) => {
+	const { loading } = useBucket();
+	const { syncFilesInCurrentFolder } = useFirebase();
+
+	// handleSync to be completed
 	const handleSync = async () => {
-        try {
-            await syncFilesInCurrentFolder();
-        } catch (error) {
-            console.error("Error syncing files:", error);
-        }
-    };
+		try {
+			await syncFilesInCurrentFolder();
+		} catch (error) {
+			console.error("Error syncing files:", error);
+		}
+	};
 
 	return (
 		<>
 			<IconButton
+				disabled={loading}
 				pos="fixed"
 				p="4"
 				borderRadius="50%"
@@ -39,8 +41,8 @@ const SyncButton: React.FC<Props> = ({  }) => {
 				boxShadow="4.2px 4px 6.5px -1.7px rgba(0, 0, 0, 0.4)"
 				colorScheme="yellow"
 				aria-label="sync file"
-			    // onClick to be completed
-                onClick={handleSync}
+				// onClick to be completed
+				onClick={handleSync}
 			>
 				<Refresh size="42px" />
 			</IconButton>

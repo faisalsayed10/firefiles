@@ -14,7 +14,7 @@ export type ContextValue = {
   removeFolder: (folder: DriveFolder) => Promise<void>;
   addFile: (files: File[] | FileList) => Promise<any>;
   removeFile: (file: DriveFile) => Promise<boolean>;
-  syncFilesInCurrentFolder: () => Promise<void>;
+  syncFilesInCurrentFolder: () => Promise<() => void>;
 };
 
 export const ROOT_FOLDER: DriveFolder = {
