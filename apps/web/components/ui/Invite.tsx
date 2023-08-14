@@ -53,7 +53,7 @@ export default function Invite() {
   return (
     <>
       <Button variant="ghost" fontWeight="normal" onClick={onOpen}>
-        Invite
+        Share
       </Button>
 
       <Modal

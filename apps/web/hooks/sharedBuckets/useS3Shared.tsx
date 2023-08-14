@@ -375,19 +375,22 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
 
           const localFolders = localStorage.getItem(`local_folders_${data.id}`);
           let localFoldersArray: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
+          const commonPrefixes = Array.isArray(listObjectsResponse.results.CommonPrefixes)
+            ? listObjectsResponse.results.CommonPrefixes
+            : [listObjectsResponse.results.CommonPrefixes];
           localFoldersArray = localFoldersArray.filter(
             (folder) =>
               folder.parent === currentFolder.fullPath &&
-              !results.CommonPrefixes?.find((prefix) => prefix.Prefix === folder.fullPath),
+              !commonPrefixes?.find((prefix) => prefix.Prefix === folder.fullPath),
           );
 
           setFolders(localFoldersArray);
 
-          if (results.CommonPrefixes) {
-            for (let i = 0; i < results.CommonPrefixes.length; i++) {
+          if (commonPrefixes.length > 0) {
+            for (let i = 0; i < commonPrefixes.length; i++) {
               const driveFolder: DriveFolder = {
-                fullPath: results.CommonPrefixes[i].Prefix,
-                name: results.CommonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
+                fullPath: commonPrefixes[i].Prefix,
+                name: commonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
                 bucketName: results.Name,
                 parent: currentFolder.fullPath,
                 bucketUrl: data.keys.bucketUrl,

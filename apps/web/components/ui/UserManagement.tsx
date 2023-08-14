@@ -88,7 +88,7 @@ const UserManagementModal = ({ isOpen, onClose }) => {
       };
 
       return (
-        <Modal size="lg" isOpen={isOpen} onClose={onClose}>
+        <Modal size="2xl" isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>User Management</ModalHeader>
@@ -116,11 +116,6 @@ const UserManagementModal = ({ isOpen, onClose }) => {
                         </Td>
                       </Tr>
                     ))}
-                  </Tbody>
-                </Table>
-
-                <Table variant="simple">
-                  <Tbody>
                     <Tr>
                       <Th>Pending User</Th>
                       <Th>Role</Th>

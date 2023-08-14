@@ -56,7 +56,7 @@ export default function InviteNotification() {
             <DrawerOverlay />
             <DrawerContent>
               <DrawerCloseButton />
-              <DrawerHeader>Invitation Requests</DrawerHeader>
+              <DrawerHeader>Invitation Inbox</DrawerHeader>
 
               <DrawerBody>
                 {data?.map((request, index) => (
@@ -72,7 +72,7 @@ export default function InviteNotification() {
                           try {
                             await axios.patch(`/api/bucketsOnUsers?bucketId=${request.bucketId}`);
                             mutate(data.filter((b) => b.bucketId !== request.bucketId));
-                            toast.success("You have successfully accepted the invitation");
+                            toast.success("You have successfully accepted the invitation. Refresh dashboard for access.");
                           } catch (error) {
                             toast.error("Something went wrong");
                           }

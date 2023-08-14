@@ -98,7 +98,7 @@ const Drives: React.FC<Props> = ({ optionProps, driveRole }) => {
                 align="left"
                 px="2"
               >
-                {driveRole === Role.CREATOR ? drive.name : `${driveRole} ${drive.name}`}
+                {drive.name}
               </Text>
               <OptionsPopover header={drive.name}>
                 <Flex alignItems="stretch" flexDirection="column">

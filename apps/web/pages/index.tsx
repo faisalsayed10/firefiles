@@ -13,6 +13,7 @@ import Drives from "@components/drives/Drives";
 import AddDriveButton from "@components/ui/AddDriveButton";
 import Navbar from "@components/ui/Navbar";
 import useUser from "@hooks/useUser";
+import { Role } from "@prisma/client";
 import gravatar from "gravatar";
 import Head from "next/head";
 import React from "react";
@@ -79,7 +80,7 @@ const Dashboard = () => {
             ]}
             gap={[2, 6, 6]}
           >
-            <Drives optionProps={optionProps} driveRole={"CREATOR"} />
+            <Drives optionProps={optionProps} driveRole={Role.CREATOR} />
             <AddDriveButton />
           </Grid>
         </Box>
@@ -96,9 +97,9 @@ const Dashboard = () => {
             ]}
             gap={[2, 6, 6]}
           >
-						<Drives optionProps={optionProps} driveRole={"ADMIN"} />
-            <Drives optionProps={optionProps} driveRole={"EDITOR"} />
-            <Drives optionProps={optionProps} driveRole={"VIEWER"} />
+            {[Role.ADMIN, Role.EDITOR, Role.VIEWER].map((role) => (
+              <Drives optionProps={optionProps} driveRole={role} />
+            ))}
           </Grid>
         </Box>
       </Flex>
