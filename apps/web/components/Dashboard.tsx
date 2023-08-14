@@ -40,6 +40,7 @@ const Dashboard = () => {
   const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
   const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
   const role = useContext(RoleContext);
+  const { keys: drive } = useKeys();
 
   useEffect(() => {
     const storedView = localStorage.getItem("grid_view");
@@ -112,8 +113,8 @@ const Dashboard = () => {
               <Navbar />
               <Flex justifyContent="space-between" alignItems="center">
                 <FolderBreadCrumbs currentFolder={currentFolder} />
-                <Text fontWeight="bold" marginRight="9">
-                  {role}
+                <Text fontWeight="bold" whiteSpace="nowrap" marginRight="9" textAlign="right">
+                  {`${drive.name} - ${role}`}
                 </Text>
               </Flex>
               <Divider />
