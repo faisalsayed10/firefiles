@@ -50,6 +50,7 @@ const UserManagementModal = ({ isOpen, onClose }) => {
           await axios.delete(`/api/bucketsOnUsers?inviteeId=${id}&bucketId=${router.query.id}`);
           mutate(data.filter((user) => user.inviteeId !== id));
           toast.success("You have successfully removed this user to this bucket.");
+          window.location.reload();
         } catch (error) {
           toast.error(error.message);
         }
