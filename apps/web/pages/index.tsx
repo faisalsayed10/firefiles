@@ -97,8 +97,8 @@ const Dashboard = () => {
             ]}
             gap={[2, 6, 6]}
           >
-            {[Role.ADMIN, Role.EDITOR, Role.VIEWER].map((role) => (
-              <Drives optionProps={optionProps} driveRole={role} />
+            {[Role.ADMIN, Role.EDITOR, Role.VIEWER].map((role, index) => (
+              <Drives key={index} optionProps={optionProps} driveRole={role} />
             ))}
           </Grid>
         </Box>

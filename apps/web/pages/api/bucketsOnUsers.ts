@@ -223,7 +223,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
 
         if (userBOURecords.length > 0)
           return res.status(403).json({
-            error: `Cannot create access invitation: user with the email ${email} already has invited to this bucket`,
+            error: `Cannot create access invitation: user with the email ${email} already has been invited to this bucket`,
           });
 
         await prisma.bucketsOnUsers.create({
