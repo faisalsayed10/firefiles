@@ -60,8 +60,10 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const allFilesFetched = useRef(false);
 
 	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive,
-		deleteFilesInFolder, getFileByFullPath, isFileInDrive } = useIndexedDB(); // import indexeddb hook
+		deleteFilesInFolder, getFileByFullPath, isFileInDrive, isCurrentFolderInDB,
+		getFilesInCurrentFolder, addFolderToDrive, getFoldersInCurrentFolder } = useIndexedDB(); // import indexeddb hook
 	const driveName = data.name;
+	createNewDrive(driveName);
 
 	const addFolder = (name: string) => {
 		const path =
@@ -77,6 +79,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		};
 
 		setFolders((folders) => [...folders, newFolder]);
+		addFolderToDrive(driveName, newFolder);
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
 		const folders: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
 		localStorage.setItem(
@@ -93,7 +96,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			folders.filter((f) => f.fullPath !== folder.fullPath),
 		);
 
-		deleteFilesInFolder(driveName, folder.name);
+		deleteFilesInFolder(driveName, folder.fullPath);
 
 		// delete from localStorage
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
@@ -137,7 +140,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 					? filesToUpload[i].name
 					: `${decodeURIComponent(currentFolder.fullPath)}${filesToUpload[i].name
 					}`;
-			console.log(filePath);
+			//console.log(filePath);
 
 			const fileRef = ref(getStorage(app), filePath);
 			const uploadTask = uploadBytesResumable(fileRef, filesToUpload[i]);
@@ -219,28 +222,29 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		const foundFile = await getFileByFullPath(driveName, file.fullPath);
 
 		if (!foundFile) {
-			const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
-				}/o/${encodeURIComponent(file.fullPath)}`;
+		const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
+			}/o/${encodeURIComponent(file.fullPath)}`;
 
-			const { data } = await axios.get(fileUrl, {
-				headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
-			});
+		const { data } = await axios.get(fileUrl, {
+			headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
+		});
 
-			updatedFile = {
-				...file,
-				contentType: data.contentType,
-				size: data.size,
-				createdAt: data.timeCreated,
-				updatedAt: data.updated,
-				url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
-			};
+		updatedFile = {
+			...file,
+			contentType: data.contentType,
+			size: data.size,
+			createdAt: data.timeCreated,
+			updatedAt: data.updated,
+			url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
+			parent: currentFolder.fullPath,
+		};
 		} else {
-			//console.log(foundFile);
 			updatedFile = {
 				...file,
 				size: foundFile.size,
 				url: foundFile.url,
 				contentType: foundFile.contentType,
+				parent: foundFile.parent,
 			};
 		}
 
@@ -345,13 +349,10 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				return;
 
 			for (let i = 0; i < files.length; i++) {
-				// Get the file metadata first before adding it to the drive
 				const updatedFile = await getFileMetadata(files[i], i);
-				await addFileToDrive(data.name, updatedFile);
-				//console.log(data.name, files[i]);
+				await addFileToDrive(driveName, updatedFile);
 			}
-		};
-
+		}
 		processFiles();
 	}, [appUser, allFilesFetched.current]);
 
@@ -407,12 +408,13 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		if (!user?.email || !app || !appUser || !currentFolder) return;
 		const storage = getStorage(app);
 		setLoading(true);
-		createNewDrive(data.name);
 		allFilesFetched.current = false;
 
 		(async () => {
 			try {
-				if (!files) {
+				const folderInDrive = await isCurrentFolderInDB(driveName, currentFolder.fullPath);
+				//console.log('folder is in the drive already? ' + folderInDrive);
+				if (!files && !folderInDrive) {
 					const reference = ref(storage, currentFolder.fullPath);
 					let results = await list(reference, { maxResults: 100 });
 
@@ -424,6 +426,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 							parent: results.items[i].parent.fullPath + "/",
 						};
 						setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
+						//await addFileToDrive(driveName, driveFile);
 					}
 
 					while (results.nextPageToken) {
@@ -446,6 +449,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 								parent: more.items[i].parent.fullPath + "/",
 							};
 							setFiles((files) => [...files, driveFile]);
+							//await addFileToDrive(driveName, driveFile);
 						}
 					}
 
@@ -462,6 +466,9 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 					);
 
 					setFolders(localFoldersArray);
+					for (let i = 0; i < localFoldersArray.length; i++) {
+						await addFolderToDrive(driveName, localFoldersArray[i]);
+					}
 
 					for (let i = 0; i < results.prefixes.length; i++) {
 						const driveFolder = {
@@ -471,7 +478,30 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 							parent: results.prefixes[i].parent.fullPath + "/",
 						};
 						setFolders((folders) => [...folders, driveFolder]);
+						await addFolderToDrive(driveName, driveFolder);
 					}
+				} else if (folderInDrive) {
+					const currentFiles = await getFilesInCurrentFolder(driveName, currentFolder.fullPath);
+					for (let i = 0; i < currentFiles.length; i++) {
+						await getFileMetadata(currentFiles[i], i);
+					}
+					allFilesFetched.current = true;
+
+					const currentFolders = await getFoldersInCurrentFolder(driveName, currentFolder.fullPath);
+					for (let i = 0; i < currentFolders.length; i++) {
+						const driveFolder = {
+							name: currentFolders[i].name,
+							fullPath: currentFolders[i].fullPath,
+							bucketName: currentFolders[i].bucketName,
+							parent: currentFolders[i].parent,
+						};
+						setFolders((folders) => [
+							...(folders || []).slice(0, i),
+							driveFolder,
+							...(folders || []).slice(i + 1),
+						]);
+					}
+					//allFilesFetched.current = true;
 				}
 			} catch (err) {
 				console.error(err);
