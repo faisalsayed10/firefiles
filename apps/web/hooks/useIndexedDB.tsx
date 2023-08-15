@@ -103,16 +103,16 @@ const useIndexedDB = () => {
   };
 
   // Delete a file from an existing drive - used for delete a file data
-  const deleteFileFromDrive = async (driveName, fileName) => {
+  const deleteFileFromDrive = async (driveName, fileFullPath) => {
     if (!db) return;
 
     const drive = await db.drives.where('driveName').equals(driveName).first();
 
     if (drive) {
-      const updatedFiles = drive.files.filter((file) => file.name !== fileName);
+      const updatedFiles = drive.files.filter((file) => file.fullPath !== fileFullPath);
       await db.drives.update(drive.id, { files: updatedFiles });
 
-      console.log(`File '${fileName}' deleted from drive '${driveName}'.`);
+      console.log(`File '${fileFullPath}' deleted from drive '${driveName}'.`);
     } else {
       console.log(`Drive '${driveName}' not found.`);
     }
@@ -125,25 +125,24 @@ const useIndexedDB = () => {
     const drive = await db.drives.where('driveName').equals(driveName).first();
 
     if (drive) {
-        const filesToDelete = drive.files.filter(file => file.fullPath.startsWith(folderFullPath));
+      const filesToDelete = drive.files.filter(file => file.fullPath.startsWith(folderFullPath));
 
-        if (filesToDelete.length === 0) {
-            console.log(`No files found in folder '${folderFullPath}' of drive '${driveName}'.`);
-            return;
-        }
+      if (filesToDelete.length === 0) {
+        console.log(`No files found in folder '${folderFullPath}' of drive '${driveName}'.`);
+        return;
+      }
 
-        const updatedFiles = drive.files.filter(file => !file.fullPath.startsWith(folderFullPath));
-        const updatedFolders = drive.folders.filter(folder => folder.fullPath !== folderFullPath);
+      const updatedFiles = drive.files.filter(file => !file.fullPath.startsWith(folderFullPath));
+      const updatedFolders = drive.folders.filter(folder => folder.fullPath !== folderFullPath);
 
-        await db.drives.update(drive.id, { files: updatedFiles, folders: updatedFolders });
+      await db.drives.update(drive.id, { files: updatedFiles, folders: updatedFolders });
 
-        console.log(`Deleted ${filesToDelete.length} files from folder '${folderFullPath}' of drive '${driveName}'.`);
-        console.log(`Deleted folder '${folderFullPath}' from drive '${driveName}'.`);
+      console.log(`Deleted ${filesToDelete.length} files from folder '${folderFullPath}' of drive '${driveName}'.`);
+      console.log(`Deleted folder '${folderFullPath}' from drive '${driveName}'.`);
     } else {
-        console.log(`Drive '${driveName}' not found.`);
+      console.log(`Drive '${driveName}' not found.`);
     }
-};
-
+  };
 
   // find the file data with file's fullPath
   const getFileByFullPath = async (driveName, fullPath) => {
@@ -162,9 +161,9 @@ const useIndexedDB = () => {
 
   const deleteDbDrive = async (driveName) => {
     if (!db) return;
-  
+
     const drive = await db.drives.where('driveName').equals(driveName).first();
-  
+
     if (drive) {
       await db.drives.delete(drive.id);
       console.log(`Drive '${driveName}' and its data have been deleted.`);
@@ -175,58 +174,80 @@ const useIndexedDB = () => {
 
   const isFileInDrive = async (driveName, fullPath) => {
     if (!db) return false;
-  
+
     const drive = await db.drives.where('driveName').equals(driveName).first();
-  
+
     if (drive) {
       const fileExists = drive.files.some(file => file.fullPath === fullPath);
       return fileExists;
     }
-  
+
     return false; // Drive not found, so the file can't exist in it
   };
 
   const isCurrentFolderInDB = async (driveName, currentFolderPath) => {
     if (!db) return false;
-  
+
     const drive = await db.drives.where('driveName').equals(driveName).first();
-  
+
     if (drive) {
       const filesInCurrentFolder = drive.files.filter(file => file.parent === currentFolderPath);
       const fileExistsInDB = filesInCurrentFolder.length > 0;
       return fileExistsInDB;
     }
-  
+
     return false; // Drive not found, so no files can exist in it
   };
 
   const getFilesInCurrentFolder = async (driveName, currentFolderPath) => {
     if (!db) return [];
-  
+
     const drive = await db.drives.where('driveName').equals(driveName).first();
-  
+
     if (drive) {
       const filesInCurrentFolder = drive.files.filter(file => file.parent === currentFolderPath);
       return filesInCurrentFolder;
     }
-  
+
     return []; // Drive not found, so no files can exist in it
   };
 
-const getFoldersInCurrentFolder = async (driveName, currentFolderPath) => {
-  if (!db) return [];
+  const getFoldersInCurrentFolder = async (driveName, currentFolderPath) => {
+    if (!db) return [];
 
-  const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where('driveName').equals(driveName).first();
 
-  if (drive) {
-    if (currentFolderPath === "")
-      currentFolderPath = "/";
-    const foldersInCurrentFolder = drive.folders.filter(folder => folder.parent === currentFolderPath);
-    //console.log(foldersInCurrentFolder);
-    return foldersInCurrentFolder;
+    if (drive) {
+      if (currentFolderPath === "")
+        currentFolderPath = "/";
+      const foldersInCurrentFolder = drive.folders.filter(folder => folder.parent === currentFolderPath);
+      //console.log(foldersInCurrentFolder);
+      return foldersInCurrentFolder;
+    }
+    return [];
+  };
+
+  const syncWithFirebaseResponse = async (driveName, currentFolderPath, apiResponse) => {
+    if (!db) return;
+
+    const drive = await db.drives.where('driveName').equals(driveName).first();
+
+    if (drive) {
+      const existingFiles = drive.files.filter(file => file.parent === currentFolderPath);
+      console.log('existing files in current folder are:', existingFiles);
+      for (const existingFile of existingFiles) {
+        const fileExistsInApiResponse = apiResponse.items.some(item => item.fullPath === existingFile.fullPath);
+        if (!fileExistsInApiResponse) {
+          // The file does not exist in apiResponse.items
+          console.log(`File with fullPath '${existingFile.fullPath}' does not exist in API response.`);
+          await deleteFileFromDrive(driveName, existingFile.fullPath);
+          // Perform actions like updating or deleting the file in indexedDB
+        }
+      }
+
+    }
+
   }
-  return [];
-};
 
   return {
     db,
@@ -240,7 +261,8 @@ const getFoldersInCurrentFolder = async (driveName, currentFolderPath) => {
     isFileInDrive,
     isCurrentFolderInDB,
     getFilesInCurrentFolder,
-    getFoldersInCurrentFolder
+    getFoldersInCurrentFolder,
+    syncWithFirebaseResponse,
   };
 };
 

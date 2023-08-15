@@ -61,7 +61,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 
 	const { db, createNewDrive, addFileToDrive, deleteFileFromDrive,
 		deleteFilesInFolder, getFileByFullPath, isFileInDrive, isCurrentFolderInDB,
-		getFilesInCurrentFolder, addFolderToDrive, getFoldersInCurrentFolder } = useIndexedDB(); // import indexeddb hook
+		getFilesInCurrentFolder, addFolderToDrive, getFoldersInCurrentFolder, syncWithFirebaseResponse } = useIndexedDB(); // import indexeddb hook
 	const driveName = data.name;
 
 	const addFolder = (name: string) => {
@@ -209,7 +209,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 	const removeFile = async (file: DriveFile) => {
 		if (!app) return false;
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
-		deleteFileFromDrive(data.name, file.name);
+		deleteFileFromDrive(data.name, file.fullPath);
 		deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => { });
 		return true;
 	};
@@ -224,19 +224,19 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${file.bucketName
 				}/o/${encodeURIComponent(file.fullPath)}`;
 
-			const { data } = await axios.get(fileUrl, {
-				headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
-			});
+				const { data } = await axios.get(fileUrl, {
+					headers: { Authorization: `Firebase ${await appUser.getIdToken()}` },
+				});
 
-			updatedFile = {
-				...file,
-				contentType: data.contentType,
-				size: data.size,
-				createdAt: data.timeCreated,
-				updatedAt: data.updated,
-				url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
-				parent: currentFolder.fullPath,
-			};
+				updatedFile = {
+					...file,
+					contentType: data.contentType,
+					size: data.size,
+					createdAt: data.timeCreated,
+					updatedAt: data.updated,
+					url: `${fileUrl}?alt=media&token=${data.downloadTokens}`,
+					parent: currentFolder.fullPath,
+				};
 		} else {
 			updatedFile = {
 				...file,
@@ -260,6 +260,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 		if (!user?.email || !app || !appUser || !currentFolder) return;
 		const storage = getStorage(app);
 		setLoading(true);
+		setFiles(null);
+		setFolders(null);
 
 		allFilesFetched.current = false;
 
@@ -267,10 +269,11 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 			try {
 				const reference = ref(storage, currentFolder.fullPath);
 				let results = await list(reference, { maxResults: 100 });
+				await syncWithFirebaseResponse(driveName, currentFolder.fullPath, results);
 
 				for (let i = 0; i < results.items.length; i++) {
-					const fileExists = await isFileInDrive(driveName, results.items[i].fullPath);
-					if (!fileExists) {
+					// const fileExists = await isFileInDrive(driveName, results.items[i].fullPath);
+					// if (!fileExists) {
 						const driveFile = {
 							fullPath: results.items[i].fullPath,
 							name: results.items[i].name,
@@ -278,9 +281,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 							parent: results.items[i].parent.fullPath + "/",
 						};
 						setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
-					}
+					// }
 				}
-
 				while (results.nextPageToken) {
 					const more = await list(reference, {
 						maxResults: 100,
@@ -294,8 +296,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 					};
 
 					for (let i = 0; i < more.items.length; i++) {
-						const fileExists = await isFileInDrive(driveName, more.items[i].fullPath);
-						if (!fileExists) {
+						// const fileExists = await isFileInDrive(driveName, more.items[i].fullPath);
+						// if (!fileExists) {
 							const driveFile = {
 								fullPath: more.items[i].fullPath,
 								name: more.items[i].name,
@@ -303,8 +305,9 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 								parent: more.items[i].parent.fullPath + "/",
 							};
 							setFiles((files) => [...files, driveFile]);
-						}
+						// }
 					}
+					await syncWithFirebaseResponse(driveName, currentFolder.fullPath, results);
 				}
 
 				allFilesFetched.current = true;
@@ -356,8 +359,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
 				await addFileToDrive(driveName, updatedFile);
 			}
 		}
-		processFiles();
-	}, [appUser, allFilesFetched.current]);
+			processFiles();
+		}, [appUser, allFilesFetched.current]);
 
 
 	useEffect(() => {
