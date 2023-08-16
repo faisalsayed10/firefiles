@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Dexie, { Table } from 'dexie';
+import Dexie, { Table } from "dexie";
 
 const useIndexedDB = () => {
   const [db, setDb] = useState(null);
@@ -7,9 +7,9 @@ const useIndexedDB = () => {
   // Initialize the database and create the object store
   useEffect(() => {
     const initializeDB = async () => {
-      const dexieDB = new Dexie('firefiles_Drive');
+      const dexieDB = new Dexie("firefiles_Drive");
       dexieDB.version(1).stores({
-        drives: '++id,driveName', // id for identify, could be deleted
+        drives: "++id,driveName", // id for identify, could be deleted
       });
       await dexieDB.open();
       setDb(dexieDB);
@@ -22,7 +22,7 @@ const useIndexedDB = () => {
     if (!db) return;
 
     // Check if the drive with the given name already exists
-    const existingDrive = await db.drives.where('driveName').equals(driveName).first();
+    const existingDrive = await db.drives.where("driveName").equals(driveName).first();
 
     if (existingDrive) {
       console.log(`Drive '${driveName}' already exists.`);
@@ -38,11 +38,11 @@ const useIndexedDB = () => {
   const addFileToDrive = async (driveName, fileData) => {
     if (!db) return;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
       // Check if the file with the same name already exists in the drive
-      const existingFile = drive.files.find(file => file.fullPath === fileData.fullPath);
+      const existingFile = drive.files.find((file) => file.fullPath === fileData.fullPath);
 
       // check if the file has the same path:
       if (existingFile) {
@@ -70,10 +70,12 @@ const useIndexedDB = () => {
   const addFolderToDrive = async (driveName, folderData) => {
     if (!db) return;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
     if (drive) {
       // Check if the file with the same name already exists in the drive
-      const existingFolder = drive.folders.find(folder => folder.fullPath === folderData.fullPath);
+      const existingFolder = drive.folders.find(
+        (folder) => folder.fullPath === folderData.fullPath,
+      );
 
       // check if the file has the same path:
       if (existingFolder) {
@@ -101,7 +103,7 @@ const useIndexedDB = () => {
   const deleteFileFromDrive = async (driveName, fileFullPath) => {
     if (!db) return;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
       const updatedFiles = drive.files.filter((file) => file.fullPath !== fileFullPath);
@@ -117,20 +119,20 @@ const useIndexedDB = () => {
   const deleteFilesInFolder = async (driveName, folderFullPath) => {
     if (!db) return;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
       // if (folderFullPath === "")
       //   folderFullPath = "/";
-      const folderToDelete = drive.folders.find(folder => folder.fullPath === folderFullPath);
+      const folderToDelete = drive.folders.find((folder) => folder.fullPath === folderFullPath);
 
       if (folderToDelete.length === 0) {
         console.log(`No folder called '${folderFullPath}' found in drive '${driveName}'.`);
         return;
       }
 
-      const updatedFiles = drive.files.filter(file => !file.fullPath.startsWith(folderFullPath));
-      const updatedFolders = drive.folders.filter(folder => folder.fullPath !== folderFullPath);
+      const updatedFiles = drive.files.filter((file) => !file.fullPath.startsWith(folderFullPath));
+      const updatedFolders = drive.folders.filter((folder) => folder.fullPath !== folderFullPath);
 
       await db.drives.update(drive.id, { files: updatedFiles, folders: updatedFolders });
 
@@ -144,10 +146,10 @@ const useIndexedDB = () => {
   const getFileByFullPath = async (driveName, fullPath) => {
     if (!db) return null;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
-      const file = drive.files.find(file => file.fullPath === fullPath);
+      const file = drive.files.find((file) => file.fullPath === fullPath);
       return file || null; // Return the file if found, otherwise return null
     }
 
@@ -157,7 +159,7 @@ const useIndexedDB = () => {
   const deleteDbDrive = async (driveName) => {
     if (!db) return;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
       await db.drives.delete(drive.id);
@@ -170,10 +172,10 @@ const useIndexedDB = () => {
   const isFileInDrive = async (driveName, fullPath) => {
     if (!db) return false;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
-      const fileExists = drive.files.some(file => file.fullPath === fullPath);
+      const fileExists = drive.files.some((file) => file.fullPath === fullPath);
       return fileExists;
     }
 
@@ -183,24 +185,24 @@ const useIndexedDB = () => {
   const isCurrentFolderInDB = async (driveName, currentFolderPath) => {
     if (!db) return false;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
-      const filesInCurrentFolder = drive.files.filter(file => file.parent === currentFolderPath);
+      const filesInCurrentFolder = drive.files.filter((file) => file.parent === currentFolderPath);
       const fileExistsInDB = filesInCurrentFolder.length > 0;
       return fileExistsInDB;
     }
 
-    return false; 
+    return false;
   };
 
   const getFilesInCurrentFolder = async (driveName, currentFolderPath) => {
     if (!db) return [];
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
-      const filesInCurrentFolder = drive.files.filter(file => file.parent === currentFolderPath);
+      const filesInCurrentFolder = drive.files.filter((file) => file.parent === currentFolderPath);
       return filesInCurrentFolder;
     }
 
@@ -210,12 +212,13 @@ const useIndexedDB = () => {
   const getFoldersInCurrentFolder = async (driveName, currentFolderPath) => {
     if (!db) return [];
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
-      if (currentFolderPath === "")
-        currentFolderPath = "/";
-      const foldersInCurrentFolder = drive.folders.filter(folder => folder.parent === currentFolderPath);
+      if (currentFolderPath === "") currentFolderPath = "/";
+      const foldersInCurrentFolder = drive.folders.filter(
+        (folder) => folder.parent === currentFolderPath,
+      );
       return foldersInCurrentFolder;
     }
     return [];
@@ -224,23 +227,25 @@ const useIndexedDB = () => {
   const syncWithFirebaseResponse = async (driveName, currentFolderPath, apiResponse) => {
     if (!db) return;
 
-    const drive = await db.drives.where('driveName').equals(driveName).first();
+    const drive = await db.drives.where("driveName").equals(driveName).first();
 
     if (drive) {
-      const existingFiles = drive.files.filter(file => file.parent === currentFolderPath);
+      const existingFiles = drive.files.filter((file) => file.parent === currentFolderPath);
       for (const existingFile of existingFiles) {
-        const fileExistsInApiResponse = apiResponse.items.some(item => item.fullPath === existingFile.fullPath);
+        const fileExistsInApiResponse = apiResponse.items.some(
+          (item) => item.fullPath === existingFile.fullPath,
+        );
         if (!fileExistsInApiResponse) {
           // The file does not exist in apiResponse.items
-          console.log(`File with fullPath '${existingFile.fullPath}' does not exist in API response.`);
+          console.log(
+            `File with fullPath '${existingFile.fullPath}' does not exist in API response.`,
+          );
           await deleteFileFromDrive(driveName, existingFile.fullPath);
           // Perform actions like updating or deleting the file in indexedDB
         }
       }
-
     }
-
-  }
+  };
 
   return {
     db,

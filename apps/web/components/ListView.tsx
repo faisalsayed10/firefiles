@@ -1,12 +1,4 @@
-import {
-	Divider,
-	Flex,
-	Grid,
-	IconButton,
-	Skeleton,
-	Text,
-	Box,
-} from "@chakra-ui/react";
+import { Divider, Flex, Grid, IconButton, Skeleton, Text, Box } from "@chakra-ui/react";
 import FilesEmptyState from "@components/files/FilesEmptyState";
 import FilesTable from "@components/files/FilesTable";
 import FilesTableSkeleton from "@components/files/FilesTableSkeleton";
@@ -17,75 +9,74 @@ import React from "react";
 import { LayoutGrid } from "tabler-icons-react";
 import FileSortMenu from "@components/ui/FileSortMenu";
 
-
 type Props = {
-	setGridView: React.Dispatch<React.SetStateAction<boolean>>;
-	loading: boolean;
-	currentFolder: DriveFolder;
-	folders: DriveFolder[];
-	files: DriveFile[];
-	setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
-	setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
-	fileSort: FileSortConfig;
+  setGridView: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
+  currentFolder: DriveFolder;
+  folders: DriveFolder[];
+  files: DriveFile[];
+  setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
+  setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
+  fileSort: FileSortConfig;
 };
 
 const ListView: React.FC<Props> = (props) => {
-	return (
-		<>
-			{props.loading ? (
-				<Grid
-					templateColumns={[
-						"repeat(auto-fill, minmax(140px, 1fr))",
-						"repeat(auto-fill, minmax(160px, 1fr))",
-						"repeat(auto-fill, minmax(160px, 1fr))",
-					]}
-					gap={[2, 6, 6]}
-					my="6"
-					mx="4"
-				>
-					<Skeleton h="140px" w="full" borderRadius="lg" />
-					<Skeleton h="140px" w="full" borderRadius="lg" />
-					<Skeleton h="140px" w="full" borderRadius="lg" />
-					<Skeleton h="140px" w="full" borderRadius="lg" />
-				</Grid>
-			) : (
-				<Grid
-					templateColumns={[
-						"repeat(auto-fill, minmax(140px, 1fr))",
-						"repeat(auto-fill, minmax(160px, 1fr))",
-						"repeat(auto-fill, minmax(160px, 1fr))",
-					]}
-					gap={[2, 6, 6]}
-					my="6"
-					mx="4"
-				>
-					{props.folders?.map((f) => (
-						<Folder key={f.name} setIsFolderDeleting={props.setIsFolderDeleting} folder={f} />
-					))}
-					<AddFolderButton currentFolder={props.currentFolder} />
-				</Grid>
-			)}
-			<Divider />
-			<Flex align="center" justify="space-between" m="4">
-				<Text fontSize="3xl" fontWeight="600">
-					Your Files
-				</Text>
-				<Box>
-					<FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort}/>
-					<IconButton aria-label="change-view" onClick={() => props.setGridView(true)}>
-						<LayoutGrid />
-					</IconButton>
-				</Box>
-			</Flex>
-			{props.files === null && props.loading ? (
-				<FilesTableSkeleton />
-			) : !props.files || props.files?.length === 0 ? (
-				<FilesEmptyState />
-			) : (
-				<FilesTable files={props.files} />
-			)}
-		</>
-	);
+  return (
+    <>
+      {props.loading ? (
+        <Grid
+          templateColumns={[
+            "repeat(auto-fill, minmax(140px, 1fr))",
+            "repeat(auto-fill, minmax(160px, 1fr))",
+            "repeat(auto-fill, minmax(160px, 1fr))",
+          ]}
+          gap={[2, 6, 6]}
+          my="6"
+          mx="4"
+        >
+          <Skeleton h="140px" w="full" borderRadius="lg" />
+          <Skeleton h="140px" w="full" borderRadius="lg" />
+          <Skeleton h="140px" w="full" borderRadius="lg" />
+          <Skeleton h="140px" w="full" borderRadius="lg" />
+        </Grid>
+      ) : (
+        <Grid
+          templateColumns={[
+            "repeat(auto-fill, minmax(140px, 1fr))",
+            "repeat(auto-fill, minmax(160px, 1fr))",
+            "repeat(auto-fill, minmax(160px, 1fr))",
+          ]}
+          gap={[2, 6, 6]}
+          my="6"
+          mx="4"
+        >
+          {props.folders?.map((f) => (
+            <Folder key={f.name} setIsFolderDeleting={props.setIsFolderDeleting} folder={f} />
+          ))}
+          <AddFolderButton currentFolder={props.currentFolder} />
+        </Grid>
+      )}
+      <Divider />
+      <Flex align="center" justify="space-between" m="4">
+        <Text fontSize="3xl" fontWeight="600">
+          Your Files
+        </Text>
+        <Box>
+          <FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort} />
+          <IconButton aria-label="change-view" onClick={() => props.setGridView(true)}>
+            <LayoutGrid />
+          </IconButton>
+        </Box>
+      </Flex>
+      {props.files === null && props.loading ? (
+        <FilesTableSkeleton />
+      ) : !props.files || props.files?.length === 0 ? (
+        <FilesEmptyState />
+      ) : (
+        <FilesTable files={props.files} />
+      )}
+    </>
+  );
 };
 
 export default ListView;

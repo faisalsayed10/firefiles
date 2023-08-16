@@ -1,6 +1,9 @@
 import { RawDataPart } from "../index";
 
-export async function* getChunkBuffer(data: Buffer, partSize: number): AsyncGenerator<RawDataPart, void, undefined> {
+export async function* getChunkBuffer(
+  data: Buffer,
+  partSize: number,
+): AsyncGenerator<RawDataPart, void, undefined> {
   let partNumber = 1;
   let startByte = 0;
   let endByte = partSize;
