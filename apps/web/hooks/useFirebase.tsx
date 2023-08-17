@@ -1,5 +1,5 @@
 import { Drive, User } from "@prisma/client";
-import { Config, DriveFile, DriveFolder, UploadingFile } from "@util/types";
+import { Config, DriveFile, DriveFolder, Tag, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
@@ -27,6 +27,7 @@ import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
 import useIndexedDB from "./useIndexedDB";
+import { getMetadata, updateMetadata } from "@firebase/storage";
 
 const FirebaseContext = createContext<ContextValue>(null);
 export default () => useContext(FirebaseContext);
@@ -41,6 +42,7 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
   fullPath,
   children,
 }) => {
+  
   const [app, setApp] = useState<FirebaseApp>();
   const [appUser, setAppUser] = useState<FirebaseUser>();
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,8 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
   const [files, setFiles] = useState<DriveFile[]>(null);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const allFilesFetched = useRef(false);
+  const enableTags = true;
+  const driveName = data.name;
 
   const {
     db,
@@ -66,7 +70,6 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
     getFoldersInCurrentFolder,
     syncWithFirebaseResponse,
   } = useIndexedDB();
-  const driveName = data.name;
 
   const addFolder = (name: string) => {
     const path =
@@ -201,6 +204,79 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
     deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => {});
     return true;
   };
+    
+	// get array of tags
+	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
+		if (!app) return;
+		return getMetadata(ref(getStorage(app), file.fullPath))
+			.then((metadata) => {
+				// convert customMetadata object to array of objects in the format: {key: tagKey, value: tagValue}
+				if (metadata.customMetadata) {
+					return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
+				}
+			}).catch((err) => {
+					toast.error(`${err.message}`);
+			});
+	}
+
+	// add tag to object
+	const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
+		if (!app) return false;
+		if (!key.trim()){
+			toast.error('Error: Tag key is blank.')
+			return false;
+		}
+		key = key.trim()
+		const tagList = await listTags(file);
+		// check for existing tag key, since same tag key will overwrite the previous value
+		if (tagList) {
+			for (const tag of tagList) {
+				if (tag.key === key) {
+					toast.error('Error: Tag key already exists.')
+					return false;
+				}
+			}
+		}
+		await updateMetadata(ref(getStorage(app), file.fullPath),  {
+			customMetadata: {
+				[key]:value,
+			} }).catch((err) => {
+				toast.error(`${err.message}`);
+				return false;
+			});
+		return true;
+	}
+
+	// edit existing tag
+	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+		if (!app) return false;
+		// remove previous tag in order to edit
+		if (!await removeTags(file, prevTag.key)) {
+				return false;
+		}
+		// update the tag
+		if (await addTags(file, newTag.key, newTag.value)){
+			return true;
+		} else {
+			// if new tag values are invalid, add back the previous tag
+			await addTags(file, prevTag.key, prevTag.value)
+			toast.error(`Error: Tag not edited.`);
+			return false;
+		}
+	}
+
+	// remove tag from object
+	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
+		if (!app) return false;
+		await updateMetadata(ref(getStorage(app), file.fullPath),  {
+			customMetadata: {
+				[key]:null,
+			} }).catch((err) => {
+				toast.error(`${err.message}`);
+				return false;
+			});
+		return true;
+	}
 
   const getFileMetadata = async (file: DriveFile, i: number) => {
     let updatedFile: DriveFile;
@@ -505,6 +581,11 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
         removeFile,
         removeFolder,
         syncFilesInCurrentFolder,
+        enableTags,
+				listTags,
+				addTags,
+				editTags,
+				removeTags
       }}
     >
       {children}
