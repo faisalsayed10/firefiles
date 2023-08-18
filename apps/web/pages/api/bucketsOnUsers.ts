@@ -9,7 +9,7 @@ import { SendgridEmailSender } from "@util/emailSender/sendgridEmailSender";
 import { z } from "zod";
 const url = process.env.DEPLOY_URL || process.env.VERCEL_URL;
 
-// FIXME: For future expansion, the authorization functionality could be moved out to its own microservice
+// TODO: For future expansion, the authorization functionality could be moved out to its own microservice
 
 /**
  * Schema for performing a DELETE operation on a BOU record.
@@ -246,7 +246,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // PATCH - UPDATE
     } else if (req.method == "PATCH") {
       // Validate params...
-      const parms = patchBOUSchema.safeParse(req.query);
+      const parms = patchBOUSchema.safeParse(req.body);
       if (!parms.success)
         return res.status(400).json({ error: `invalid patch BucketsOnUsers parameters` });
       const { bucketId, inviteeData } = parms.data;
@@ -254,7 +254,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // Authorize action...
       const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
         select: { role: true },
-        where: { userId: user.id, bucketId: bucketId }, // I deleted isPending: false since there might be invitee who is pending
+        where: { userId: user.id, bucketId: bucketId },
       });
 
       // Requesting user must have access or invitation to access for this drive
@@ -297,7 +297,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
       // Authorize action...
       const { role: requestorRole } = await prisma.bucketsOnUsers.findFirst({
         select: { role: true },
-        where: { userId: user.id, bucketId: bucketId }, // I deleted isPending: false since there might be invitee who is pending
+        where: { userId: user.id, bucketId: bucketId },
       });
 
       // Requesting user must have access to the drive

@@ -84,7 +84,9 @@ export default function InviteNotification() {
                           onClick={async (e) => {
                             e.stopPropagation();
                             try {
-                              await axios.patch(`/api/bucketsOnUsers?bucketId=${request.bucketId}`);
+                              await axios.patch(`/api/bucketsOnUsers`, {
+                                bucketId: request.bucketId,
+                              });
                               mutate(data.filter((b) => b.bucketId !== request.bucketId));
                               toast.success(
                                 "You have successfully accepted the invitation. Refresh page to access.",
