@@ -159,3 +159,7 @@ type S3Drive = {
   (S3DriveClient | S3DriveServer);
 
 export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);
+export type TagFilter = {
+  key?: string,
+  value?: string
+}

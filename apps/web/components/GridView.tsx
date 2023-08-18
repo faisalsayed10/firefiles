@@ -1,14 +1,16 @@
 import { Box, Flex, Grid, IconButton, Skeleton, Text } from "@chakra-ui/react";
 import Folder from "@components/folders/Folder";
-import { DriveFile, DriveFolder } from "@util/types";
-import React, { useContext } from "react";
-import { LayoutList } from "tabler-icons-react";
+import { DriveFile, DriveFolder, TagFilter } from "@util/types";
+import React, { useContext, useState } from "react";
+import { LayoutList, Filter } from "tabler-icons-react";
 import { FileSortConfig } from "@util/types";
 import File from "./files/File";
 import AddFolderButton from "./folders/AddFolderButton";
 import FileSortMenu from "./ui/FileSortMenu";
 import { RoleContext } from "pages/drives/[id]";
 import { Role } from "@prisma/client";
+import FilterTags from "./popups/FilterTags";
+import useBucket from "@hooks/useBucket";
 
 type Props = {
   setGridView: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,10 +21,22 @@ type Props = {
   setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
   setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
   fileSort: FileSortConfig;
+	fileTagFilter: TagFilter;
+	setFileTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
 };
 
 const GridView: React.FC<Props> = (props) => {
   const role = useContext(RoleContext);
+	const [isFilterTagsOpen, setIsFilterTagsOpen] = useState(false);
+	const { enableTags } = useBucket();
+
+	const openFilterTags = () => {
+		setIsFilterTagsOpen(true);
+	};
+
+	const closeFilterTags = () => {
+		setIsFilterTagsOpen(false);
+	};
 
   return (
     <Box mx="4" mb="6">
@@ -32,6 +46,9 @@ const GridView: React.FC<Props> = (props) => {
         </Text>
         <Box>
           <FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort} />
+					{enableTags ? (<IconButton aria-label="filter-tags" mr={1} onClick={openFilterTags}>
+						<Filter />
+					</IconButton>) : (null)}
           <IconButton aria-label="change-view" onClick={() => props.setGridView(false)}>
             <LayoutList />
           </IconButton>
@@ -77,6 +94,7 @@ const GridView: React.FC<Props> = (props) => {
             props.files?.map((file) => <File key={file.name} file={file} gridView={true} />)}
         </Grid>
       )}
+			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} fileTagFilter={props.fileTagFilter} setFileTagFilter={props.setFileTagFilter} />
     </Box>
   );
 };

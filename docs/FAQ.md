@@ -45,3 +45,8 @@ Yes! We do! We can't provide a time frame for this yet, but we can only say that
 ## I wanted **\_\_** as a provider but I couldn't find it.
 
 Create an issue at https://github.com/faisalsayed10/firefiles/issues and we'll add it for you (or if you're a developer yourself, we'd love some contributions!) :)
+
+## How does file tagging and filtering work? 
+
+Tagging is currently only supported in Firebase using custom metadata and AWS S3 using object tagging (S3 only allows up to 10 tags per object). A tag consists of a key and a value. Keys on one file must be unique. Blank keys and keys consisting only of spaces are prevented for usability. Keys that would be duplicates after leading and trailing whitespace is removed are also prevented. Blank/space-only tag values are currently allowed and do not throw any errors. 
+Because of this, filtering by blank keys is prevented, while filtering by blank/space-only values is allowed.
