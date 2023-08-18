@@ -1,5 +1,3 @@
 {
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"typescript.tsdk": "./apps/web/node_modules/typescript/lib",
-	"typescript.enablePromptUseWorkspaceTsdk": true
+	"editor.defaultFormatter": "esbenp.prettier-vscode"
 }
