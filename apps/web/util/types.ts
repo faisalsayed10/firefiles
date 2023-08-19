@@ -23,8 +23,8 @@ export enum Provider {
   backblaze,
   deta,
   git,
-  wasabi,
-  digitalocean,
+	wasabi,
+	digitalocean,
   cloudflare,
 }
 
@@ -57,111 +57,11 @@ export type DriveFolder = {
 };
 
 export type Tag = {
-  key: string;
-  value: string;
-};
-interface CommonDrive {
-  id: string;
-  createdAt: Date;
-  name: string;
-  permissions: "owned" | "shared";
-  environment: "client" | "server";
-  supportsDeletion: boolean;
-  supportsGetObject: boolean;
-  supportsListObjects: boolean;
+	key: string;
+	value: string;
 }
 
-interface FirebasePublicKeys {
-  authDomain: string;
-  storageBucket: string;
-  appId: string;
-  projectId: string;
-  password?: string;
-}
-
-interface FirebaseDriveOwned {
-  permissions: "owned";
-  supportsDeletion: true;
-  supportsGetObject: true;
-  supportsListObjects: true;
-  keys: FirebasePublicKeys & {
-    apiKey: string;
-  };
-}
-
-interface FirebaseDriveShared {
-  supportsDeletion: false;
-  supportsGetObject: false;
-  supportsListObjects: false;
-  permissions: "shared";
-  keys: FirebasePublicKeys;
-}
-
-interface FirebaseDriveClient {
-  environment: "client";
-}
-
-interface FirebaseDriveServer {
-  environment: "server";
-  getDeleteObjectUrl?: () => Promise<string>;
-  getListObjectsUrl?: () => Promise<string>;
-  getObjectUrl?: () => Promise<string>;
-  performDeleteObjects?: () => void;
-}
-
-type FirebaseDrive = { type: "firebase" } & (FirebaseDriveOwned | FirebaseDriveShared) &
-  (FirebaseDriveClient | FirebaseDriveServer);
-
-interface S3PublicKeys {
-  region: string;
-  bucketUrl: string;
-  Bucket: string;
-}
-
-interface S3DriveOwned {
-  permissions: "owned";
-  keys: S3PublicKeys & {
-    accessKey: string;
-    secretKey: string;
-    endpoint?: string;
-  };
-  supportsTagging: true;
-  supportsUploading: true;
-}
-
-interface S3DriveShared {
-  permissions: "shared";
-  keys: S3PublicKeys;
-  supportsTagging: false;
-  supportsUploading: false;
-}
-
-interface S3DriveClient {
-  environment: "client";
-}
-
-interface S3DriveServer {
-  environment: "server";
-  getDeleteObjectUrl: (fullPath: string) => Promise<string>;
-  getListObjectsUrl: (
-    fullPath: string,
-    continuationToken?: string,
-    delimiter?: string,
-  ) => Promise<string>;
-  getObjectUrl: (fullPath: string) => Promise<string>;
-  performDeleteObjects: (deleteParams: string) => void;
-}
-
-type S3Drive = {
-  type: "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean";
-  supportsDeletion: true;
-  supportsGetObject: true;
-  supportsListObjects: true;
-} & (S3DriveOwned | S3DriveShared) &
-  (S3DriveClient | S3DriveServer);
-
-export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);
 export type TagFilter = {
-  key?: string;
-  value?: string;
-};
+  key?: string,
+  value?: string
+}

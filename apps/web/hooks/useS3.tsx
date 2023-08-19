@@ -8,8 +8,9 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Drive } from "@prisma/client";
 import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, Provider, Tag, StorageDrive, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
@@ -29,7 +30,7 @@ const S3Context = createContext<ContextValue>(null);
 export default () => useContext(S3Context);
 
 type Props = {
-	data: StorageDrive;
+	data: Drive & { keys: any };
 	fullPath?: string;
 };
 
@@ -38,11 +39,6 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	fullPath,
 	children,
 }) => {
-	if (data.permissions !== "owned" || data.type === "firebase") {
-    toast.error('Drive type invalid for S3 Provider.')
-		return;
-	}
-
 	const [s3Client, setS3Client] = useState<S3Client>(
 		new S3Client({
 			region: data.keys.region,

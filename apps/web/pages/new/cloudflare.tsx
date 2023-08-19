@@ -13,7 +13,6 @@ import {
 } from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
-import { Role } from "@prisma/client";
 import axios from "axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -81,7 +80,7 @@ const NewS3 = () => {
 
       const Bucket = existingBucket !== "Not Selected" ? existingBucket : newBucket.trim();
 
-      const createDrive = axios.post<{ driveId: string }>("/api/drive", {
+      await axios.post("/api/drive", {
         data: {
           accessKey: accessKeyId,
           secretKey: secretKey,
@@ -94,12 +93,7 @@ const NewS3 = () => {
         type: "cloudflare",
       });
 
-      toast.promise(createDrive, {
-        loading: "Creating drive...",
-        success: "Drive created successfully.",
-        error: "An error occurred while creating the drive.",
-      });
-
+      toast.success("Drive created successfully!");
       router.push("/");
     } catch (err) {
       console.error(err);
