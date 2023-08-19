@@ -23,8 +23,8 @@ const S3Context = createContext<ContextValue>(null);
 export default () => useContext(S3Context);
 
 type Props = {
-  data: Drive & { keys: any };
-  fullPath?: string;
+	data: Drive & { keys: any };
+	fullPath?: string;
 };
 
 export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
@@ -166,14 +166,14 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 					prevUploadingFiles.map((uploadFile) => {
 						return uploadFile.id === id
 							? {
-									...uploadFile,
-									state: "running",
-									progress: Number(
-										parseFloat(
-											((progress.loaded / progress.total) * 100).toString(),
-										).toFixed(2),
-									),
-							  }
+								...uploadFile,
+								state: "running",
+								progress: Number(
+									parseFloat(
+										((progress.loaded / progress.total) * 100).toString(),
+									).toFixed(2),
+								),
+							}
 							: uploadFile;
 					}),
 				);
@@ -245,19 +245,25 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 		return true;
 	};
 
+	// To be implemented
+	const syncFilesInCurrentFolder = async () => {
+		return () => {
+		};
+	}
+
 	// get array of tags
 	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
 		try {
-			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
-			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
+			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }));
+			return response.TagSet.map(tag => ({ key: tag.Key, value: tag.Value }));
 		} catch (err) {
 			toast.error(`Error: ${err.message}`);
 		}
 	}
 
 	// add tag to existing object
-	const addTags = async (file: DriveFile, key:string, value:string): Promise<boolean> => {
-		if (!key.trim()){
+	const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
+		if (!key.trim()) {
 			toast.error('Error: Tag key is blank.')
 			return false;
 		}
@@ -267,11 +273,11 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 			Key: file.fullPath
 		}));
 		const currentTags = currentTagsResponse.TagSet;
-		currentTags.push({Key: key, Value: value});
+		currentTags.push({ Key: key, Value: value });
 		const params = {
 			Bucket: data.keys.Bucket,
 			Key: file.fullPath,
-			Tagging: {TagSet: currentTags}
+			Tagging: { TagSet: currentTags }
 		};
 
 		try {
@@ -286,11 +292,11 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	// edit existing tag
 	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
 		// remove previous tag in order to edit
-		if (!await removeTags(file, prevTag.key)){
+		if (!await removeTags(file, prevTag.key)) {
 			return false;
 		} else {
 			// add the new tag
-			if (await addTags(file, newTag.key, newTag.value)){
+			if (await addTags(file, newTag.key, newTag.value)) {
 				return true;
 			} else {
 				// if new tag values are invalid, add back the previous tag
@@ -302,15 +308,15 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	};
 
 	// remove tag from an object
-	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
-		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+	const removeTags = async (file: DriveFile, key: string): Promise<boolean> => {
+		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }));
 		let existingTags = getTagging.TagSet
 		const updatedTags = existingTags.filter(tag => tag.Key !== key);
 
 		const putTagging = {
-			Bucket: data.keys.Bucket, 
+			Bucket: data.keys.Bucket,
 			Key: file.fullPath,
-			Tagging: {TagSet: updatedTags}
+			Tagging: { TagSet: updatedTags }
 		}
 
 		try {
@@ -471,6 +477,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 				addFolder,
 				removeFile,
 				removeFolder,
+				syncFilesInCurrentFolder,
 				enableTags,
 				listTags,
 				addTags,
@@ -484,23 +491,23 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 };
 
 async function emptyS3Directory(client: S3Client, Bucket: string, Prefix: string) {
-  const listParams = { Bucket, Prefix };
-  const listedObjects = await client.send(new ListObjectsV2Command(listParams));
+	const listParams = { Bucket, Prefix };
+	const listedObjects = await client.send(new ListObjectsV2Command(listParams));
 
-  if (listedObjects.CommonPrefixes?.length > 0) {
-    for (let i = 0; i < listedObjects.CommonPrefixes.length; i++) {
-      await emptyS3Directory(client, Bucket, listedObjects.CommonPrefixes[i].Prefix);
-    }
-  }
+	if (listedObjects.CommonPrefixes?.length > 0) {
+		for (let i = 0; i < listedObjects.CommonPrefixes.length; i++) {
+			await emptyS3Directory(client, Bucket, listedObjects.CommonPrefixes[i].Prefix);
+		}
+	}
 
-  if (listedObjects.Contents?.length === 0) return;
+	if (listedObjects.Contents?.length === 0) return;
 
-  const deleteParams = { Bucket, Delete: { Objects: [] } };
+	const deleteParams = { Bucket, Delete: { Objects: [] } };
 
-  for (let i = 0; i < listedObjects.Contents.length; i++) {
-    deleteParams.Delete.Objects.push({ Key: listedObjects.Contents[i].Key });
-  }
+	for (let i = 0; i < listedObjects.Contents.length; i++) {
+		deleteParams.Delete.Objects.push({ Key: listedObjects.Contents[i].Key });
+	}
 
-  await client.send(new DeleteObjectsCommand(deleteParams));
-  if (listedObjects.IsTruncated) await emptyS3Directory(client, Bucket, Prefix);
+	await client.send(new DeleteObjectsCommand(deleteParams));
+	if (listedObjects.IsTruncated) await emptyS3Directory(client, Bucket, Prefix);
 }
