@@ -5,7 +5,7 @@
 		"dev": "next",
 		"build": "next build",
 		"start": "next start",
-		"vercel-build": "prisma generate && prisma db push && next build",
+		"vercel-build": "prisma generate && prisma db push --accept-data-loss && next build",
 		"postinstall": "prisma generate",
 		"type-check": "tsc",
 		"lint": "pnpm prettier --write ."
