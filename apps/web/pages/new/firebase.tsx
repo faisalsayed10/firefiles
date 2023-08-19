@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
-import { Role } from "@prisma/client";
 import axios from "axios";
 import toObject from "convert-to-object";
 import Head from "next/head";
@@ -52,19 +51,15 @@ const NewFirebase = () => {
       )
         throw new Error("One or more fields are missing!");
 
-      const createDrive = axios.post<{ driveId: string }>("/api/drive", {
-        data,
-        name: data.projectId,
-        type: "firebase",
-      });
+      const promise = axios.post("/api/drive", { data, name: data.projectId, type: "firebase" });
 
-      toast.promise(createDrive, {
+      toast.promise(promise, {
         loading: "Creating drive...",
         success: "Drive created successfully.",
         error: "An error occurred while creating the drive.",
       });
 
-      createDrive.then(() => router.push("/"));
+      promise.then(() => router.push("/"));
     } catch (err) {
       console.error(err);
       toast.error(err.message);

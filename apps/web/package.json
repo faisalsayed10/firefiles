@@ -27,7 +27,6 @@
 		"copy-to-clipboard": "^3.3.1",
 		"crypto-js": "^4.1.1",
 		"evaporate": "^2.1.4",
-		"fast-xml-parser": "^4.2.7",
 		"file-icon-vectors": "^1.0.0",
 		"firebase": "^9.5.0",
 		"framer-motion": "^4",
@@ -54,8 +53,7 @@
 		"tabler-icons-react": "^1.45.0",
 		"underscore": "^1.13.2",
 		"validator": "^13.7.0",
-		"video-react": "^0.15.0",
-		"zod": "^3.21.4"
+		"video-react": "^0.15.0"
 	},
 	"devDependencies": {
 		"@types/crypto-js": "^4.0.2",
