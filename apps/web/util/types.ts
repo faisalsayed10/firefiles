@@ -26,6 +26,7 @@ export enum Provider {
 	wasabi,
 	digitalocean,
   cloudflare,
+  samba,
 }
 
 export type FileSortConfig = {

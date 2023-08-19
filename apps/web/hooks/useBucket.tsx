@@ -2,6 +2,7 @@ import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/type
 import useFirebase from "./useFirebase";
 import useKeys from "./useKeys";
 import useS3 from "./useS3";
+import useSamba from "./useSamba";
 
 export type ContextValue = {
 	loading: boolean;
@@ -34,13 +35,15 @@ export default function useBucket(): ContextValue {
   
 	switch (Provider[keys.type] as Provider) {
 	  	case Provider.firebase:
-			return useFirebase();
+				return useFirebase();
 	  	case Provider.s3:
 	  	case Provider.backblaze:
 	  	case Provider.wasabi:
 	  	case Provider.digitalocean:
     	case Provider.cloudflare:
-			return useS3();
+				return useS3();
+			case Provider.samba:
+				return useSamba();
 	 	default:
 			return null;
 	}

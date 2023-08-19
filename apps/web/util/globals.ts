@@ -30,16 +30,9 @@ export const PROVIDERS = [
     logo: "/cloudflare.png",
   },
   {
-    id: "deta",
-    name: "Deta",
-    logo: "/deta.png",
-    isComingSoon: true,
-  },
-  {
-    id: "git",
-    name: "Git",
-    logo: "/git.png",
-    isComingSoon: true,
+    id: "samba",
+    name: "Samba",
+    logo: "/samba.png",
   }
 ];
 

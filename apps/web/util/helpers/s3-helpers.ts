@@ -35,6 +35,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
   switch (type) {
     case "firebase":
     case "wasabi":
+    case "samba":
       return { success: true };
     case "digitalocean":
     case "s3":
