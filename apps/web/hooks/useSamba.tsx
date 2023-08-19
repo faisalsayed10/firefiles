@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
 import SambaClient from "samba-client";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import { Drive } from "@prisma/client";
 import { DriveFile, DriveFolder, UploadingFile } from "@util/types";
 import toast from "react-hot-toast";
 import useUser from "./useUser";
-import mime from "mime";
+import mime from "mime-types";
 
 const SambaContext = createContext<ContextValue>(null);
 export default () => useContext(SambaContext);
@@ -14,7 +14,7 @@ type Props = {
     data: Drive & { keys: any };
     fullPath?: string;
 };
-export const SambaProvider: React.FC<Props> = ({ data, fullPath, children }) => {
+export const SambaProvider: React.FC<PropsWithChildren<Props>> = ({ data, fullPath, children }) => {
     const sambaClient = new SambaClient({
         address: data.keys.address,
         username: "" || data.keys.username,
@@ -29,6 +29,7 @@ export const SambaProvider: React.FC<Props> = ({ data, fullPath, children }) => 
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [files, setFiles] = useState<DriveFile[]>(null);
     const isMounted = useRef(false);
+    const enableTags = false;
 
     const addFolder = async (name: string) => {
         const path =
@@ -137,6 +138,7 @@ export const SambaProvider: React.FC<Props> = ({ data, fullPath, children }) => 
                 files,
                 folders,
                 uploadingFiles,
+                enableTags,
                 setUploadingFiles,
                 addFile,
                 addFolder,
