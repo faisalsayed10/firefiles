@@ -45,7 +45,7 @@ export default function InviteNotification() {
           >
             <Bell size={24} strokeWidth={1.5} />
           </Button>
-          {data.length > 0 ? (
+          {data?.length > 0 ? (
             <Badge
               onClick={() => {
                 onOpen();
