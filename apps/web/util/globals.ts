@@ -33,6 +33,7 @@ export const PROVIDERS = [
     id: "samba",
     name: "Samba",
     logo: "/samba.png",
+    isComingSoon: true,
   }
 ];
 
