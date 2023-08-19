@@ -7,25 +7,25 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
 /**
- * Schema for performing a DELETE operation on a drive for a single object.
+ * Schema for performing a GET operation on a drive to fetch a list of objects.
  *
- * @param {string} driveId - A required driveId query parameter
- * @param {string} fullPath - A required fullPath query parameter
+ * @param {string} fullPath - An optional fullPath query parameter
+ * @param {string=} continuationToken - An optional continuation query parameter
+ * @param {string=} delimiter - An optional delimiter query parameter
  */
-const deleteSchema = z.object({
-  driveId: z.string().nonempty(),
-  fullPath: z.string().nonempty(),
+const getObjectsListSchema = z.object({
+  fullPath: z.string(),
+  continuationToken: z.string().optional(),
+  delimiter: z.string().optional(),
 });
 
 /**
- * Schema for performing a GET operation on a drive for a single object.
+ * Schema for performing a DELETE operation on a drive remove a list of objects.
  *
- * @param {string} driveId - A required driveId query parameter
- * @param {string} fullPath - A required fullPath query parameter
+ * @param {string} deleteParams - A required deleteParams query parameter
  */
-const getObjectSchema = z.object({
-  driveId: z.string().nonempty(),
-  fullPath: z.string().nonempty(),
+const deleteObjectsSchema = z.object({
+  deleteParams: z.string().nonempty(),
 });
 
 export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
@@ -44,7 +44,7 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     // validate user has ANY access to this drive
     const { role } = await prisma.bucketsOnUsers.findFirst({
       select: { role: true },
-      where: { userId: user.id, bucketId: driveId },
+      where: { userId: user.id, bucketId: driveId, isPending: false },
     });
     if (!role)
       return res
@@ -55,7 +55,27 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
     if (privilegedDrive.environment !== "server")
       return res.status(500).json({ error: "Server failed to create privilegedDrive" });
 
-    // DELETE
+    // GET: A list of objects
+    if (req.method === "GET") {
+      if (!privilegedDrive.supportsListObjects)
+        return res
+          .status(400)
+          .json({ error: `driveId ${drive.id} does not support getObjectsList` });
+
+      const parms = getObjectsListSchema.safeParse(req.query);
+      if (!parms.success) return res.status(400).json({ error: `bad getObjectsList parameters` });
+
+      const { fullPath, continuationToken, delimiter } = parms.data;
+
+      const getObjectsListUrl = await privilegedDrive.getListObjectsUrl(
+        fullPath,
+        delimiter,
+        continuationToken,
+      );
+
+      return res.status(200).json({ getObjectsListUrl });
+    }
+
     if (req.method === "DELETE") {
       if (!privilegedDrive.supportsDeletion) {
         return res.status(400).json({ error: `driveId ${drive.id} does not support deletion` });
@@ -65,31 +85,14 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           error: `userId ${user.id} does not have delete permissions in driveId ${drive.id}`,
         });
 
-      const parms = deleteSchema.safeParse(req.query);
+      const parms = deleteObjectsSchema.safeParse(req.query);
       if (!parms.success)
-        return res.status(400).json({
-          error: "bad delete file parameters",
-        });
+        return res.status(400).json({ error: `invalid deleteObjects parameters` });
 
-      const { fullPath } = parms.data;
-      const deleteObjectUrl = await privilegedDrive.getDeleteObjectUrl(fullPath);
-      return res.status(200).json({ deleteObjectUrl });
-    }
-    // GET: A single file object
-    if (req.method === "GET") {
-      if (!privilegedDrive.supportsGetObject) {
-        return res.status(400).json({ error: `driveId ${drive.id} does not support deletion` });
-      }
+      const { deleteParams } = parms.data;
+      privilegedDrive.performDeleteObjects(deleteParams);
 
-      const parms = getObjectSchema.safeParse(req.query);
-      if (!parms.success)
-        return res.status(400).json({
-          error: "bad getObject parameters",
-        });
-
-      const { fullPath } = parms.data;
-      const getObjectUrl = await privilegedDrive.getObjectUrl(fullPath);
-      return res.status(200).json({ getObjectUrl });
+      return res.status(200).json({ message: `objects ${deleteParams} successfully deleted` });
     }
   } catch (err) {
     console.error(err.message);

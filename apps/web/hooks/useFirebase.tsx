@@ -1,5 +1,5 @@
 import { Drive, User } from "@prisma/client";
-import { Config, DriveFile, DriveFolder, Tag, UploadingFile } from "@util/types";
+import { Config, DriveFile, DriveFolder, Tag, StorageDrive, UploadingFile } from "@util/types";
 import axios from "axios";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
@@ -33,8 +33,8 @@ const FirebaseContext = createContext<ContextValue>(null);
 export default () => useContext(FirebaseContext);
 
 type Props = {
-  data: Drive;
-  fullPath?: string;
+	data: StorageDrive;
+	fullPath?: string;
 };
 
 export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
@@ -613,38 +613,45 @@ const recursiveDelete = async (
   }
 };
 
-const initializeAppAndLogin = async (data: Drive, user: User, setApp: any) => {
-  const has_logged_in = window.localStorage.getItem(`has_logged_in_${data.id}`) === "true" || false;
-  const initialize = initializeApp(data.keys as any, data.id);
-  setApp(initialize);
+const initializeAppAndLogin = async (data: StorageDrive, user: User, setApp: any) => {
+	const has_logged_in =
+		window.localStorage.getItem(`has_logged_in_${data.id}`) === "true" || false;
+	const initialize = initializeApp(data.keys as any, data.id);
+	setApp(initialize);
 
-  if (!has_logged_in) {
-    await loginTheirUser(initialize, user, data);
-  }
+	if (!has_logged_in) {
+		await loginTheirUser(initialize, user, data);
+	}
 };
 
-const loginTheirUser = async (app: FirebaseApp, user: User, data: Drive) => {
-  const auth = getAuth(app);
-  const config = app.options as Config;
-  const setLoggedIn = () => window.localStorage.setItem(`has_logged_in_${data.id}`, "true");
-  const email = user.email.split("@")[0] + "+firefiles@" + user.email.split("@")[1];
-  let password: string;
+const loginTheirUser = async (app: FirebaseApp, user: User, data: StorageDrive) => {
+	const auth = getAuth(app);
+	const config = app.options as Config;
+	const setLoggedIn = () =>
+		window.localStorage.setItem(`has_logged_in_${data.id}`, "true");
+	const email =
+		user.email.split("@")[0] + "+firefiles@" + user.email.split("@")[1];
+	let password: string;
 
-  if (config.password) {
-    password = config.password;
-  } else {
-    password = nanoid(Math.floor(Math.random() * (30 - 20)) + 20);
-  }
+	if (config.password) {
+		password = config.password;
+	} else {
+		password = nanoid(Math.floor(Math.random() * (30 - 20)) + 20);
+	}
 
-  await signInWithEmailAndPassword(auth, email, password)
-    .then(() => setLoggedIn())
-    .catch(async (err) => {
-      if (err.message.includes("auth/user-not-found")) {
-        await createUserWithEmailAndPassword(auth, email, password).then(() => setLoggedIn());
-      } else {
-        router.push("/error?message=" + err.message);
-      }
-    });
+	await signInWithEmailAndPassword(auth, email, password)
+		.then(() => setLoggedIn())
+		.catch(async (err) => {
+			if (err.message.includes("auth/user-not-found")) {
+				await createUserWithEmailAndPassword(auth, email, password).then(() =>
+					setLoggedIn(),
+				);
+			} else {
+				router.push("/error?message=" + err.message);
+			}
+		});
 
-  if (!config.password) await axios.put(`/api/drive?id=${data.id}`, { ...config, password });
+	if (!config.password)
+	console.log( { ...config, password })
+		await axios.put(`/api/drive?id=${data.id}`, { data: { ...config, password }});
 };

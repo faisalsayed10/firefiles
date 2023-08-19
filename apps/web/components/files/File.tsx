@@ -10,13 +10,14 @@ import useBucket from "@hooks/useBucket";
 import { DriveFile } from "@util/types";
 import copy from "copy-to-clipboard";
 import { nanoid } from "nanoid";
-import React, { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import DeleteAlert from "../popups/DeleteAlert";
 import FileGrid from "./FileGrid";
 import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
 import TagsPopup from "../popups/TagsPopup";
+import { RoleContext } from "pages/drives/[id]";
 
 interface Props {
   file: DriveFile;
@@ -35,7 +36,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
     copy(file.url);
     toast.success("File URL copied to clipboard!");
   };
-
+  const role = useContext(RoleContext);
   const deleteFile = async () => {
     try {
       const success = await removeFile(file);

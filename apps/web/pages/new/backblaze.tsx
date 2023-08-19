@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import { ArrowNarrowLeft } from "tabler-icons-react";
 import "video-react/dist/video-react.css";
 import validator from "validator";
+import { Role } from "@prisma/client";
 
 const NewS3 = () => {
   const { user } = useUser();
@@ -91,7 +92,7 @@ const NewS3 = () => {
 
       const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-      await axios.post("/api/drive", {
+      const createDrive = axios.post("/api/drive", {
         data: {
           accessKey: keyId,
           secretKey: applicationKey,
@@ -104,7 +105,12 @@ const NewS3 = () => {
         type: "backblaze",
       });
 
-      toast.success("Drive created successfully!");
+      toast.promise(createDrive, {
+        loading: "Creating drive...",
+        success: "Drive created successfully.",
+        error: "An error occurred while creating the drive.",
+      });
+
       router.push("/");
     } catch (err) {
       console.error(err);

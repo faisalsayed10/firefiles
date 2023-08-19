@@ -15,6 +15,7 @@ Firefiles is an open‑source alternative to Dropbox which lets you setup a clou
 - Manage files in the browser.
 - Easily download and share files.
 - File previews.
+- File tagging and filtering (if provider supports).
 - AWS S3 support.
 - Dark theme.
 

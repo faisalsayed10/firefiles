@@ -2,9 +2,11 @@ import { Flex, MenuDivider, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
+import { Role } from "@prisma/client";
 import { DriveFolder, Provider } from "@util/types";
 import { useRouter } from "next/router";
-import React, { useRef, useState } from "react";
+import { RoleContext } from "pages/drives/[id]";
+import React, { useContext, useRef, useState } from "react";
 import { ExternalLink, Folder as FolderIcon, FolderMinus, Plus } from "tabler-icons-react";
 import DeleteAlert from "../popups/DeleteAlert";
 
@@ -19,6 +21,7 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
   const router = useRouter();
   const cancelRef = useRef();
   const { removeFolder } = useBucket();
+  const role = useContext(RoleContext);
 
   const optionProps = {
     p: 2,
@@ -89,10 +92,12 @@ const Folder: React.FC<Props> = ({ folder, setIsFolderDeleting }) => {
                 <Text ml="2">Open in new tab</Text>
               </Flex>
               <MenuDivider />
-              <Flex {...optionProps} onClick={() => setIsOpen(true)}>
-                <FolderMinus />
-                <Text ml="2">Delete Folder</Text>
-              </Flex>
+              {role === Role.VIEWER || (
+                <Flex {...optionProps} onClick={() => setIsOpen(true)}>
+                  <FolderMinus />
+                  <Text ml="2">Delete Folder</Text>
+                </Flex>
+              )}
             </Flex>
           </OptionsPopover>
         </Flex>

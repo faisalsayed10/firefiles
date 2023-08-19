@@ -1,9 +1,11 @@
-import { IconButton, Td, Tr } from "@chakra-ui/react";
+import { IconButton, Td, Tr, Tooltip } from "@chakra-ui/react";
+import { Role } from "@prisma/client";
 import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
+import { RoleContext } from "pages/drives/[id]";
 import prettyBytes from "pretty-bytes";
-import React from "react";
 import { Copy, FileDownload, FileMinus, Tags, TagsOff } from "tabler-icons-react";
+import React, { useContext, useState } from "react";
 import FileIcon from "./FileIcon";
 import TagsPopup from "../popups/TagsPopup";
 import useBucket from "@hooks/useBucket";
@@ -21,6 +23,7 @@ interface Props {
 const FileRow: React.FC<Props> = (props) => {
   const [isTagsOpen, setIsTagsOpen] = React.useState(false);
   const { enableTags } = useBucket();
+  const role = useContext(RoleContext);
 
   const onTagsOpen = () => {
     setIsTagsOpen(true);
@@ -69,13 +72,27 @@ const FileRow: React.FC<Props> = (props) => {
           />
         </Td>
         <Td textAlign="center">
-          <IconButton
-            aria-label="Delete file"
-            icon={<FileMinus />}
-            onClick={() => props.setIsOpen(true)}
-            variant="outline"
-            colorScheme="red"
-          />
+          {role === Role.VIEWER ? (
+            <Tooltip label="You don't have delete permissions as a Viewer">
+              <span>
+                <IconButton
+                  disabled
+                  aria-label="Delete file"
+                  icon={<FileMinus />}
+                  variant="outline"
+                  colorScheme="red"
+                />
+              </span>
+            </Tooltip>
+          ) : (
+            <IconButton
+              aria-label="Delete file"
+              icon={<FileMinus />}
+              onClick={() => props.setIsOpen(true)}
+              variant="outline"
+              colorScheme="red"
+            />
+          )}
         </Td>
         {/*disable tags depending on provider*/}
         {enableTags ? (

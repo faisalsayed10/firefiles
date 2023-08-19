@@ -7,6 +7,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { NextApiRequest, NextApiResponse } from "next";
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
 
 export const createNewBucket = async (
   client: S3Client,
@@ -29,11 +30,14 @@ export const createNewBucket = async (
 };
 
 export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiResponse, body: any) => {
+
   const { data, type } = body;
 
   switch (type) {
     case "firebase":
+    case "wasabi":
       return { success: true };
+    case "digitalocean":
     case "s3":
     case "backblaze":
     case "cloudflare":
@@ -52,7 +56,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
               AllowedHeaders: ["*"],
               AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
               AllowedOrigins: [process.env.DEPLOY_URL, process.env.VERCEL_URL],
-              ExposeHeaders: ["ETag"],
+              ExposeHeaders: ["Access-Control-Allow-Origin"],
             },
           ],
         },
@@ -94,4 +98,27 @@ export const calculateVariablePartSize = (size: number) => {
   else if (size <= 10 * gb) return 50 * mb;
   else if (size <= 100 * gb) return 100 * mb;
   else return 500 * mb;
+};
+
+export const parseXML2JSON = (rawXML: string) => {
+  const parserOptions = { allowBooleanAttributes: true };
+  const parser = new XMLParser(parserOptions);
+  try {
+    const result = parser.parse(rawXML);
+    return { success: true, json: result };
+  } catch (err) {
+    console.error(`XML parse error: ${err}`);
+    return { success: false, error: err };
+  }
+};
+
+export const buildJSON2XML = (json: any) => {
+  const builder = new XMLBuilder();
+  try {
+    const result = builder.build(json);
+    return { success: true, xml: result };
+  } catch (err) {
+    console.error(`XML build error: ${err}`);
+    return { success: false, error: err };
+  }
 };

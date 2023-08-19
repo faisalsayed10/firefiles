@@ -14,6 +14,7 @@ import {
 import AWSRegionSelect from "@components/ui/AWSRegionSelect";
 import VideoModal from "@components/ui/VideoModal";
 import useUser from "@hooks/useUser";
+import { Role } from "@prisma/client";
 import axios from "axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -78,7 +79,7 @@ const NewS3 = () => {
 
       const Bucket = selectedBucket !== "Not Selected" ? selectedBucket : bucketName.trim();
 
-      await axios.post("/api/drive", {
+      const createDrive = axios.post<{ driveId: string }>("/api/drive", {
         data: {
           accessKey,
           secretKey,
@@ -89,8 +90,13 @@ const NewS3 = () => {
         name: Bucket,
         type: "s3",
       });
+      
+      toast.promise(createDrive, {
+        loading: "Creating drive...",
+        success: "Drive created successfully.",
+        error: "An error occurred while creating the drive.",
+      });
 
-      toast.success("Drive created successfully!");
       router.push("/");
     } catch (err) {
       console.error(err);

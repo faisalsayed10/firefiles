@@ -2,21 +2,27 @@ import Dashboard from "@components/Dashboard";
 import { FirebaseProvider } from "@hooks/useFirebase";
 import { KeysProvider } from "@hooks/useKeys";
 import { S3Provider } from "@hooks/useS3";
+import { S3SharedProvider } from "@hooks/sharedBuckets/useS3Shared";
 import useUser from "@hooks/useUser";
-import { Drive } from "@prisma/client";
+import { Drive, Role } from "@prisma/client";
 import prisma from "@util/prisma";
 import { sessionOptions } from "@util/session";
 import { AES, enc } from "crypto-js";
 import { withIronSessionSsr } from "iron-session/next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
+import { StorageDrive } from "@util/types";
+import { createClientDrive } from "@util/helpers/storage-drive";
 
 type Props = {
-  data: Drive;
+  data: StorageDrive;
+  role: Role;
 };
 
-const DrivePage: React.FC<Props> = ({ data }) => {
+export const RoleContext: React.Context<Role> = createContext(Role.VIEWER);
+
+const DrivePage: React.FC<Props> = ({ data, role }) => {
   const router = useRouter();
   const [folderPath, setFolderPath] = useState("");
   const { user } = useUser({ redirectTo: "/login" });
@@ -32,17 +38,29 @@ const DrivePage: React.FC<Props> = ({ data }) => {
         <title>Your Files | Firefiles</title>
       </Head>
       <KeysProvider data={data}>
-        {data.type === "firebase" ? (
-          <FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
-            <Dashboard />
-          </FirebaseProvider>
-        ) : data.type === "s3" || data.type === "backblaze" || data.type === "cloudflare" ? (
-          <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
-            <Dashboard />
-          </S3Provider>
-        ) : (
-          <p>No provider found.</p>
-        )}
+        <RoleContext.Provider value={role}>
+          {data.type === "firebase" ? (
+            <FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+              <Dashboard />
+            </FirebaseProvider>
+          ) : data.type === "s3" ||
+            data.type === "backblaze" ||
+            data.type === "cloudflare" ||
+            data.type === "wasabi" ||
+            data.type === "digitalocean" ? (
+            data.permissions === "owned" ? (
+              <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
+                <Dashboard />
+              </S3Provider>
+            ) : (
+              <S3SharedProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+                <Dashboard />
+              </S3SharedProvider>
+            )
+          ) : (
+            <p>No provider found.</p>
+          )}
+        </RoleContext.Provider>
       </KeysProvider>
     </>
   );
@@ -54,13 +72,21 @@ export const getServerSideProps = withIronSessionSsr(async ({ req, res, params }
     const id = params.id as string;
     if (!user?.email) throw new Error("User not logged in");
 
-    const drive = await prisma.drive.findFirst({ where: { id, userId: user.id } });
-    if (!drive?.keys) throw new Error("Drive not found");
+    const drive = await prisma.drive.findFirst({ where: { id } });
+    if (!drive?.keys) throw new Error(`driveId ${id} not found`);
 
-    drive.keys = JSON.parse(AES.decrypt(drive.keys, process.env.CIPHER_KEY).toString(enc.Utf8));
-    drive.createdAt = drive.createdAt.toString() as any;
+    const bucketOnUser = await prisma.bucketsOnUsers.findFirst({
+      where: { userId: user.id, bucketId: drive.id },
+    });
+    if (!bucketOnUser?.role) throw new Error(`userId ${user.id} cannot access driveId ${drive.id}`);
 
-    return { props: { data: drive } };
+    const accessDrive =
+      drive.type === "firebase"
+        ? createClientDrive(drive, Role.CREATOR)
+        : createClientDrive(drive, bucketOnUser.role);
+    accessDrive.createdAt = accessDrive.createdAt.toString() as any;
+
+    return { props: { data: accessDrive, role: bucketOnUser.role } };
   } catch (err) {
     return { redirect: { permanent: false, destination: "/" }, props: {} };
   }

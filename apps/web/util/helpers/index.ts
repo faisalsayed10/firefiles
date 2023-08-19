@@ -3,6 +3,7 @@ import { deleteApp, getApps } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { DriveFile, Provider } from "../types";
+import { Role } from "@prisma/client";
 
 export const deleteDrive = async (type: Provider, id: string) => {
   if (window.confirm("Are you sure you want to delete this drive?")) {
@@ -25,6 +26,15 @@ export const deleteDrive = async (type: Provider, id: string) => {
       default:
         break;
     }
+
+    toast.success("Drive deleted successfully");
+  }
+};
+
+export const detachDrive = async (id: string) => {
+  if (window.confirm("Are you sure you want to detach this drive?")) {
+    await axios.delete(`/api/bucketsOnUsers?bucketId=${id}`);
+    toast.success("Drive detached successfully");
   }
 };
 

@@ -1,3 +1,4 @@
+
 import {
   Box,
   Center,
@@ -13,16 +14,18 @@ import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
 import Navbar from "@components/ui/Navbar";
 import useBucket from "@hooks/useBucket";
 import useKeys from "@hooks/useKeys";
-import { Provider, FileSortConfig } from "@util/types";
-import React, { useEffect, useMemo, useState } from "react";
+import { DriveFile, FileSortConfig, TagFilter } from "@util/types";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Dropzone from "react-dropzone";
 import LoadingOverlay from "react-loading-overlay";
 import UploadProgress from "./files/UploadProgress";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import { DriveFile } from "@util/types";
 import { sortDriveFiles } from "@util/file-sorting";
 import { Refresh } from "tabler-icons-react";
+import { RoleContext } from "pages/drives/[id]";
+import { Role } from "@prisma/client";
+import toast from "react-hot-toast";
 
 const baseStyle = {
   outline: "none",
@@ -47,6 +50,33 @@ const Dashboard = () => {
   const [gridView, setGridView] = useState(false);
   const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
   const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
+	const [fileTagFilter, setFileTagFilter] = useState<TagFilter>({});
+	const { listTags } = useBucket();
+  const role = useContext(RoleContext);
+  const { keys: drive } = useKeys();
+	
+	// filter files by tag
+	const filterDriveFiles = async (files: DriveFile[]): Promise<DriveFile[]> => {
+		// map each file to a boolean array
+		const mapFilter = await Promise.all(files.map(file => filterByTag(file, fileTagFilter)));
+		// filter files by the boolean array
+		return files.filter((file, index) => mapFilter[index]);
+	}
+	// return a boolean based on if file matches the tag filter
+	const filterByTag = async (file: DriveFile, fileTagFilter): Promise<boolean> => {
+		const tags = await listTags(file);
+		if (tags) {
+			// filter based on whether key, value, or both is provided
+			if (fileTagFilter.hasOwnProperty("key") && fileTagFilter.hasOwnProperty("value")) {
+				return tags.some(tag => (tag.key === fileTagFilter.key) && (tag.value === fileTagFilter.value));
+			} else if (fileTagFilter.hasOwnProperty("key")) {
+				return tags.some(tag => (tag.key === fileTagFilter.key))
+			} else if (fileTagFilter.hasOwnProperty("value")) {
+				return tags.some(tag => (tag.value === fileTagFilter.value))
+			}
+		}
+		return false;
+	}
 
   useEffect(() => {
     const storedView = localStorage.getItem("grid_view");
@@ -64,14 +94,25 @@ const Dashboard = () => {
     localStorage.setItem("file_sort", JSON.stringify(fileSort));
   }, [fileSort]);
 
-  useEffect(() => {
-    if (!files) {
-      setSortedFiles([]);
-      return;
-    }
-    const sortedFiles = sortDriveFiles(files, fileSort);
-    setSortedFiles(sortedFiles);
-  }, [fileSort, files]);
+useEffect(() => {
+	if (!files) {
+		setSortedFiles([]);
+		return;
+	}
+	// filter files if user has selected filter
+	if (fileTagFilter.hasOwnProperty("key") || fileTagFilter.hasOwnProperty("value")) {
+		const fetchFilteredFiles = async () => {
+			const filteredFiles = await filterDriveFiles(files);
+			// sort filtered files
+			const sortedFilteredFiles = sortDriveFiles(filteredFiles, fileSort);
+			setSortedFiles(sortedFilteredFiles);
+		}
+		fetchFilteredFiles().catch(() => {toast.error(`Unable to fetch filtered files.`)});
+	} else {
+		const sortedFiles = sortDriveFiles(files, fileSort);
+		setSortedFiles(sortedFiles);
+	}
+}, [fileSort, files, fileTagFilter]);
 
   return (
     <>
@@ -81,6 +122,7 @@ const Dashboard = () => {
         text={`Deleting Files... \nPlease DO NOT close this tab.`}
       >
         <Dropzone
+          disabled={role === Role.VIEWER}
           onDrop={(files) => {
             setDraggedFilesToUpload(files);
             setIsDragging(false);
@@ -116,7 +158,12 @@ const Dashboard = () => {
                 DROP FILES ANYWHERE ON THE SCREEN
               </Text>
               <Navbar />
-              <FolderBreadCrumbs currentFolder={currentFolder} />
+              <Flex justifyContent="space-between" alignItems="center">
+                <FolderBreadCrumbs currentFolder={currentFolder} />
+                <Text fontWeight="bold" whiteSpace="nowrap" marginRight="9" textAlign="right">
+                  {`${drive.name} - ${role}`}
+                </Text>
+              </Flex>
               <Divider />
               {!gridView ? (
                 <ListView
@@ -128,6 +175,8 @@ const Dashboard = () => {
                   setIsFolderDeleting={setIsFolderDeleting}
                   setFileSort={setFileSort}
                   fileSort={fileSort}
+									fileTagFilter={fileTagFilter}
+									setFileTagFilter={setFileTagFilter}
                 />
               ) : (
                 <GridView
@@ -139,16 +188,22 @@ const Dashboard = () => {
                   setIsFolderDeleting={setIsFolderDeleting}
                   setFileSort={setFileSort}
                   fileSort={fileSort}
+									fileTagFilter={fileTagFilter}
+									setFileTagFilter={setFileTagFilter}
                 />
               )}
             </Box>
           )}
         </Dropzone>
-        <UploadFileButton
-          filesToUpload={draggedFilesToUpload}
-          setFilesToUpload={setDraggedFilesToUpload}
-        />
-        <SyncButton />
+        {role === Role.VIEWER ? (
+          ""
+        ) : (
+          <UploadFileButton
+            filesToUpload={draggedFilesToUpload}
+            setFilesToUpload={setDraggedFilesToUpload}
+          />
+          <SyncButton />
+        )}
       </LoadingOverlay>
       {uploadingFiles.length > 0 && (
         <Center>
