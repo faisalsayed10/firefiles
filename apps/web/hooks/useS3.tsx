@@ -2,17 +2,26 @@ import {
 	DeleteObjectCommand,
 	DeleteObjectsCommand,
 	GetObjectCommand,
+	PutObjectTaggingCommand,
+	GetObjectTaggingCommand,
 	ListObjectsV2Command,
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Drive } from "@prisma/client";
 import { calculateVariablePartSize } from "@util/helpers/s3-helpers";
-import { DriveFile, DriveFolder, Provider, UploadingFile } from "@util/types";
+import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/types";
 import { Upload } from "@util/upload";
 import mime from "mime-types";
 import { nanoid } from "nanoid";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+	createContext,
+	PropsWithChildren,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import toast from "react-hot-toast";
 import { ContextValue, ROOT_FOLDER } from "./useBucket";
 import useUser from "./useUser";
@@ -25,14 +34,21 @@ type Props = {
 	fullPath?: string;
 };
 
-export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
+export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
+	data,
+	fullPath,
+	children,
+}) => {
 	const [s3Client, setS3Client] = useState<S3Client>(
 		new S3Client({
 			region: data.keys.region,
 			maxAttempts: 1,
-			credentials: { accessKeyId: data.keys.accessKey, secretAccessKey: data.keys.secretKey },
+			credentials: {
+				accessKeyId: data.keys.accessKey,
+				secretAccessKey: data.keys.secretKey,
+			},
 			...(data.keys?.endpoint ? { endpoint: data.keys.endpoint } : {}),
-		})
+		}),
 	);
 	const [loading, setLoading] = useState(false);
 	const { user } = useUser();
@@ -42,6 +58,8 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const [files, setFiles] = useState<DriveFile[]>(null);
 	const isMounted = useRef(false);
+	// enable tags if s3. add new providers with tag support here
+	const enableTags = (Provider[data.type] as Provider) === Provider.s3;
 
 	// Fallback for old buckets not already having the bucketUrl.
 	useEffect(() => {
@@ -49,11 +67,16 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		isMounted.current = true;
 		if (data.keys.bucketUrl) return;
 
-		if ((Provider[data.type] as Provider) === Provider.s3) {
-			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`;
-		} else if ((Provider[data.type] as Provider) === Provider.backblaze) {
-			data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.backblazeb2.com`;
-		}
+		switch (Provider[data.type] as Provider) {
+			case Provider.s3:
+			  data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.amazonaws.com`;
+			  break;
+			case Provider.backblaze:
+			  data.keys.bucketUrl = `https://${data.keys.Bucket}.s3.${data.keys.region}.backblazeb2.com`;
+			  break;
+			default:
+			  break;
+		  }
 
 		return () => {
 			isMounted.current = false;
@@ -78,19 +101,29 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 		setFolders((folders) => [...folders, newFolder]);
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
 		const folders: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
-		localStorage.setItem(`local_folders_${data.id}`, JSON.stringify([...folders, newFolder]));
+		localStorage.setItem(
+			`local_folders_${data.id}`,
+			JSON.stringify([...folders, newFolder]),
+		);
 	};
 
 	const removeFolder = async (folder: DriveFolder) => {
 		// remove from local state
-		setFolders((folders) => folders.filter((f) => f.fullPath !== folder.fullPath));
+		setFolders((folders) =>
+			folders.filter((f) => f.fullPath !== folder.fullPath),
+		);
 
 		// delete from localStorage
 		const localFolders = localStorage.getItem(`local_folders_${data.id}`);
 		if (localFolders) {
 			const folders = JSON.parse(localFolders);
-			const filtered = folders.filter((f) => !f.fullPath.includes(folder.fullPath));
-			localStorage.setItem(`local_folders_${data.id}`, JSON.stringify(filtered));
+			const filtered = folders.filter(
+				(f) => !f.fullPath.includes(folder.fullPath),
+			);
+			localStorage.setItem(
+				`local_folders_${data.id}`,
+				JSON.stringify(filtered),
+			);
 		}
 
 		// recursively delete children
@@ -100,7 +133,9 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	const addFile = async (filesToUpload: File[] | FileList) => {
 		Array.from(filesToUpload).forEach(async (file) => {
 			if (/[#\$\[\]\*/]/.test(file.name))
-				return toast.error("File name cannot contain special characters (#$[]*/).");
+				return toast.error(
+					"File name cannot contain special characters (#$[]*/).",
+				);
 
 			if (files?.filter((f) => f.name === file.name).length > 0)
 				return toast.error("File with same name already exists.");
@@ -134,7 +169,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 							progress: 0,
 							error: false,
 						},
-					])
+					]),
 				);
 			});
 
@@ -146,27 +181,33 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 									...uploadFile,
 									state: "running",
 									progress: Number(
-										parseFloat(((progress.loaded / progress.total) * 100).toString()).toFixed(2)
+										parseFloat(
+											((progress.loaded / progress.total) * 100).toString(),
+										).toFixed(2),
 									),
 							  }
 							: uploadFile;
-					})
+					}),
 				);
 			});
 
 			upload.on("paused", () => {
 				setUploadingFiles((prevUploadingFiles) =>
 					prevUploadingFiles.map((uploadFile) => {
-						return uploadFile.id === id ? { ...uploadFile, state: "paused" } : uploadFile;
-					})
+						return uploadFile.id === id
+							? { ...uploadFile, state: "paused" }
+							: uploadFile;
+					}),
 				);
 			});
 
 			upload.on("resumed", () => {
 				setUploadingFiles((prevUploadingFiles) =>
 					prevUploadingFiles.map((uploadFile) => {
-						return uploadFile.id === id ? { ...uploadFile, state: "running" } : uploadFile;
-					})
+						return uploadFile.id === id
+							? { ...uploadFile, state: "running" }
+							: uploadFile;
+					}),
 				);
 			});
 
@@ -182,7 +223,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 			upload.on("completed", async () => {
 				setUploadingFiles((prevUploadingFiles) =>
-					prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id)
+					prevUploadingFiles.filter((uploadFile) => uploadFile.id !== id),
 				);
 				const newFile: DriveFile = {
 					fullPath: Key,
@@ -196,7 +237,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 					url: await getSignedUrl(
 						s3Client,
 						new GetObjectCommand({ Bucket: data.keys.Bucket, Key: Key }),
-						{ expiresIn: 3600 * 24 }
+						{ expiresIn: 3600 * 24 },
 					),
 				};
 
@@ -210,8 +251,88 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 
 	const removeFile = async (file: DriveFile) => {
 		setFiles((files) => files.filter((f) => f.fullPath !== file.fullPath));
-		await s3Client.send(new DeleteObjectCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }));
+		await s3Client.send(
+			new DeleteObjectCommand({ Bucket: data.keys.Bucket, Key: file.fullPath }),
+		);
 		return true;
+	};
+
+	// get array of tags
+	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
+		try {
+			if (!enableTags) return;
+			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+		}
+	}
+
+	// add tag to existing object
+	const addTags = async (file: DriveFile, key:string, value:string): Promise<boolean> => {
+		if (!key.trim()){
+			toast.error('Error: Tag key is blank.')
+			return false;
+		}
+		key = key.trim()
+		const currentTagsResponse = await s3Client.send(new GetObjectTaggingCommand({
+			Bucket: data.keys.Bucket,
+			Key: file.fullPath
+		}));
+		const currentTags = currentTagsResponse.TagSet;
+		currentTags.push({Key: key, Value: value});
+		const params = {
+			Bucket: data.keys.Bucket,
+			Key: file.fullPath,
+			Tagging: {TagSet: currentTags}
+		};
+
+		try {
+			await s3Client.send(new PutObjectTaggingCommand(params));
+			return true;
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+			return false;
+		}
+	};
+
+	// edit existing tag
+	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+		// remove previous tag in order to edit
+		if (!await removeTags(file, prevTag.key)){
+			return false;
+		} else {
+			// add the new tag
+			if (await addTags(file, newTag.key, newTag.value)){
+				return true;
+			} else {
+				// if new tag values are invalid, add back the previous tag
+				await addTags(file, prevTag.key, prevTag.value)
+				toast.error(`Error: Tag not edited.`);
+				return false;
+			}
+		}
+	};
+
+	// remove tag from an object
+	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
+		const getTagging = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
+		let existingTags = getTagging.TagSet
+		const updatedTags = existingTags.filter(tag => tag.Key !== key);
+
+		const putTagging = {
+			Bucket: data.keys.Bucket, 
+			Key: file.fullPath,
+			Tagging: {TagSet: updatedTags}
+		}
+
+		try {
+			await s3Client.send(new PutObjectTaggingCommand(putTagging));
+			return true;
+		} catch (err) {
+			toast.error(`Error: ${err.message}`);
+			return false;
+		}
 	};
 
 	// set currentFolder
@@ -247,7 +368,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 							Bucket: data.keys.Bucket,
 							Prefix: currentFolder.fullPath,
 							Delimiter: "/",
-						})
+						}),
 					);
 
 					if (results.Contents) {
@@ -263,21 +384,30 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								bucketUrl: data.keys.bucketUrl,
 								url: await getSignedUrl(
 									s3Client,
-									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
-									{ expiresIn: 3600 * 24 }
+									new GetObjectCommand({
+										Bucket: results.Name,
+										Key: result.Key,
+									}),
+									{ expiresIn: 3600 * 24 },
 								),
 							};
 
-							setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
+							setFiles((files) =>
+								files ? [...files, driveFile] : [driveFile],
+							);
 						});
 					}
 
 					const localFolders = localStorage.getItem(`local_folders_${data.id}`);
-					let localFoldersArray: DriveFolder[] = localFolders ? JSON.parse(localFolders) : [];
+					let localFoldersArray: DriveFolder[] = localFolders
+						? JSON.parse(localFolders)
+						: [];
 					localFoldersArray = localFoldersArray.filter(
 						(folder) =>
 							folder.parent === currentFolder.fullPath &&
-							!results.CommonPrefixes?.find((prefix) => prefix.Prefix === folder.fullPath)
+							!results.CommonPrefixes?.find(
+								(prefix) => prefix.Prefix === folder.fullPath,
+							),
 					);
 
 					setFolders(localFoldersArray);
@@ -286,7 +416,9 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 						for (let i = 0; i < results.CommonPrefixes.length; i++) {
 							const driveFolder: DriveFolder = {
 								fullPath: results.CommonPrefixes[i].Prefix,
-								name: results.CommonPrefixes[i].Prefix.slice(0, -1).split("/").pop(),
+								name: results.CommonPrefixes[i].Prefix.slice(0, -1)
+									.split("/")
+									.pop(),
 								bucketName: results.Name,
 								parent: currentFolder.fullPath,
 								bucketUrl: data.keys.bucketUrl,
@@ -303,7 +435,7 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								Prefix: currentFolder.fullPath,
 								ContinuationToken: results.ContinuationToken,
 								Delimiter: "/",
-							})
+							}),
 						);
 
 						results.Contents.forEach(async (result) => {
@@ -318,11 +450,16 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 								bucketUrl: data.keys.bucketUrl,
 								url: await getSignedUrl(
 									s3Client,
-									new GetObjectCommand({ Bucket: results.Name, Key: result.Key }),
-									{ expiresIn: 3600 * 24 }
+									new GetObjectCommand({
+										Bucket: results.Name,
+										Key: result.Key,
+									}),
+									{ expiresIn: 3600 * 24 },
 								),
 							};
-							setFiles((files) => (files ? [...files, driveFile] : [driveFile]));
+							setFiles((files) =>
+								files ? [...files, driveFile] : [driveFile],
+							);
 						});
 					}
 				}
@@ -347,6 +484,11 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 				addFolder,
 				removeFile,
 				removeFolder,
+				enableTags,
+				listTags,
+				addTags,
+				editTags,
+				removeTags
 			}}
 		>
 			{children}
@@ -354,13 +496,21 @@ export const S3Provider: React.FC<Props> = ({ data, fullPath, children }) => {
 	);
 };
 
-async function emptyS3Directory(client: S3Client, Bucket: string, Prefix: string) {
+async function emptyS3Directory(
+	client: S3Client,
+	Bucket: string,
+	Prefix: string,
+) {
 	const listParams = { Bucket, Prefix };
 	const listedObjects = await client.send(new ListObjectsV2Command(listParams));
 
 	if (listedObjects.CommonPrefixes?.length > 0) {
 		for (let i = 0; i < listedObjects.CommonPrefixes.length; i++) {
-			await emptyS3Directory(client, Bucket, listedObjects.CommonPrefixes[i].Prefix);
+			await emptyS3Directory(
+				client,
+				Bucket,
+				listedObjects.CommonPrefixes[i].Prefix,
+			);
 		}
 	}
 

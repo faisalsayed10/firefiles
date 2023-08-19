@@ -7,8 +7,7 @@ import {
 	useDisclosure,
 } from "@chakra-ui/react";
 import useBucket from "@hooks/useBucket";
-import useKeys from "@hooks/useKeys";
-import { DriveFile, Provider } from "@util/types";
+import { DriveFile } from "@util/types";
 import copy from "copy-to-clipboard";
 import { nanoid } from "nanoid";
 import React, { useRef, useState } from "react";
@@ -17,6 +16,7 @@ import DeleteAlert from "../popups/DeleteAlert";
 import FileGrid from "./FileGrid";
 import FilePreview from "./FilePreview";
 import FileRow from "./FileRow";
+import TagsPopup from "../popups/TagsPopup";
 
 interface Props {
 	file: DriveFile;
@@ -25,10 +25,11 @@ interface Props {
 
 const File: React.FC<Props> = ({ file, gridView = false }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { removeFile } = useBucket();
+	const { removeFile, enableTags } = useBucket();
 	const [id] = useState(nanoid());
 	const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 	const cancelRef = useRef();
+	const { isOpen: isTagsOpen, onOpen: onTagsOpen, onClose: onTagsClose } = useDisclosure();
 
 	const copyFile = () => {
 		copy(file.url);
@@ -55,6 +56,9 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 			));
 		}
 	};
+	const handleTagsOpen = () => {
+		onTagsOpen();
+	};
 
 	return (
 		<>
@@ -65,6 +69,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 					id={id}
 					onPreviewOpen={onPreviewOpen}
 					setIsOpen={setIsOpen}
+					onTagsOpen={handleTagsOpen}
 				/>
 			) : (
 				<FileRow
@@ -73,6 +78,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 					id={id}
 					onPreviewOpen={onPreviewOpen}
 					setIsOpen={setIsOpen}
+					onTagsOpen={handleTagsOpen}
 				/>
 			)}
 
@@ -89,6 +95,7 @@ const File: React.FC<Props> = ({ file, gridView = false }) => {
 					<FilePreview url={file.url} file={file} />
 				</ModalContent>
 			</Modal>
+			{enableTags ? (<TagsPopup isOpen={isTagsOpen} onClose={onTagsClose} file={file} />):(null)}
 		</>
 	);
 };

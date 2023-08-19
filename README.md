@@ -1,7 +1,9 @@
 <div align="center">
-      <h1> <img src="https://firefiles.vercel.app/logo.png" width="80px"><br/>Firefiles</h1>
+      <h1> <img src="https://firefiles.app/logo.png" width="80px"><br/>Firefiles</h1>
      </div>
-<p align="center"> <a href="https://firefiles.vercel.app" target="_blank"><img alt="" src="https://img.shields.io/badge/Website-EA4C89?style=normal&logo=dribbble&logoColor=white" style="vertical-align:center" /></a> <a href="https://twitter.com/faisal_sayed05" target="_blank"><img alt="" src="https://img.shields.io/badge/Twitter-1DA1F2?style=normal&logo=twitter&logoColor=white" style="vertical-align:center" /></a></p>
+<p align="center"> <a href="https://firefiles.app" target="_blank"><img alt="" src="https://img.shields.io/badge/Website-EA4C89?style=normal&logo=dribbble&logoColor=white" style="vertical-align:center" /></a> <a href="https://twitter.com/faisal_sayed05" target="_blank"><img alt="" src="https://img.shields.io/badge/Twitter-1DA1F2?style=normal&logo=twitter&logoColor=white" style="vertical-align:center" /></a></p>
+
+Join Discord: https://discord.gg/qZxDmmWWUs
 
 # Description
 
@@ -13,12 +15,13 @@ Firefiles is an open‑source alternative to Dropbox which lets you setup a clou
 - Manage files in the browser.
 - Easily download and share files.
 - File previews.
+- File tagging and filtering (if provider supports).
 - AWS S3 support.
 - Dark theme.
 
 # Screenshots
 
- <img src="https://firefiles.vercel.app/firefiles-demo3.png">
+ <img src="https://firefiles.app/firefiles-demo3.png">
  
 # Tech Used
 
@@ -34,3 +37,7 @@ Firefiles is an open-source project. If you want to support the project, you can
 - [Ko-fi](https://ko-fi.com/faisalsayed10)
 - [liberapay](https://en.liberapay.com/faisalsayed10/)
 - [Buy me a Coffee](https://www.buymeacoffee.com/faisalsayed10)
+
+## Our Sponsors
+
+[![Foss United](apps/landing/public/fossunited-badge.svg)](https://fossunited.org)
