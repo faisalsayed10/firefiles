@@ -260,6 +260,7 @@ export const S3Provider: React.FC<PropsWithChildren<Props>> = ({
 	// get array of tags
 	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
 		try {
+			if (!enableTags) return;
 			const response = await s3Client.send(new GetObjectTaggingCommand({ Bucket: data.keys.Bucket, Key: file.fullPath}));
 			return response.TagSet.map(tag => ({key: tag.Key, value:tag.Value}));
 		} catch (err) {
