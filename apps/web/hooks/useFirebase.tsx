@@ -42,7 +42,6 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
   fullPath,
   children,
 }) => {
-  
   const [app, setApp] = useState<FirebaseApp>();
   const [appUser, setAppUser] = useState<FirebaseUser>();
   const [loading, setLoading] = useState(true);
@@ -204,79 +203,82 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
     deleteObject(ref(getStorage(app), file.fullPath)).catch((_) => {});
     return true;
   };
-    
-	// get array of tags
-	const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
-		if (!app) return;
-		return getMetadata(ref(getStorage(app), file.fullPath))
-			.then((metadata) => {
-				// convert customMetadata object to array of objects in the format: {key: tagKey, value: tagValue}
-				if (metadata.customMetadata) {
-					return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
-				}
-			}).catch((err) => {
-					toast.error(`${err.message}`);
-			});
-	}
 
-	// add tag to object
-	const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
-		if (!app) return false;
-		if (!key.trim()){
-			toast.error('Error: Tag key is blank.')
-			return false;
-		}
-		key = key.trim()
-		const tagList = await listTags(file);
-		// check for existing tag key, since same tag key will overwrite the previous value
-		if (tagList) {
-			for (const tag of tagList) {
-				if (tag.key === key) {
-					toast.error('Error: Tag key already exists.')
-					return false;
-				}
-			}
-		}
-		await updateMetadata(ref(getStorage(app), file.fullPath),  {
-			customMetadata: {
-				[key]:value,
-			} }).catch((err) => {
-				toast.error(`${err.message}`);
-				return false;
-			});
-		return true;
-	}
+  // get array of tags
+  const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
+    if (!app) return;
+    return getMetadata(ref(getStorage(app), file.fullPath))
+      .then((metadata) => {
+        // convert customMetadata object to array of objects in the format: {key: tagKey, value: tagValue}
+        if (metadata.customMetadata) {
+          return Object.entries(metadata.customMetadata).map(([k, v]) => ({ key: k, value: v }));
+        }
+      })
+      .catch((err) => {
+        toast.error(`${err.message}`);
+      });
+  };
 
-	// edit existing tag
-	const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
-		if (!app) return false;
-		// remove previous tag in order to edit
-		if (!await removeTags(file, prevTag.key)) {
-				return false;
-		}
-		// update the tag
-		if (await addTags(file, newTag.key, newTag.value)){
-			return true;
-		} else {
-			// if new tag values are invalid, add back the previous tag
-			await addTags(file, prevTag.key, prevTag.value)
-			toast.error(`Error: Tag not edited.`);
-			return false;
-		}
-	}
+  // add tag to object
+  const addTags = async (file: DriveFile, key: string, value: string): Promise<boolean> => {
+    if (!app) return false;
+    if (!key.trim()) {
+      toast.error("Error: Tag key is blank.");
+      return false;
+    }
+    key = key.trim();
+    const tagList = await listTags(file);
+    // check for existing tag key, since same tag key will overwrite the previous value
+    if (tagList) {
+      for (const tag of tagList) {
+        if (tag.key === key) {
+          toast.error("Error: Tag key already exists.");
+          return false;
+        }
+      }
+    }
+    await updateMetadata(ref(getStorage(app), file.fullPath), {
+      customMetadata: {
+        [key]: value,
+      },
+    }).catch((err) => {
+      toast.error(`${err.message}`);
+      return false;
+    });
+    return true;
+  };
 
-	// remove tag from object
-	const removeTags = async (file: DriveFile, key:string): Promise<boolean> => {
-		if (!app) return false;
-		await updateMetadata(ref(getStorage(app), file.fullPath),  {
-			customMetadata: {
-				[key]:null,
-			} }).catch((err) => {
-				toast.error(`${err.message}`);
-				return false;
-			});
-		return true;
-	}
+  // edit existing tag
+  const editTags = async (file: DriveFile, prevTag: Tag, newTag: Tag): Promise<boolean> => {
+    if (!app) return false;
+    // remove previous tag in order to edit
+    if (!(await removeTags(file, prevTag.key))) {
+      return false;
+    }
+    // update the tag
+    if (await addTags(file, newTag.key, newTag.value)) {
+      return true;
+    } else {
+      // if new tag values are invalid, add back the previous tag
+      await addTags(file, prevTag.key, prevTag.value);
+      toast.error(`Error: Tag not edited.`);
+      return false;
+    }
+  };
+
+  // remove tag from object
+  const removeTags = async (file: DriveFile, key: string): Promise<boolean> => {
+    if (!app) return false;
+    await updateMetadata(ref(getStorage(app), file.fullPath), {
+      customMetadata: {
+        [key]: null,
+      },
+    }).catch((err) => {
+      toast.error(`${err.message}`);
+      return false;
+    });
+    return true;
+  };
 
   const getFileMetadata = async (file: DriveFile, i: number) => {
     let updatedFile: DriveFile;
@@ -582,10 +584,10 @@ export const FirebaseProvider: React.FC<PropsWithChildren<Props>> = ({
         removeFolder,
         syncFilesInCurrentFolder,
         enableTags,
-				listTags,
-				addTags,
-				editTags,
-				removeTags
+        listTags,
+        addTags,
+        editTags,
+        removeTags,
       }}
     >
       {children}

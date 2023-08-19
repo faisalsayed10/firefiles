@@ -55,6 +55,6 @@ export type DriveFolder = {
 };
 
 export type Tag = {
-	key: string;
-	value: string;
-}
+  key: string;
+  value: string;
+};

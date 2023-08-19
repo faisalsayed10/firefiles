@@ -10,104 +10,114 @@ import TagsPopup from "../popups/TagsPopup";
 import useBucket from "@hooks/useBucket";
 import toast from "react-hot-toast";
 
-
 interface Props {
-	file: DriveFile;
-	onPreviewOpen: () => void;
-	copyFile: () => void;
-	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	id: string;
-	onTagsOpen: () => void;
+  file: DriveFile;
+  onPreviewOpen: () => void;
+  copyFile: () => void;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  id: string;
+  onTagsOpen: () => void;
 }
 
 const FileGrid: React.FC<Props> = (props) => {
-	const optionProps = {
-		p: 2,
-		cursor: "pointer",
-		_hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
-	};
-	const [isTagsPopupOpen, setIsTagsPopupOpen] = React.useState(false);
-	const { enableTags } = useBucket();
+  const optionProps = {
+    p: 2,
+    cursor: "pointer",
+    _hover: { backgroundColor: useColorModeValue("gray.100", "rgba(237, 242, 247, 0.1)") },
+  };
+  const [isTagsPopupOpen, setIsTagsPopupOpen] = React.useState(false);
+  const { enableTags } = useBucket();
 
-	const openTagsPopup = () => {
-		setIsTagsPopupOpen(true);
-	};
+  const openTagsPopup = () => {
+    setIsTagsPopupOpen(true);
+  };
 
-	const closeTagsPopup = () => {
-		setIsTagsPopupOpen(false);
-	};
-	return (
-		<>
-			<Flex
-				cursor="pointer"
-				direction="column"
-				align="center"
-				borderWidth="1px"
-				borderRadius="lg"
-				boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
-				transition="ease-in-out 0.1s"
-				className="hoverAnim"
-				w={["140px", "180px", "180px", "180px"]}
-				h="140px"
-				overflow="hidden"
-			>
-				<Box w="100%" h="100px" overflow="hidden" onClick={props.onPreviewOpen}>
-					{props.file?.contentType?.startsWith("image") ? (
-						<Image src={props.file.url} alt={props.file.name} w="full" h="full" objectFit="cover" />
-					) : (
-						<Box display="flex" alignItems="center" justifyContent="center" h="full">
-							<FileIcon extension={props.file.name.split(".").pop()} id={props.id} bigIcon={true} />
-						</Box>
-					)}
-				</Box>
-				<Flex p="2" w="full" justify="space-between" alignItems="center">
-					<Text
-						flex="1"
-						isTruncated={true}
-						as="p"
-						fontSize="xs"
-						align="left"
-						px="2"
-						onClick={props.onPreviewOpen}
-					>
-						{props.file.name}
-					</Text>
-					<OptionsPopover
-						header={props.file.name}
-						footer={`Size: ${props.file.size && prettyBytes(parseInt(props.file.size) || 0)}`}
-					>
-						{!props.file ? (
-							<Spinner />
-						) : (
-							<Flex alignItems="stretch" flexDirection="column">
-								<Flex {...optionProps} onClick={props.copyFile}>
-									<Copy />
-									<Text ml="2">Share</Text>
-								</Flex>
-								<Flex {...optionProps} onClick={() => download(props.file)}>
-									<FileDownload />
-									<Text ml="2">Download</Text>
-								</Flex>
-								<Flex {...optionProps} onClick={() => props.setIsOpen(true)}>
-									<FileMinus />
-									<Text ml="2">Delete</Text>
-								</Flex>
-								{/*disable tags depending on provider*/}
-								{ enableTags ? (<Flex {...optionProps} onClick={openTagsPopup}>
-									<Tags />
-									<Text ml="2">Tags</Text>
-								</Flex>):(<Flex {...optionProps} onClick={() => {toast.error('Tags not supported for this provider.')}}>
-									<TagsOff color={'gray'} />
-									<Text ml="2" color={'gray'}>Tags</Text>
-								</Flex>) }
-							</Flex>
-						)}
-					</OptionsPopover>
-				</Flex>
-			</Flex>
-			<TagsPopup isOpen={isTagsPopupOpen} onClose={closeTagsPopup} file={props.file} />
-		</>
-	);
+  const closeTagsPopup = () => {
+    setIsTagsPopupOpen(false);
+  };
+  return (
+    <>
+      <Flex
+        cursor="pointer"
+        direction="column"
+        align="center"
+        borderWidth="1px"
+        borderRadius="lg"
+        boxShadow="5.5px 4.2px 7.8px -1.7px rgba(0, 0, 0, 0.1)"
+        transition="ease-in-out 0.1s"
+        className="hoverAnim"
+        w={["140px", "180px", "180px", "180px"]}
+        h="140px"
+        overflow="hidden"
+      >
+        <Box w="100%" h="100px" overflow="hidden" onClick={props.onPreviewOpen}>
+          {props.file?.contentType?.startsWith("image") ? (
+            <Image src={props.file.url} alt={props.file.name} w="full" h="full" objectFit="cover" />
+          ) : (
+            <Box display="flex" alignItems="center" justifyContent="center" h="full">
+              <FileIcon extension={props.file.name.split(".").pop()} id={props.id} bigIcon={true} />
+            </Box>
+          )}
+        </Box>
+        <Flex p="2" w="full" justify="space-between" alignItems="center">
+          <Text
+            flex="1"
+            isTruncated={true}
+            as="p"
+            fontSize="xs"
+            align="left"
+            px="2"
+            onClick={props.onPreviewOpen}
+          >
+            {props.file.name}
+          </Text>
+          <OptionsPopover
+            header={props.file.name}
+            footer={`Size: ${props.file.size && prettyBytes(parseInt(props.file.size) || 0)}`}
+          >
+            {!props.file ? (
+              <Spinner />
+            ) : (
+              <Flex alignItems="stretch" flexDirection="column">
+                <Flex {...optionProps} onClick={props.copyFile}>
+                  <Copy />
+                  <Text ml="2">Share</Text>
+                </Flex>
+                <Flex {...optionProps} onClick={() => download(props.file)}>
+                  <FileDownload />
+                  <Text ml="2">Download</Text>
+                </Flex>
+                <Flex {...optionProps} onClick={() => props.setIsOpen(true)}>
+                  <FileMinus />
+                  <Text ml="2">Delete</Text>
+                </Flex>
+                {/*disable tags depending on provider*/}
+                {enableTags ? (
+                  <Flex {...optionProps} onClick={openTagsPopup}>
+                    <Tags />
+                    <Text ml="2">Tags</Text>
+                  </Flex>
+                ) : (
+                  <Flex
+                    {...optionProps}
+                    onClick={() => {
+                      toast.error("Tags not supported for this provider.");
+                    }}
+                  >
+                    <TagsOff color={"gray"} />
+                    <Text ml="2" color={"gray"}>
+                      Tags
+                    </Text>
+                  </Flex>
+                )}
+              </Flex>
+            )}
+          </OptionsPopover>
+        </Flex>
+      </Flex>
+      <TagsPopup isOpen={isTagsPopupOpen} onClose={closeTagsPopup} file={props.file} />
+    </>
+  );
 };
 
 export default FileGrid;
