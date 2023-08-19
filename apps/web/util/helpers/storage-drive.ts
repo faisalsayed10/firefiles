@@ -215,7 +215,7 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
   }
 };
 
-const s3DriveType = (drive: Drive): "s3" | "backblaze" | "cloudflare" => {
+const s3DriveType = (drive: Drive): "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean" => {
   const type = drive.type;
   if (type === "s3" || type === "backblaze" || type === "cloudflare") return type;
   else throw new Error(`Invalid provider type '${type}' found on driveId ${drive.id}`);

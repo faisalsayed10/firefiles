@@ -43,7 +43,11 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
             <FirebaseProvider data={data} fullPath={decodeURIComponent(folderPath)}>
               <Dashboard />
             </FirebaseProvider>
-          ) : data.type === "s3" || data.type === "backblaze" || data.type === "cloudflare" ? (
+          ) : data.type === "s3" ||
+            data.type === "backblaze" ||
+            data.type === "cloudflare" ||
+            data.type === "wasabi" ||
+            data.type === "digitalocean" ? (
             data.permissions === "owned" ? (
               <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
                 <Dashboard />

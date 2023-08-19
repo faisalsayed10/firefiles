@@ -23,6 +23,8 @@ export enum Provider {
   backblaze,
   deta,
   git,
+  wasabi,
+  digitalocean,
   cloudflare,
 }
 
@@ -151,7 +153,7 @@ interface S3DriveServer {
 }
 
 type S3Drive = {
-  type: "s3" | "backblaze" | "cloudflare";
+  type: "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean";
   supportsDeletion: true;
   supportsGetObject: true;
   supportsListObjects: true;
@@ -160,6 +162,6 @@ type S3Drive = {
 
 export type StorageDrive = CommonDrive & (FirebaseDrive | S3Drive);
 export type TagFilter = {
-  key?: string,
-  value?: string
-}
+  key?: string;
+  value?: string;
+};
