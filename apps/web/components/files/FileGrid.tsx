@@ -1,10 +1,13 @@
 import { Box, Flex, Image, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import OptionsPopover from "@components/popups/OptionsPopover";
+import { FirebaseProvider } from "@hooks/useFirebase";
+import { Role } from "@prisma/client";
 import { download } from "@util/helpers";
 import { DriveFile } from "@util/types";
+import { RoleContext } from "pages/drives/[id]";
 import prettyBytes from "pretty-bytes";
-import React from "react";
 import { Copy, FileDownload, FileMinus, Tags, TagsOff } from "tabler-icons-react";
+import React, { useContext } from "react";
 import FileIcon from "./FileIcon";
 import TagsPopup from "../popups/TagsPopup";
 import useBucket from "@hooks/useBucket";
@@ -28,6 +31,7 @@ const FileGrid: React.FC<Props> = (props) => {
 	};
 	const [isTagsPopupOpen, setIsTagsPopupOpen] = React.useState(false);
 	const { enableTags } = useBucket();
+	const role = useContext(RoleContext);
 
 	const openTagsPopup = () => {
 		setIsTagsPopupOpen(true);
@@ -88,10 +92,12 @@ const FileGrid: React.FC<Props> = (props) => {
 									<FileDownload />
 									<Text ml="2">Download</Text>
 								</Flex>
-								<Flex {...optionProps} onClick={() => props.setIsOpen(true)}>
-									<FileMinus />
-									<Text ml="2">Delete</Text>
-								</Flex>
+                {role === Role.VIEWER || (
+                  <Flex {...optionProps} onClick={() => props.setIsOpen(true)}>
+                    <FileMinus />
+                    <Text ml="2">Delete</Text>
+                  </Flex>
+                )}
 								{/*disable tags depending on provider*/}
 								{ enableTags ? (<Flex {...optionProps} onClick={openTagsPopup}>
 									<Tags />
@@ -108,6 +114,7 @@ const FileGrid: React.FC<Props> = (props) => {
 			<TagsPopup isOpen={isTagsPopupOpen} onClose={closeTagsPopup} file={props.file} />
 		</>
 	);
+
 };
 
 export default FileGrid;
