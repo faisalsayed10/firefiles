@@ -8,6 +8,7 @@ import {
   IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { Flex } from '@chakra-ui/react';
 import UploadFileButton from "@components/files/UploadFileButton";
 import SyncButton from "@components/files/SyncButton";
 import FolderBreadCrumbs from "@components/folders/FolderBreadCrumbs";
@@ -50,33 +51,33 @@ const Dashboard = () => {
   const [gridView, setGridView] = useState(false);
   const [fileSort, setFileSort] = useState<FileSortConfig>({ property: "name", isAscending: true });
   const [sortedFiles, setSortedFiles] = useState<DriveFile[]>([]);
-	const [fileTagFilter, setFileTagFilter] = useState<TagFilter>({});
-	const { listTags } = useBucket();
+  const [fileTagFilter, setFileTagFilter] = useState<TagFilter>({});
+  const { listTags } = useBucket();
   const role = useContext(RoleContext);
   const { keys: drive } = useKeys();
-	
-	// filter files by tag
-	const filterDriveFiles = async (files: DriveFile[]): Promise<DriveFile[]> => {
-		// map each file to a boolean array
-		const mapFilter = await Promise.all(files.map(file => filterByTag(file, fileTagFilter)));
-		// filter files by the boolean array
-		return files.filter((file, index) => mapFilter[index]);
-	}
-	// return a boolean based on if file matches the tag filter
-	const filterByTag = async (file: DriveFile, fileTagFilter): Promise<boolean> => {
-		const tags = await listTags(file);
-		if (tags) {
-			// filter based on whether key, value, or both is provided
-			if (fileTagFilter.hasOwnProperty("key") && fileTagFilter.hasOwnProperty("value")) {
-				return tags.some(tag => (tag.key === fileTagFilter.key) && (tag.value === fileTagFilter.value));
-			} else if (fileTagFilter.hasOwnProperty("key")) {
-				return tags.some(tag => (tag.key === fileTagFilter.key))
-			} else if (fileTagFilter.hasOwnProperty("value")) {
-				return tags.some(tag => (tag.value === fileTagFilter.value))
-			}
-		}
-		return false;
-	}
+
+  // filter files by tag
+  const filterDriveFiles = async (files: DriveFile[]): Promise<DriveFile[]> => {
+    // map each file to a boolean array
+    const mapFilter = await Promise.all(files.map(file => filterByTag(file, fileTagFilter)));
+    // filter files by the boolean array
+    return files.filter((file, index) => mapFilter[index]);
+  }
+  // return a boolean based on if file matches the tag filter
+  const filterByTag = async (file: DriveFile, fileTagFilter): Promise<boolean> => {
+    const tags = await listTags(file);
+    if (tags) {
+      // filter based on whether key, value, or both is provided
+      if (fileTagFilter.hasOwnProperty("key") && fileTagFilter.hasOwnProperty("value")) {
+        return tags.some(tag => (tag.key === fileTagFilter.key) && (tag.value === fileTagFilter.value));
+      } else if (fileTagFilter.hasOwnProperty("key")) {
+        return tags.some(tag => (tag.key === fileTagFilter.key))
+      } else if (fileTagFilter.hasOwnProperty("value")) {
+        return tags.some(tag => (tag.value === fileTagFilter.value))
+      }
+    }
+    return false;
+  }
 
   useEffect(() => {
     const storedView = localStorage.getItem("grid_view");
@@ -94,25 +95,25 @@ const Dashboard = () => {
     localStorage.setItem("file_sort", JSON.stringify(fileSort));
   }, [fileSort]);
 
-useEffect(() => {
-	if (!files) {
-		setSortedFiles([]);
-		return;
-	}
-	// filter files if user has selected filter
-	if (fileTagFilter.hasOwnProperty("key") || fileTagFilter.hasOwnProperty("value")) {
-		const fetchFilteredFiles = async () => {
-			const filteredFiles = await filterDriveFiles(files);
-			// sort filtered files
-			const sortedFilteredFiles = sortDriveFiles(filteredFiles, fileSort);
-			setSortedFiles(sortedFilteredFiles);
-		}
-		fetchFilteredFiles().catch(() => {toast.error(`Unable to fetch filtered files.`)});
-	} else {
-		const sortedFiles = sortDriveFiles(files, fileSort);
-		setSortedFiles(sortedFiles);
-	}
-}, [fileSort, files, fileTagFilter]);
+  useEffect(() => {
+    if (!files) {
+      setSortedFiles([]);
+      return;
+    }
+    // filter files if user has selected filter
+    if (fileTagFilter.hasOwnProperty("key") || fileTagFilter.hasOwnProperty("value")) {
+      const fetchFilteredFiles = async () => {
+        const filteredFiles = await filterDriveFiles(files);
+        // sort filtered files
+        const sortedFilteredFiles = sortDriveFiles(filteredFiles, fileSort);
+        setSortedFiles(sortedFilteredFiles);
+      }
+      fetchFilteredFiles().catch(() => { toast.error(`Unable to fetch filtered files.`) });
+    } else {
+      const sortedFiles = sortDriveFiles(files, fileSort);
+      setSortedFiles(sortedFiles);
+    }
+  }, [fileSort, files, fileTagFilter]);
 
   return (
     <>
@@ -175,8 +176,8 @@ useEffect(() => {
                   setIsFolderDeleting={setIsFolderDeleting}
                   setFileSort={setFileSort}
                   fileSort={fileSort}
-									fileTagFilter={fileTagFilter}
-									setFileTagFilter={setFileTagFilter}
+                  fileTagFilter={fileTagFilter}
+                  setFileTagFilter={setFileTagFilter}
                 />
               ) : (
                 <GridView
@@ -188,8 +189,8 @@ useEffect(() => {
                   setIsFolderDeleting={setIsFolderDeleting}
                   setFileSort={setFileSort}
                   fileSort={fileSort}
-									fileTagFilter={fileTagFilter}
-									setFileTagFilter={setFileTagFilter}
+                  fileTagFilter={fileTagFilter}
+                  setFileTagFilter={setFileTagFilter}
                 />
               )}
             </Box>
@@ -202,8 +203,8 @@ useEffect(() => {
             filesToUpload={draggedFilesToUpload}
             setFilesToUpload={setDraggedFilesToUpload}
           />
-          <SyncButton />
         )}
+        <SyncButton />
       </LoadingOverlay>
       {uploadingFiles.length > 0 && (
         <Center>

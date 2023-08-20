@@ -30,7 +30,6 @@ export const createNewBucket = async (
 };
 
 export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiResponse, body: any) => {
-
   const { data, type } = body;
 
   switch (type) {
