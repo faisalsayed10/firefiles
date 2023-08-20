@@ -36,12 +36,12 @@ const getDriveSchema = z.object({
 /**
  * Schema for performing a POST operation for a Drive record.
  *
- * @param {string} data - A required decrypted drive data body parameter
+ * @param {JSON} data - A required decrypted drive data body parameter
  * @param {string} name - A required drive name body parameter
  * @param {string} type - A required drive type body parameter
  */
 const postDriveSchema = z.object({
-  data: z.string().nonempty(),
+  data: z.record(z.unknown()), // TODO: Parse func to check for specific drive type properties
   name: z.string().nonempty(),
   type: z.string().nonempty(),
 });

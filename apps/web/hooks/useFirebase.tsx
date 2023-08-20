@@ -624,28 +624,32 @@ const initializeAppAndLogin = async (data: StorageDrive, user: User, setApp: any
 };
 
 const loginTheirUser = async (app: FirebaseApp, user: User, data: StorageDrive) => {
-  const auth = getAuth(app);
-  const config = app.options as Config;
-  const setLoggedIn = () => window.localStorage.setItem(`has_logged_in_${data.id}`, "true");
-  const email = user.email.split("@")[0] + "+firefiles@" + user.email.split("@")[1];
-  let password: string;
+	const auth = getAuth(app);
+	const config = app.options as Config;
+	const setLoggedIn = () =>
+		window.localStorage.setItem(`has_logged_in_${data.id}`, "true");
+	const email =
+		user.email.split("@")[0] + "+firefiles@" + user.email.split("@")[1];
+	let password: string;
 
-  if (config.password) {
-    password = config.password;
-  } else {
-    password = nanoid(Math.floor(Math.random() * (30 - 20)) + 20);
-  }
+	if (config.password) {
+		password = config.password;
+	} else {
+		password = nanoid(Math.floor(Math.random() * (30 - 20)) + 20);
+	}
 
-  await signInWithEmailAndPassword(auth, email, password)
-    .then(() => setLoggedIn())
-    .catch(async (err) => {
-      if (err.message.includes("auth/user-not-found")) {
-        await createUserWithEmailAndPassword(auth, email, password).then(() => setLoggedIn());
-      } else {
-        router.push("/error?message=" + err.message);
-      }
-    });
+	await signInWithEmailAndPassword(auth, email, password)
+		.then(() => setLoggedIn())
+		.catch(async (err) => {
+			if (err.message.includes("auth/user-not-found")) {
+				await createUserWithEmailAndPassword(auth, email, password).then(() =>
+					setLoggedIn(),
+				);
+			} else {
+				router.push("/error?message=" + err.message);
+			}
+		});
 
-  if (!config.password) console.log({ ...config, password });
-  await axios.put(`/api/drive?id=${data.id}`, { data: { ...config, password } });
+	if (!config.password)
+		await axios.put(`/api/drive?id=${data.id}`, { data: { ...config, password }});
 };
