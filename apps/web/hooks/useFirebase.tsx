@@ -512,6 +512,5 @@ const loginTheirUser = async (app: FirebaseApp, user: User, data: StorageDrive) 
 		});
 
 	if (!config.password)
-	console.log( { ...config, password })
 		await axios.put(`/api/drive?id=${data.id}`, { data: { ...config, password }});
 };
