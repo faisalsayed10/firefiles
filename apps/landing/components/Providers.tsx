@@ -4,7 +4,7 @@ const PROVIDERS = [
 	{ name: "Digital Ocean", src: "/logos/digitalocean.png", comingSoon: false },
 	{ name: "Backblaze", src: "/logos/backblaze.png", comingSoon: false },
 	{ name: "Wasabi", src: "/logos/wasabi.png", comingSoon: false },
-	{ name: "Scaleway", src: "/logos/scaleway.png", comingSoon: true },
+	{ name: "Scaleway", src: "/logos/scaleway.png", comingSoon: false },
 	// { name: "Cloudflare", src: "/logos/cloudflare.png", comingSoon: true },
 	{ name: "Cloudinary", src: "/logos/cloudinary.png", comingSoon: true },
 	{ name: "Azure", src: "/logos/azure.png", comingSoon: true },
