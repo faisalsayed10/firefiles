@@ -47,7 +47,8 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
             data.type === "backblaze" ||
             data.type === "cloudflare" ||
             data.type === "wasabi" ||
-            data.type === "digitalocean" ? (
+            data.type === "digitalocean" ||
+            data.type === "scaleway" ? (
             data.permissions === "owned" ? (
               <S3Provider data={data} fullPath={decodeURIComponent(folderPath)}>
                 <Dashboard />
