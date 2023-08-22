@@ -26,6 +26,7 @@ export enum Provider {
   wasabi,
   digitalocean,
   cloudflare,
+  scaleway,
 }
 
 export type FileSortConfig = {
