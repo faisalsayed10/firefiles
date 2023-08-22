@@ -144,7 +144,15 @@ const NewS3 = () => {
             onChange={(e) => setSecretKey(e.target.value)}
             required
           />
-          <AWSRegionSelect value={region} onChange={(e) => setRegion(e.target.value)} />
+          <Input
+						mb="2"
+						variant="flushed"
+						placeholder="Endpoint - https://s3.<your-region>.scw.cloud"
+						type="text"
+						value={endpoint}
+						onChange={(e) => setEndpoint(e.target.value)}
+						required
+					/>
           <VideoModal src="/scaleway-keys-tutorial.mov" />
           <Button type="submit" isLoading={loading} colorScheme="green" variant="solid">
             Next
