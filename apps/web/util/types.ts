@@ -154,7 +154,7 @@ interface S3DriveServer {
 }
 
 type S3Drive = {
-  type: "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean";
+  type: "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean" | "scaleway";
   supportsDeletion: true;
   supportsGetObject: true;
   supportsListObjects: true;
