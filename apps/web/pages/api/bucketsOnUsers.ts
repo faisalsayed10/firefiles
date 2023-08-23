@@ -150,31 +150,46 @@ export default withIronSessionApiRoute(async (req: NextApiRequest, res: NextApiR
           where: { bucketId },
         });
 
-        const outgoingRequests: outgoingGetProp[] = await Promise.all(
+        const getBucketName = async (bucketId) => {
+          const { name: bucketName } = await prisma.drive.findFirst({
+            where: { id: bucketId },
+            select: { name: true },
+          });
+          return bucketName;
+        };
+        
+        const getInviteeInfo = async (userId) => {
+          const user = await prisma.user.findFirst({
+            where: {
+              id: userId,
+            },
+            select: {
+              id: true,
+              email: true,
+            },
+          });
+          return user;
+        };
+        
+        const createOutgoingRequest = async (bucketOnUser) => {
+          const bucketName = await getBucketName(bucketOnUser.bucketId);
+          const inviteeInfo = await getInviteeInfo(bucketOnUser.userId);
+        
+          return {
+            accessType: "outgoing",
+            bucketId: bucketOnUser.bucketId,
+            bucketName,
+            role: bucketOnUser.role,
+            isPending: bucketOnUser.isPending,
+            inviteeEmail: inviteeInfo?.email || null,
+            inviteeId: inviteeInfo?.id || null,
+          };
+        };
+        
+        const outgoingRequests = await Promise.all(
           bucketsOnUsers.map(async (bucketOnUser) => {
-            const { name: bucketName } = await prisma.drive.findFirst({
-              where: { id: bucketOnUser.bucketId },
-              select: { name: true },
-            });
-            const { id: inviteeId, email: inviteeEmail } = await prisma.user.findFirst({
-              where: {
-                id: bucketOnUser.userId,
-              },
-              select: {
-                id: true,
-                email: true,
-              },
-            });
-            return {
-              accessType: "outgoing",
-              bucketId: bucketOnUser.bucketId,
-              bucketName,
-              role: bucketOnUser.role,
-              isPending: bucketOnUser.isPending,
-              inviteeEmail,
-              inviteeId,
-            };
-          }),
+            return createOutgoingRequest(bucketOnUser);
+          })
         );
 
         return res.status(200).json(outgoingRequests);
