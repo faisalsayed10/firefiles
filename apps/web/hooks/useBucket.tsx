@@ -15,6 +15,7 @@ export type ContextValue = {
   removeFolder: (folder: DriveFolder) => Promise<void>;
   addFile: (files: File[] | FileList) => Promise<any>;
   removeFile: (file: DriveFile) => Promise<boolean>;
+  syncFilesInCurrentFolder: () => Promise<() => void>;
   enableTags: boolean;
   listTags?: (file: DriveFile) => Promise<void | Tag[]>;
   addTags?: (file: DriveFile, key: string, value: string) => Promise<boolean>;

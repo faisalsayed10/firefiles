@@ -9,22 +9,22 @@ import { SWRConfig } from "swr";
 const ProgressBar = dynamic(() => import("@components/ProgressBar"), { ssr: false });
 
 function MyApp({ Component, pageProps }) {
-	return (
-		<ChakraProvider resetCSS theme={theme}>
-			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
-			<SWRConfig
-				value={{
-					fetcher: (url) => axios.get(url).then((res) => res.data),
-					errorRetryCount: 1,
-					onError: (err) => console.error(err),
-				}}
-			>
-				<Component {...pageProps} />
-				<Toaster position="bottom-right" />
-				<ProgressBar />
-			</SWRConfig>
-		</ChakraProvider>
-	);
+  return (
+    <ChakraProvider resetCSS theme={theme}>
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <SWRConfig
+        value={{
+          fetcher: (url) => axios.get(url).then((res) => res.data),
+          errorRetryCount: 1,
+          onError: (err) => console.error(err),
+        }}
+      >
+        <Component {...pageProps} />
+        <Toaster position="bottom-right" />
+        <ProgressBar />
+      </SWRConfig>
+    </ChakraProvider>
+  );
 }
 
 export default MyApp;

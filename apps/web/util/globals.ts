@@ -14,16 +14,16 @@ export const PROVIDERS = [
     name: "Backblaze",
     logo: "/backblaze.png",
   },
-	{
-		id: "wasabi",
-		name: "Wasabi",
-		logo: "/wasabi.png",
-	},
-	{
-		id: "digitalocean",
-		name: "Digital Ocean",
-		logo: "/digitalocean.png",
-	},
+  {
+    id: "wasabi",
+    name: "Wasabi",
+    logo: "/wasabi.png",
+  },
+  {
+    id: "digitalocean",
+    name: "Digital Ocean",
+    logo: "/digitalocean.png",
+  },
   {
     id: "cloudflare",
     name: "Cloudflare R2",
@@ -40,7 +40,7 @@ export const PROVIDERS = [
     name: "Git",
     logo: "/git.png",
     isComingSoon: true,
-  }
+  },
 ];
 
 export const FILE_TYPES = [
