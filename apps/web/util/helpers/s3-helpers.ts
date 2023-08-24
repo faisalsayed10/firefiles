@@ -55,7 +55,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
             {
               AllowedHeaders: ["*"],
               AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-              AllowedOrigins: [process.env.DEPLOY_URL, process.env.VERCEL_URL],
+              AllowedOrigins: [process.env.DEPLOY_URL, type !== "backblaze" && process.env.VERCEL_URL],
               ExposeHeaders: ["Access-Control-Allow-Origin"],
             },
           ],
