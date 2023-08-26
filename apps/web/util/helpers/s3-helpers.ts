@@ -40,6 +40,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
     case "s3":
     case "backblaze":
     case "cloudflare":
+    case "scaleway":
       const client = new S3Client({
         region: data.region,
         maxAttempts: 1,

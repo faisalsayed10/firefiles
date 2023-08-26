@@ -113,7 +113,6 @@ export const createServerDrive = (drive: Drive, userRole: Role): StorageDrive =>
           Bucket: decryptedKeys.Bucket,
         },
       };
-
       return pDrive;
     }
   }
@@ -215,11 +214,9 @@ export const createClientDrive = (drive: Drive, userRole: Role): StorageDrive =>
   }
 };
 
-const s3DriveType = (
-  drive: Drive,
-): "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean" => {
+const s3DriveType = (drive: Drive): "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean" | "scaleway" => {
   const type = drive.type;
-  if (type === "s3" || type === "backblaze" || type === "cloudflare") return type;
+  if (type === "s3" || type === "backblaze" || type === "cloudflare" || type === "wasabi" || type === "digitalocean" || type === "scaleway") return type;
   else throw new Error(`Invalid provider type '${type}' found on driveId ${drive.id}`);
 };
 

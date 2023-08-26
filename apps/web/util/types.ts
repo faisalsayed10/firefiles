@@ -26,6 +26,7 @@ export enum Provider {
   wasabi,
   digitalocean,
   cloudflare,
+  scaleway,
 }
 
 export type FileSortConfig = {
@@ -154,7 +155,7 @@ interface S3DriveServer {
 }
 
 type S3Drive = {
-  type: "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean";
+  type: "s3" | "backblaze" | "cloudflare" | "wasabi" | "digitalocean" | "scaleway";
   supportsDeletion: true;
   supportsGetObject: true;
   supportsListObjects: true;

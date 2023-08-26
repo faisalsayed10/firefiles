@@ -42,6 +42,7 @@ export default function useBucket(): ContextValue {
     case Provider.wasabi:
     case Provider.digitalocean:
     case Provider.cloudflare:
+    case Provider.scaleway:
       return keys.permissions === "owned" ? useS3() : useS3Shared();
     default:
       return null;
