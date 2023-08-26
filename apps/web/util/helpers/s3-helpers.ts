@@ -30,7 +30,6 @@ export const createNewBucket = async (
 };
 
 export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiResponse, body: any) => {
-
   const { data, type } = body;
 
   switch (type) {
@@ -56,7 +55,7 @@ export const beforeCreatingDoc = async (req: NextApiRequest, res: NextApiRespons
             {
               AllowedHeaders: ["*"],
               AllowedMethods: ["PUT", "POST", "DELETE", "GET", "HEAD"],
-              AllowedOrigins: [process.env.DEPLOY_URL, process.env.VERCEL_URL],
+              AllowedOrigins: [process.env.DEPLOY_URL],
               ExposeHeaders: ["Access-Control-Allow-Origin"],
             },
           ],

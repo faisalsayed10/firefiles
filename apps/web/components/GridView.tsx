@@ -21,22 +21,22 @@ type Props = {
   setIsFolderDeleting: React.Dispatch<React.SetStateAction<boolean>>;
   setFileSort: React.Dispatch<React.SetStateAction<FileSortConfig>>;
   fileSort: FileSortConfig;
-	fileTagFilter: TagFilter;
-	setFileTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
+  fileTagFilter: TagFilter;
+  setFileTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
 };
 
 const GridView: React.FC<Props> = (props) => {
   const role = useContext(RoleContext);
-	const [isFilterTagsOpen, setIsFilterTagsOpen] = useState(false);
-	const { enableTags } = useBucket();
+  const [isFilterTagsOpen, setIsFilterTagsOpen] = useState(false);
+  const { enableTags } = useBucket();
 
-	const openFilterTags = () => {
-		setIsFilterTagsOpen(true);
-	};
+  const openFilterTags = () => {
+    setIsFilterTagsOpen(true);
+  };
 
-	const closeFilterTags = () => {
-		setIsFilterTagsOpen(false);
-	};
+  const closeFilterTags = () => {
+    setIsFilterTagsOpen(false);
+  };
 
   return (
     <Box mx="4" mb="6">
@@ -46,9 +46,11 @@ const GridView: React.FC<Props> = (props) => {
         </Text>
         <Box>
           <FileSortMenu setFileSort={props.setFileSort} fileSort={props.fileSort} />
-					{enableTags ? (<IconButton aria-label="filter-tags" mr={1} onClick={openFilterTags}>
-						<Filter />
-					</IconButton>) : (null)}
+          {enableTags ? (
+            <IconButton aria-label="filter-tags" mr={1} onClick={openFilterTags}>
+              <Filter />
+            </IconButton>
+          ) : null}
           <IconButton aria-label="change-view" onClick={() => props.setGridView(false)}>
             <LayoutList />
           </IconButton>
@@ -94,7 +96,12 @@ const GridView: React.FC<Props> = (props) => {
             props.files?.map((file) => <File key={file.name} file={file} gridView={true} />)}
         </Grid>
       )}
-			<FilterTags isOpen={isFilterTagsOpen} onClose={closeFilterTags} fileTagFilter={props.fileTagFilter} setFileTagFilter={props.setFileTagFilter} />
+      <FilterTags
+        isOpen={isFilterTagsOpen}
+        onClose={closeFilterTags}
+        fileTagFilter={props.fileTagFilter}
+        setFileTagFilter={props.setFileTagFilter}
+      />
     </Box>
   );
 };

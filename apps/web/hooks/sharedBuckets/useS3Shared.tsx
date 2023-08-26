@@ -226,6 +226,11 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
     return true;
   };
 
+  // To be implemented
+  const syncFilesInCurrentFolder = async () => {
+    return () => {};
+  };
+
   // get array of tags
   const listTags = async (file: DriveFile): Promise<Tag[] | void> => {
     if (!data.supportsUploading) {
@@ -455,6 +460,7 @@ export const S3SharedProvider: React.FC<PropsWithChildren<Props>> = ({
         addFolder,
         removeFile,
         removeFolder,
+        syncFilesInCurrentFolder,
         enableTags,
         listTags,
         addTags,
