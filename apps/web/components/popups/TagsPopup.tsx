@@ -112,18 +112,22 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                 <>
                   <Input
                     flex="1"
-                    value={editedTag?.key ?? tag.key}  
-                    onChange={(e) => setEditedTag((prevTag) => ({ ...prevTag, key: e.target.value }))}
+                    value={editedTag?.key ?? tag.key}
+                    onChange={(e) =>
+                      setEditedTag((prevTag) => ({ ...prevTag, key: e.target.value }))
+                    }
                   />
                   <Input
                     flex="1"
                     ml="2"
-                    value={editedTag?.value ?? tag.value}  
-                    onChange={(e) => setEditedTag((prevTag) => ({ ...prevTag, value: e.target.value }))}
+                    value={editedTag?.value ?? tag.value}
+                    onChange={(e) =>
+                      setEditedTag((prevTag) => ({ ...prevTag, value: e.target.value }))
+                    }
                   />
                   <IconButton
                     aria-label="Cancel"
-                    icon={<X width={38}/>}
+                    icon={<X width={38} />}
                     variant="unstyled"
                     _focus={{ outline: "none" }}
                     onClick={() => setTagBeingEdited(null)}
@@ -131,26 +135,43 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
                   />
                   <IconButton
                     aria-label="Save Tag"
-                    icon={<Check width={38}/>}
+                    icon={<Check width={38} />}
                     variant="unstyled"
                     _focus={{ outline: "none" }}
                     onClick={() => handleEditTag(tag)}
                     _hover={{ bg: "hsl(60, 0%, 95%)" }}
-                  />  
+                  />
                 </>
               ) : (
                 <>
-                  <Text flex="1" overflow="hidden">{tag.key}</Text>
+                  <Text flex="1" overflow="hidden">
+                    {tag.key}
+                  </Text>
                   <Text flex="1" ml="4" overflow="hidden">
                     {tag.value}
                   </Text>
                   <Menu>
-                    <MenuButton as={IconButton} aria-label="Tag Options" icon={<DotsVertical width={38}/>} variant="unstyled" _hover={{ bg: "hsl(60, 0%, 95%)" }}/>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label="Tag Options"
+                      icon={<DotsVertical width={38} />}
+                      variant="unstyled"
+                      _hover={{ bg: "hsl(60, 0%, 95%)" }}
+                    />
                     <MenuList>
-                      <MenuItem icon={<Edit width={38}/>} onClick={() => {setTagBeingEdited(tag); setEditedTag(tag)}}>
+                      <MenuItem
+                        icon={<Edit width={38} />}
+                        onClick={() => {
+                          setTagBeingEdited(tag);
+                          setEditedTag(tag);
+                        }}
+                      >
                         Edit
                       </MenuItem>
-                      <MenuItem icon={<Minus width={38}/>} onClick={() => handleRemoveTag(tag.key)}>
+                      <MenuItem
+                        icon={<Minus width={38} />}
+                        onClick={() => handleRemoveTag(tag.key)}
+                      >
                         Remove
                       </MenuItem>
                     </MenuList>
@@ -177,7 +198,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
               />
               <IconButton
                 aria-label="Cancel"
-                icon={<X width={38}/>}
+                icon={<X width={38} />}
                 variant="unstyled"
                 _focus={{ outline: "none" }}
                 onClick={handleCancelTag}
@@ -185,7 +206,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
               />
               <IconButton
                 aria-label="Save Tag"
-                icon={<Check width={38}/>}
+                icon={<Check width={38} />}
                 variant="unstyled"
                 _focus={{ outline: "none" }}
                 onClick={handleSaveTag}
@@ -196,7 +217,7 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
             <Flex align="center" justify="flex-end">
               <IconButton
                 aria-label="Add Tag"
-                icon={<Plus width={38}/>}
+                icon={<Plus width={38} />}
                 variant="unstyled"
                 _focus={{ outline: "none" }}
                 onClick={handleAddTag}
@@ -211,5 +232,3 @@ const TagsPopup: React.FC<Props> = ({ isOpen, onClose, file }) => {
 };
 
 export default TagsPopup;
-
-

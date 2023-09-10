@@ -10,7 +10,7 @@ interface Buffers {
 export async function* getChunkStream<T>(
   data: T,
   partSize: number,
-  getNextData: (data: T) => AsyncGenerator<Buffer>
+  getNextData: (data: T) => AsyncGenerator<Buffer>,
 ): AsyncGenerator<RawDataPart, void, undefined> {
   let partNumber = 1;
   const currentBuffer: Buffers = { chunks: [], length: 0 };
@@ -24,7 +24,10 @@ export async function* getChunkStream<T>(
        * Concat all the buffers together once if there is more than one to concat. Attempt
        * to minimize concats as Buffer.Concat is an extremely expensive operation.
        */
-      const dataChunk = currentBuffer.chunks.length > 1 ? Buffer.concat(currentBuffer.chunks) : currentBuffer.chunks[0];
+      const dataChunk =
+        currentBuffer.chunks.length > 1
+          ? Buffer.concat(currentBuffer.chunks)
+          : currentBuffer.chunks[0];
 
       yield {
         partNumber,

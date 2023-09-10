@@ -14,16 +14,16 @@ export const PROVIDERS = [
     name: "Backblaze",
     logo: "/backblaze.png",
   },
-	{
-		id: "wasabi",
-		name: "Wasabi",
-		logo: "/wasabi.png",
-	},
-	{
-		id: "digitalocean",
-		name: "Digital Ocean",
-		logo: "/digitalocean.png",
-	},
+  {
+    id: "wasabi",
+    name: "Wasabi",
+    logo: "/wasabi.png",
+  },
+  {
+    id: "digitalocean",
+    name: "Digital Ocean",
+    logo: "/digitalocean.png",
+  },
   {
     id: "cloudflare",
     name: "Cloudflare R2",
@@ -33,8 +33,24 @@ export const PROVIDERS = [
     id: "samba",
     name: "Samba",
     logo: "/samba.png",
+  },
+  {
+    id: "scaleway",
+    name: "Scaleway",
+    logo: "/scaleway.png",
+  },
+  {
+    id: "deta",
+    name: "Deta",
+    logo: "/deta.png",
     isComingSoon: true,
-  }
+  },
+  {
+    id: "git",
+    name: "Git",
+    logo: "/git.png",
+    isComingSoon: true,
+  },
 ];
 
 export const FILE_TYPES = [
