@@ -30,6 +30,11 @@ export const PROVIDERS = [
     logo: "/cloudflare.png",
   },
   {
+    id: "samba",
+    name: "Samba",
+    logo: "/samba.png",
+  },
+  {
     id: "scaleway",
     name: "Scaleway",
     logo: "/scaleway.png",

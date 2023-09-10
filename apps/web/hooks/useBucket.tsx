@@ -2,6 +2,7 @@ import { DriveFile, DriveFolder, Provider, Tag, UploadingFile } from "@util/type
 import useFirebase from "./useFirebase";
 import useKeys from "./useKeys";
 import useS3 from "./useS3";
+import useSamba from "./useSamba";
 import useS3Shared from "./sharedBuckets/useS3Shared";
 
 export type ContextValue = {
@@ -44,6 +45,8 @@ export default function useBucket(): ContextValue {
     case Provider.cloudflare:
     case Provider.scaleway:
       return keys.permissions === "owned" ? useS3() : useS3Shared();
+    case Provider.samba:
+      return useSamba();
     default:
       return null;
   }

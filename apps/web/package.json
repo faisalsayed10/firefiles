@@ -50,6 +50,7 @@
     "react-loading-overlay": "^1.0.1",
     "resend": "^0.17.1",
     "sendgrid": "^5.2.3",
+    "samba-client": "^7.2.0",
     "swr": "^1.1.2-beta.0",
     "tabler-icons-react": "^1.45.0",
     "underscore": "^1.13.2",

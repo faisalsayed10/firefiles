@@ -2,6 +2,7 @@ import Dashboard from "@components/Dashboard";
 import { FirebaseProvider } from "@hooks/useFirebase";
 import { KeysProvider } from "@hooks/useKeys";
 import { S3Provider } from "@hooks/useS3";
+import { SambaProvider } from "@hooks/useSamba";
 import { S3SharedProvider } from "@hooks/sharedBuckets/useS3Shared";
 import useUser from "@hooks/useUser";
 import { Drive, Role } from "@prisma/client";
@@ -58,6 +59,10 @@ const DrivePage: React.FC<Props> = ({ data, role }) => {
                 <Dashboard />
               </S3SharedProvider>
             )
+          ) : data.type === "samba" ? (
+            <SambaProvider data={data} fullPath={decodeURIComponent(folderPath)}>
+              <Dashboard />
+            </SambaProvider>
           ) : (
             <p>No provider found.</p>
           )}
