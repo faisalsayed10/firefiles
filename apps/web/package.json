@@ -17,7 +17,9 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@firebase/storage": "^0.11.2",
-    "@prisma/client": "4.12.0",
+    "@libsql/client": "^0.15.15",
+    "@prisma/adapter-libsql": "^6.18.0",
+    "@prisma/client": "6.18.0",
     "@react-hook/media-query": "^1.1.1",
     "@sendgrid/mail": "^7.7.0",
     "@uiw/react-markdown-preview": "^3.4.7",
@@ -26,6 +28,8 @@
     "convert-to-object": "^0.0.4",
     "copy-to-clipboard": "^3.3.1",
     "crypto-js": "^4.1.1",
+    "dexie": "^3.2.0",
+    "dexie-react-hooks": "^1.0.7",
     "evaporate": "^2.1.4",
     "fast-xml-parser": "^4.2.7",
     "file-icon-vectors": "^1.0.0",
@@ -55,16 +59,14 @@
     "underscore": "^1.13.2",
     "validator": "^13.7.0",
     "video-react": "^0.15.0",
-    "zod": "^3.21.4",
-    "dexie": "^3.2.0",
-    "dexie-react-hooks": "^1.0.7"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.0.2",
     "@types/evaporate": "^2.1.7",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/mime-types": "^2.1.1",
-    "@types/node": "^12.12.21",
+    "@types/node": "^24.10.0",
     "@types/node-fetch": "^2.6.3",
     "@types/nprogress": "^0.2.0",
     "@types/papaparse": "^5.3.2",
@@ -73,7 +75,11 @@
     "@types/underscore": "^1.11.4",
     "@types/validator": "^13.7.2",
     "prettier": "^2.6.2",
-    "prisma": "^4.12.0",
-    "typescript": "4.9.5"
-  }
+    "prisma": "^6.18.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
 }
